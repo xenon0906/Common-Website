@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(cmd.exe /c \"del /f \"\"\\?\\C:\\Users\\siddh\\Downloads\\snapgo-website-final (1)\\nul\"\"\")",
-      "Bash(cmd.exe /c \"cd /d \"\"C:\\Users\\siddh\\Downloads\\snapgo-website-final (1)\"\" && del /f /q nul\")"
-    ]
-  }
-}
