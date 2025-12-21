@@ -102,3 +102,115 @@ model TeamMember {
   @@index([order])
   @@index([isActive])
 }
+
+// ============================================
+// PHASE 2: Dynamic Content Models
+// ============================================
+
+model HeroContent {
+  id           String   @id @default(cuid())
+  headline     String   @db.VarChar(500)
+  subtext      String   @db.Text
+  badge        String?  @db.VarChar(200)
+  ctaPrimary   String?  @db.VarChar(100)
+  ctaSecondary String?  @db.VarChar(100)
+  isActive     Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
+
+model Statistic {
+  id        String   @id @default(cuid())
+  label     String   @db.VarChar(100)
+  value     Int
+  prefix    String   @default("") @db.VarChar(20)
+  suffix    String   @default("+") @db.VarChar(20)
+  icon      String?  @db.VarChar(50)
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(200)
+  description String   @db.Text
+  icon        String   @db.VarChar(50)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model HowItWorksStep {
+  id          String   @id @default(cuid())
+  step        Int
+  title       String   @db.VarChar(200)
+  description String   @db.Text
+  icon        String   @db.VarChar(50)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  quote     String   @db.Text
+  author    String   @db.VarChar(200)
+  role      String?  @db.VarChar(100)
+  location  String?  @db.VarChar(200)
+  avatarUrl String?  @db.VarChar(500)
+  rating    Int      @default(5)
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+  @@index([isActive])
+}
+
+model AboutContent {
+  id        String   @id @default(cuid())
+  key       String   @unique @db.VarChar(50)
+  title     String?  @db.VarChar(200)
+  content   String   @db.LongText
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model AppStoreLink {
+  id        String   @id @default(cuid())
+  platform  String   @unique @db.VarChar(20)
+  url       String   @db.VarChar(500)
+  isLive    Boolean  @default(false)
+  qrCodeUrl String?  @db.VarChar(500)
+  updatedAt DateTime @updatedAt
+}
+
+model ContactInfo {
+  id        String   @id @default(cuid())
+  key       String   @unique @db.VarChar(50)
+  value     String   @db.Text
+  label     String?  @db.VarChar(100)
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String   @unique @db.VarChar(50)
+  url       String   @db.VarChar(500)
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([platform])
+}

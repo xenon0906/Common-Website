@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
-import path from 'path'
+import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/api-auth'
 
-// Path to store settings as JSON (simple file-based storage)
-const SETTINGS_FILE = path.join(process.cwd(), 'data', 'site-settings.json')
-
-// Default settings structure
+// Default settings structure (used for initial seeding)
 const DEFAULT_SETTINGS = {
   site: {
     name: 'Snapgo',
@@ -25,53 +22,18 @@ const DEFAULT_SETTINGS = {
     linkedin: 'https://www.linkedin.com/company/snapgo-service-private-limited/',
   },
   founders: ['Mohit Purohit', 'Surya Purohit'],
-  hero: {
-    headline: 'Revolutionizing Urban Transportation, One Shared Ride at a Time.',
-    subtext: "At Snapgo, we believe that getting around your city shouldn't break the bank or leave you stranded. By helping users connect with others traveling the same route, Snapgo enables ride-sharing, fare-splitting, and secure connections—making everyday travel not just cost-effective, but more social and sustainable too.",
-  },
-  stats: [
-    { label: 'App Downloads', value: 7000, suffix: '+', prefix: '' },
-    { label: 'Peak Daily Rides', value: 110, suffix: '+', prefix: '' },
-    { label: 'Cost Savings', value: 75, suffix: '%', prefix: '' },
-    { label: 'Active Users', value: 400, suffix: '+', prefix: '' },
-  ],
-  features: [
-    { title: 'Save Up to 75%', description: 'Share cab fares and save significant money on your daily commute', icon: 'Wallet' },
-    { title: 'Aadhaar Verified', description: 'All users verified via Aadhaar KYC powered by DigiLocker', icon: 'ShieldCheck' },
-    { title: 'Female-Only Option', description: 'Women can connect only with verified female riders for added safety', icon: 'Users' },
-    { title: 'Real-time & Scheduled', description: 'Find rides instantly or plan ahead for your convenience', icon: 'Clock' },
-    { title: 'Eco-Friendly', description: 'Reduce carbon footprint by sharing rides with fellow travelers', icon: 'Leaf' },
-    { title: 'Smart Matching', description: 'Advanced algorithm matches within 750m radius for perfect routes', icon: 'MapPin' },
-  ],
-  howItWorks: [
-    { step: 1, title: 'Enter Your Destination', description: 'Set your pickup and drop location in the app', icon: 'MapPin' },
-    { step: 2, title: 'Find Your Match', description: 'Our algorithm finds people going to the same destination within 750m', icon: 'Search' },
-    { step: 3, title: 'Share & Save', description: 'Connect, chat, meet at a common point, share the fare, and save money', icon: 'Users' },
-  ],
-  testimonials: [
-    { quote: 'Snapgo has saved me so much money! I used to spend Rs.400 for my daily commute, now I only pay Rs.100 by sharing with fellow students. Amazing concept!', author: 'College Student', location: 'Sharda University' },
-    { quote: 'As a working professional, Snapgo has made my daily travel both affordable and social. I have made great connections with fellow commuters.', author: 'IT Professional', location: 'Greater Noida' },
-    { quote: 'The female-only option makes me feel safe. I can now travel without worrying about security while saving money.', author: 'Graduate Student', location: 'Delhi NCR' },
-  ],
-  about: {
-    origin: "It was a regular day when we, Mohit and Surya Purohit, were heading to Ghaziabad Railway Station from our society. We booked a cab and noticed another person also taking a cab from our area. When we reached the station, we saw the same person at the parking lot. That's when it hit us - we both paid Rs.300 separately for the same route. If we had known we were going to the same place, we could have shared the ride and paid just Rs.300 total, saving Rs.300 together!",
-    spark: "This simple observation sparked an idea: What if there was an app that could connect people traveling to the same destination? And that's how Snapgo was born - from a personal experience that we knew thousands of others faced every day.",
-    mission: 'To make travel affordable and accessible for everyone by connecting people who share similar routes, reducing costs and environmental impact.',
-    vision: "To become India's most trusted ride-sharing platform, creating a community where safety, affordability, and sustainability go hand in hand.",
-    values: 'Safety first, user-centric design, transparency, sustainability, and creating value for our community at every step.',
-  },
   apps: {
     androidUrl: 'https://play.google.com/store/apps/details?id=com.snapgo.app',
-    iosUrl: '',
+    iosUrl: 'https://apps.apple.com/app/snapgo/id6739696498',
     androidLive: true,
-    iosLive: false,
+    iosLive: true,
   },
   theme: {
-    primaryColor: '#0ea5c2',
-    accentColor: '#5DD3CB',
-    backgroundColor: '#141821',
-    cardColor: '#1c2230',
-    mode: 'dark',
+    primaryColor: '#0066B3',
+    accentColor: '#0d9488',
+    backgroundColor: '#ffffff',
+    cardColor: '#f9fafb',
+    mode: 'light',
   },
   images: {
     logo: '/images/logo/Snapgo%20Logo%20White.png',
@@ -81,43 +43,128 @@ const DEFAULT_SETTINGS = {
   },
 }
 
-// Ensure data directory exists
-function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data')
-  if (!existsSync(dataDir)) {
-    mkdirSync(dataDir, { recursive: true })
-  }
-}
+// Convert flat key-value database records to nested object
+function dbToNested(records: { key: string; value: string; category: string }[]): Record<string, any> {
+  const result: Record<string, any> = {}
 
-// Load settings from file or return defaults
-function loadSettings() {
-  try {
-    ensureDataDir()
-    if (existsSync(SETTINGS_FILE)) {
-      const data = readFileSync(SETTINGS_FILE, 'utf-8')
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(data) }
+  for (const record of records) {
+    const { category, key, value } = record
+
+    if (!result[category]) {
+      result[category] = {}
     }
-  } catch (error) {
-    console.error('Error loading settings:', error)
+
+    try {
+      result[category][key] = JSON.parse(value)
+    } catch {
+      result[category][key] = value
+    }
   }
-  return DEFAULT_SETTINGS
+
+  return result
 }
 
-// Save settings to file
-function saveSettings(settings: any) {
+// Convert nested object to flat key-value pairs for database
+function nestedToFlat(obj: Record<string, any>): { category: string; key: string; value: string }[] {
+  const pairs: { category: string; key: string; value: string }[] = []
+
+  for (const [category, values] of Object.entries(obj)) {
+    if (typeof values === 'object' && values !== null && !Array.isArray(values)) {
+      for (const [key, value] of Object.entries(values)) {
+        pairs.push({
+          category,
+          key,
+          value: JSON.stringify(value),
+        })
+      }
+    } else {
+      // Handle top-level arrays/primitives
+      pairs.push({
+        category: 'general',
+        key: category,
+        value: JSON.stringify(values),
+      })
+    }
+  }
+
+  return pairs
+}
+
+// Load settings from database, merge with defaults
+async function loadSettings(): Promise<Record<string, any>> {
   try {
-    ensureDataDir()
-    writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2))
+    const records = await prisma.siteSettings.findMany()
+
+    if (records.length === 0) {
+      // No settings in DB, seed with defaults
+      await seedDefaultSettings()
+      return DEFAULT_SETTINGS
+    }
+
+    const dbSettings = dbToNested(records)
+
+    // Merge with defaults to ensure all keys exist
+    return deepMerge(DEFAULT_SETTINGS, dbSettings)
+  } catch (error) {
+    console.error('Error loading settings from database:', error)
+    return DEFAULT_SETTINGS
+  }
+}
+
+// Deep merge objects
+function deepMerge(target: any, source: any): any {
+  const result = { ...target }
+
+  for (const key of Object.keys(source)) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      result[key] = deepMerge(target[key] || {}, source[key])
+    } else {
+      result[key] = source[key]
+    }
+  }
+
+  return result
+}
+
+// Seed default settings to database
+async function seedDefaultSettings() {
+  const pairs = nestedToFlat(DEFAULT_SETTINGS)
+
+  for (const pair of pairs) {
+    const settingKey = `${pair.category}.${pair.key}`
+    await prisma.siteSettings.upsert({
+      where: { key: settingKey },
+      update: { value: pair.value, category: pair.category },
+      create: { key: settingKey, value: pair.value, category: pair.category },
+    })
+  }
+}
+
+// Save settings to database
+async function saveSettings(settings: Record<string, any>): Promise<boolean> {
+  try {
+    const pairs = nestedToFlat(settings)
+
+    for (const pair of pairs) {
+      const settingKey = `${pair.category}.${pair.key}`
+      await prisma.siteSettings.upsert({
+        where: { key: settingKey },
+        update: { value: pair.value, category: pair.category },
+        create: { key: settingKey, value: pair.value, category: pair.category },
+      })
+    }
+
     return true
   } catch (error) {
-    console.error('Error saving settings:', error)
+    console.error('Error saving settings to database:', error)
     return false
   }
 }
 
+// GET - Fetch all settings (public for frontend consumption)
 export async function GET() {
   try {
-    const settings = loadSettings()
+    const settings = await loadSettings()
     return NextResponse.json(settings)
   } catch (error) {
     console.error('Error fetching settings:', error)
@@ -128,15 +175,20 @@ export async function GET() {
   }
 }
 
+// POST - Save all settings (requires auth)
 export async function POST(request: NextRequest) {
+  // Require admin authentication
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
     const newSettings = await request.json()
-    const currentSettings = loadSettings()
+    const currentSettings = await loadSettings()
 
     // Merge new settings with current settings
-    const mergedSettings = { ...currentSettings, ...newSettings }
+    const mergedSettings = deepMerge(currentSettings, newSettings)
 
-    const success = saveSettings(mergedSettings)
+    const success = await saveSettings(mergedSettings)
 
     if (!success) {
       return NextResponse.json(
@@ -159,27 +211,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// PUT - Update specific setting (requires auth)
 export async function PUT(request: NextRequest) {
+  // Require admin authentication
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
     const { category, key, value } = await request.json()
-    const settings = loadSettings()
 
-    if (category && key) {
-      // Update specific nested value
-      if (!settings[category]) {
-        settings[category] = {}
-      }
-      settings[category][key] = value
-    }
-
-    const success = saveSettings(settings)
-
-    if (!success) {
+    if (!category || !key) {
       return NextResponse.json(
-        { error: 'Failed to update setting' },
-        { status: 500 }
+        { error: 'Category and key are required' },
+        { status: 400 }
       )
     }
+
+    const settingKey = `${category}.${key}`
+
+    await prisma.siteSettings.upsert({
+      where: { key: settingKey },
+      update: { value: JSON.stringify(value), category },
+      create: { key: settingKey, value: JSON.stringify(value), category },
+    })
 
     return NextResponse.json({
       success: true,

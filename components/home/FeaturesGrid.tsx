@@ -8,9 +8,13 @@ import { cn } from '@/lib/utils'
 import { GlowHighlight } from '@/components/shared/animations'
 import { ANIMATION_CONFIG } from '@/lib/animation-config'
 import { IconMap } from '@/components/ui/icon'
+import { FeatureData } from '@/lib/content'
+
+// Feature type for compatibility
+type FeatureType = FeatureData | typeof FEATURES[0]
 
 // 3D Tilt Card Component with GlowHighlight
-function FeatureCard({ feature, index }: { feature: typeof FEATURES[0]; index: number }) {
+function FeatureCard({ feature, index }: { feature: FeatureType; index: number }) {
   const Icon = IconMap[feature.icon]
   const cardRef = useRef<HTMLDivElement>(null)
   const [rotateX, setRotateX] = useState(0)
@@ -108,9 +112,16 @@ function FeatureCard({ feature, index }: { feature: typeof FEATURES[0]; index: n
   )
 }
 
-export function FeaturesGrid() {
+interface FeaturesGridProps {
+  features?: FeatureType[]
+}
+
+export function FeaturesGrid({ features }: FeaturesGridProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
+
+  // Use provided features or fall back to constants
+  const displayFeatures = features || FEATURES
 
   // Parallax effect for the section
   const { scrollYProgress } = useScroll({
@@ -165,7 +176,7 @@ export function FeaturesGrid() {
           transition={{ delay: 0.2 }}
         >
           <div className="flex items-center gap-1.5">
-            {FEATURES.map((_, index) => (
+            {displayFeatures.map((_, index) => (
               <motion.div
                 key={index}
                 className="w-2 h-2 rounded-full bg-primary/30"
@@ -178,7 +189,7 @@ export function FeaturesGrid() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((feature, index) => (
+          {displayFeatures.map((feature, index) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 50 }}

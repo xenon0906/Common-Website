@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/api-auth'
 
 // GET - Fetch a single team member
 export async function GET(
@@ -33,6 +34,10 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Require admin authentication
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
     const body = await req.json()
     const { name, bio, details, imageUrl, portraitUrl, email, linkedin, twitter, order, isActive } = body
@@ -79,6 +84,10 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Require admin authentication
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
     const existingMember = await prisma.teamMember.findUnique({
       where: { id: params.id },

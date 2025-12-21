@@ -1,13 +1,16 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { Suspense, useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { StatsCounter } from '@/components/home/StatsCounter'
 import { FeaturesGrid } from '@/components/home/FeaturesGrid'
 import { HowItWorks } from '@/components/home/HowItWorks'
 import { TestimonialCarousel } from '@/components/home/TestimonialCarousel'
 import { SiteLayout } from '@/components/layout/SiteLayout'
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion'
+import { CO2ImpactTracker } from '@/components/gamification/CO2ImpactTracker'
+import { SavingsCalculator } from '@/components/gamification/SavingsCalculator'
+import { HeroPremium } from '@/components/home/HeroPremium'
+import { InstagramSection } from '@/components/home/InstagramSection'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -71,11 +74,6 @@ function LoadingAnimation() {
   )
 }
 
-// Dynamically import Hero3D to avoid SSR issues with Three.js
-const Hero3D = dynamic(() => import('@/components/home/Hero3D').then((mod) => ({ default: mod.Hero3D })), {
-  ssr: false,
-  loading: () => <LoadingAnimation />,
-})
 
 // Why Snapgo Section - Enhanced with Asymmetric Layout
 function WhySnapgoSection() {
@@ -127,22 +125,8 @@ function WhySnapgoSection() {
   ]
 
   return (
-    <section ref={ref} className="py-20 bg-background relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-teal/5 blur-[100px]"
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-          transition={{ duration: 20, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-purple/5 blur-[80px]"
-          animate={{ scale: [1.2, 1, 1.2], rotate: [0, -90, 0] }}
-          transition={{ duration: 15, repeat: Infinity }}
-        />
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
+    <section ref={ref} className="section-padding bg-background">
+      <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -158,7 +142,7 @@ function WhySnapgoSection() {
             <SparklesIcon className="w-4 h-4 text-teal" />
             <span className="text-teal text-sm font-semibold">Why Choose Snapgo?</span>
           </motion.div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
             The Smarter Way to
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal via-primary to-purple"> Commute</span>
           </h2>
@@ -199,7 +183,7 @@ function WhySnapgoSection() {
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {reasons.map((reason, index) => {
             // Asymmetric: odd indices shifted up, even shifted down on desktop
             const isOdd = index % 2 !== 0
@@ -273,8 +257,8 @@ function TrustBadgesSection() {
     { icon: ShieldIcon, label: 'DPIIT Certified' },
     { icon: StarIcon, label: 'Startup India' },
     { icon: CheckCircleIcon, label: 'Aadhaar Verified' },
-    { icon: UsersIcon, label: '7000+ Users' },
-    { icon: MapPinIcon, label: '15+ Cities' },
+    { icon: UsersIcon, label: '8500+ Users' },
+    { icon: MapPinIcon, label: '110+ Daily Rides' },
     { icon: HeartIcon, label: 'Trusted Platform' },
     { icon: ZapIcon, label: 'Real-Time Matching' },
     { icon: LeafIcon, label: 'Eco-Friendly' },
@@ -303,22 +287,8 @@ function DownloadSection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section ref={ref} className="py-24 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          className="absolute top-20 left-20 w-72 h-72 rounded-full bg-teal/10 blur-[80px]"
-          animate={{ scale: [1, 1.3, 1], x: [0, 50, 0] }}
-          transition={{ duration: 10, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-purple/10 blur-[100px]"
-          animate={{ scale: [1.2, 1, 1.2], y: [0, -30, 0] }}
-          transition={{ duration: 12, repeat: Infinity }}
-        />
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
+    <section ref={ref} className="section-padding-lg bg-gray-50">
+      <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -334,7 +304,7 @@ function DownloadSection() {
             <DownloadIcon className="w-4 h-4 text-teal" />
             <span className="text-teal text-sm font-semibold">Get the App</span>
           </motion.div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
             Download <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-primary">Snapgo</span> Today
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg">
@@ -342,7 +312,7 @@ function DownloadSection() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Android */}
           <motion.div
             initial={{ opacity: 0, x: -50, rotateY: -10 }}
@@ -464,28 +434,8 @@ function CTASection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section ref={ref} className="py-24 bg-gradient-to-br from-primary to-primary/90 relative overflow-hidden">
-      {/* Animated mesh background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-white/10 blur-[120px]"
-          animate={{ scale: [1, 1.3, 1], x: [0, 50, 0] }}
-          transition={{ duration: 12, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-white/5 blur-[100px]"
-          animate={{ scale: [1.2, 1, 1.2], y: [0, -50, 0] }}
-          transition={{ duration: 10, repeat: Infinity }}
-        />
-      </div>
-
-      {/* Grid pattern */}
-      <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-        backgroundSize: '40px 40px'
-      }} />
-
-      <div className="container mx-auto px-4 relative z-10">
+    <section ref={ref} className="section-padding-lg bg-[#0066B3]">
+      <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -502,7 +452,7 @@ function CTASection() {
               <span className="text-white text-sm font-semibold">Start Your Journey</span>
             </motion.div>
 
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               Ready to Start{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-teal-100">Saving?</span>
             </h2>
@@ -545,12 +495,12 @@ function CTASection() {
               className="flex flex-wrap justify-center gap-8 mt-12"
             >
               {[
-                { value: '7000+', label: 'Happy Users' },
+                { value: '8500+', label: 'Happy Users' },
                 { value: '75%', label: 'Cost Savings' },
-                { value: '15+', label: 'Cities' },
+                { value: '110+', label: 'Daily Rides' },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-teal-300">{stat.value}</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-teal-300">{stat.value}</div>
                   <div className="text-white/80 text-sm">{stat.label}</div>
                 </div>
               ))}
@@ -566,10 +516,6 @@ function CTASection() {
 function AppPreviewSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start'],
-  })
 
   const screens = [
     { file: 'home-screen', label: 'Home Screen', description: 'Find rides instantly' },
@@ -579,20 +525,8 @@ function AppPreviewSection() {
   ]
 
   return (
-    <section ref={containerRef} className="py-24 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          className="absolute top-0 right-0 w-96 h-96 rounded-full bg-teal/5 blur-3xl"
-          style={{ y: useTransform(scrollYProgress, [0, 1], [-100, 100]) }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-primary/5 blur-3xl"
-          style={{ y: useTransform(scrollYProgress, [0, 1], [100, -100]) }}
-        />
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
+    <section ref={containerRef} className="section-padding-lg bg-white">
+      <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -608,7 +542,7 @@ function AppPreviewSection() {
             <SmartphoneIcon className="w-4 h-4 text-teal" />
             <span className="text-teal text-sm font-semibold">App Preview</span>
           </motion.div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
             See <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-primary">Snapgo</span> in Action
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg">
@@ -713,7 +647,7 @@ export default function HomePage() {
         {isLoading && <LoadingAnimation key="loader" />}
       </AnimatePresence>
 
-      {/* Hero Section with 3D Globe */}
+      {/* Premium Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.98 }}
         animate={{
@@ -723,9 +657,7 @@ export default function HomePage() {
         }}
         transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
       >
-        <Suspense fallback={null}>
-          <Hero3D />
-        </Suspense>
+        <HeroPremium />
       </motion.div>
 
       {/* Trust Badges Marquee */}
@@ -762,6 +694,30 @@ export default function HomePage() {
         transition={{ duration: 0.6, delay: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
       >
         <StatsCounter />
+      </motion.div>
+
+      {/* CO2 Impact Tracker - Gamification */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{
+          opacity: contentRevealed ? 1 : 0,
+          y: contentRevealed ? 0 : 30
+        }}
+        transition={{ duration: 0.6, delay: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+      >
+        <CO2ImpactTracker />
+      </motion.div>
+
+      {/* Savings Calculator - Gamification */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{
+          opacity: contentRevealed ? 1 : 0,
+          y: contentRevealed ? 0 : 30
+        }}
+        transition={{ duration: 0.6, delay: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+      >
+        <SavingsCalculator />
       </motion.div>
 
       {/* Features Grid */}
@@ -823,6 +779,18 @@ export default function HomePage() {
         transition={{ duration: 0.6, delay: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
       >
         <TestimonialCarousel />
+      </motion.div>
+
+      {/* Instagram Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{
+          opacity: contentRevealed ? 1 : 0,
+          y: contentRevealed ? 0 : 30
+        }}
+        transition={{ duration: 0.6, delay: 0.85, ease: [0.34, 1.56, 0.64, 1] }}
+      >
+        <InstagramSection />
       </motion.div>
 
       {/* CTA Section */}

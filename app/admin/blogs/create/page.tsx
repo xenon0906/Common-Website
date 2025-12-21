@@ -24,6 +24,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
+import { FileUpload } from '@/components/ui/FileUpload'
 
 const blogSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
@@ -360,12 +361,13 @@ Download snapgo and join thousands of users already saving money on their daily 
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="imageUrl">Featured Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    {...register('imageUrl')}
-                    placeholder="https://..."
+                  <FileUpload
+                    category="blog"
+                    label="Featured Image"
+                    description="Upload a featured image for your blog post"
+                    onUploadComplete={(url) => setValue('imageUrl', url)}
                   />
+                  <input type="hidden" {...register('imageUrl')} />
                 </div>
               </CardContent>
             </Card>

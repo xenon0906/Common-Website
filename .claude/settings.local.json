@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:www.rapido.bike)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "Bash(npx prisma generate)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "WebSearch",
+      "WebFetch(domain:www.uber.com)",
+      "WebFetch(domain:www.marketermilk.com)",
+      "WebFetch(domain:www.unsection.com)",
+      "Bash(cat:*)"
+    ]
+  }
+}

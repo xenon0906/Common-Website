@@ -1,18 +1,20 @@
 'use client'
 
-import { Navbar } from '@/components/layout/Navbar'
+import { GlassNavbar } from '@/components/layout/GlassNavbar'
 import { Footer } from '@/components/layout/Footer'
 
 interface SiteLayoutProps {
   children: React.ReactNode
+  hideFooter?: boolean
+  hideNavbar?: boolean
 }
 
-export function SiteLayout({ children }: SiteLayoutProps) {
+export function SiteLayout({ children, hideFooter = false, hideNavbar = false }: SiteLayoutProps) {
   return (
     <>
-      <Navbar />
+      {!hideNavbar && <GlassNavbar />}
       <main className="flex-1">{children}</main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </>
   )
 }

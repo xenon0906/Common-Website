@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/api-auth'
 
 // GET - Fetch all team members
 // Use ?includeInactive=true to include inactive members (for admin panel)
@@ -24,6 +25,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Create a new team member
 export async function POST(req: NextRequest) {
+  // Require admin authentication
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
     const body = await req.json()
     const { name, bio, details, imageUrl, portraitUrl, email, linkedin, twitter, order } = body

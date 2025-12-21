@@ -17,7 +17,7 @@ const config: Config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#0066B3',  // SnapGo Primary Blue
+          DEFAULT: '#0066B3',  // Snapgo Primary Blue
           foreground: '#ffffff',
           50: '#e6f0f9',
           100: '#cce1f3',
@@ -125,11 +125,13 @@ const config: Config = {
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'float-slow': 'float 8s ease-in-out infinite',
+        'float-3d': 'float-3d 6s ease-in-out infinite',
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
         'slide-up': 'slide-up 0.5s ease-out',
         'slide-down': 'slide-down 0.5s ease-out',
         'slide-left': 'slide-left 0.5s ease-out',
         'slide-right': 'slide-right 0.5s ease-out',
+        'slide-in-bottom': 'slide-in-bottom 0.5s ease-out',
         'fade-in': 'fade-in 0.5s ease-out',
         'spin-slow': 'spin 20s linear infinite',
         'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
@@ -137,6 +139,12 @@ const config: Config = {
         'gradient': 'gradient-shift 8s ease infinite',
         'shimmer': 'shimmer 2s linear infinite',
         'wiggle': 'wiggle 1s ease-in-out infinite',
+        'draw-path': 'draw-path 1s ease-out forwards',
+        'confetti': 'confetti 1s ease-out forwards',
+        'check-draw': 'check-draw 0.4s ease-out forwards',
+        'scale-in': 'scale-in 0.3s ease-out forwards',
+        'nav-hide': 'nav-hide 0.3s ease-out forwards',
+        'nav-show': 'nav-show 0.3s ease-out forwards',
       },
       keyframes: {
         float: {
@@ -191,12 +199,59 @@ const config: Config = {
           '0%, 100%': { transform: 'rotate(-3deg)' },
           '50%': { transform: 'rotate(3deg)' },
         },
+        'float-3d': {
+          '0%, 100%': { transform: 'translateY(0) rotateY(0deg)' },
+          '50%': { transform: 'translateY(-20px) rotateY(5deg)' },
+        },
+        'slide-in-bottom': {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'draw-path': {
+          '0%': { strokeDashoffset: '1000' },
+          '100%': { strokeDashoffset: '0' },
+        },
+        'confetti': {
+          '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translateY(-100px) rotate(720deg)', opacity: '0' },
+        },
+        'check-draw': {
+          '0%': { strokeDashoffset: '50' },
+          '100%': { strokeDashoffset: '0' },
+        },
+        'scale-in': {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'nav-hide': {
+          '0%': { transform: 'translateY(0)' },
+          '100%': { transform: 'translateY(-100%)' },
+        },
+        'nav-show': {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
       },
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
         '112': '28rem',
         '128': '32rem',
+        // Premium section spacing
+        'section-sm': '5rem',      // 80px
+        'section-md': '6.25rem',   // 100px
+        'section-lg': '7.5rem',    // 120px
+        'section-xl': '10rem',     // 160px
+      },
+      backdropBlur: {
+        xs: '2px',
+        '2xl': '40px',
+        '3xl': '64px',
+      },
+      backdropSaturate: {
+        125: '1.25',
+        150: '1.5',
+        175: '1.75',
       },
     },
   },

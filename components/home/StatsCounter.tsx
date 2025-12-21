@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react'
 import { motion, useInView, useScroll, useTransform } from 'framer-motion'
 import { STATS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { StatisticData } from '@/lib/content'
 
 interface AnimatedCounterProps {
   value: number
@@ -47,8 +48,11 @@ function AnimatedCounter({ value, prefix = '', suffix = '', duration = 2.5 }: An
   )
 }
 
+// Stat type for compatibility
+type StatType = StatisticData | typeof STATS[0]
+
 // Individual stat card with hover effects
-function StatCard({ stat, index, isInView }: { stat: typeof STATS[0]; index: number; isInView: boolean }) {
+function StatCard({ stat, index, isInView }: { stat: StatType; index: number; isInView: boolean }) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
@@ -107,9 +111,16 @@ function StatCard({ stat, index, isInView }: { stat: typeof STATS[0]; index: num
   )
 }
 
-export function StatsCounter() {
+interface StatsCounterProps {
+  stats?: StatType[]
+}
+
+export function StatsCounter({ stats }: StatsCounterProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
+
+  // Use provided stats or fall back to constants
+  const displayStats = stats || STATS
 
   // Parallax scrolling effect
   const { scrollYProgress } = useScroll({
@@ -201,7 +212,7 @@ export function StatsCounter() {
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {STATS.map((stat, index) => (
+          {displayStats.map((stat, index) => (
             <StatCard
               key={stat.label}
               stat={stat}

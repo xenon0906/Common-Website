@@ -1,467 +1,443 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { SiteLayout } from '@/components/layout/SiteLayout'
+import { InteractiveWalkthrough, PhoneMockup } from '@/components/how-it-works/InteractiveStepCard'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import {
-  MapPinIcon,
-  SearchIcon,
-  UsersIcon,
-  MessageIcon,
-  NavigationIcon,
-  WalletIcon,
-  CalendarIcon,
-  ArrowRightIcon,
-  ZapIcon,
-  TargetIcon,
-  DownloadIcon,
-  SparklesIcon,
-} from '@/components/ui/icon'
-import { PageHero } from '@/components/shared/PageHero'
-import { StepSequence, StepItem, StepDots, ScrollReveal, FloatingOrb } from '@/components/shared/animations'
-import { GlowHighlight, StepCounter } from '@/components/shared/animations'
-import { FlowingLine } from '@/components/shared/animations/ConnectionLine'
-import { AsymmetricSection } from '@/components/shared/layouts'
-import { ANIMATION_CONFIG } from '@/lib/animation-config'
+  MapPin,
+  Search,
+  Users,
+  MessageCircle,
+  Navigation,
+  Wallet,
+  Calendar,
+  Zap,
+  Target,
+  Download,
+  Sparkles,
+  ArrowRight,
+  Check,
+  Clock,
+  Shield,
+} from 'lucide-react'
 
-interface StepData {
-  icon: React.FC<{ className?: string; size?: number }>
-  title: string
-  description: string
-}
-
-const realTimeSteps: StepData[] = [
-  { icon: MapPinIcon, title: 'Enter Locations', description: 'Set current location (or use auto-detect) and destination, specify number of people' },
-  { icon: SearchIcon, title: 'Smart Search', description: 'Choose preferences: number of riders, gender filter (female-only option), search radius (750m default)' },
-  { icon: UsersIcon, title: 'Find Matches', description: 'Algorithm finds verified users within 750m of source and destination, see profiles and KYC status' },
-  { icon: MessageIcon, title: 'Connect & Chat', description: 'Send ride requests to matches, once accepted, chat in group to coordinate pickup and time' },
-  { icon: NavigationIcon, title: 'Meet at Midpoint', description: 'App suggests optimal meeting point convenient for everyone, navigate using built-in map' },
-  { icon: WalletIcon, title: 'Share & Save', description: 'Book cab together, share fare equally, save up to 75%' },
+// Step data for real-time rides
+const realTimeSteps = [
+  {
+    icon: MapPin,
+    title: 'Enter Your Locations',
+    description: 'Set your pickup point and destination',
+    details: 'Use auto-detect for instant location or manually enter addresses. Specify how many people are traveling with you for accurate matching.',
+  },
+  {
+    icon: Search,
+    title: 'Set Your Preferences',
+    description: 'Customize your ride matching options',
+    details: 'Choose the number of co-riders, enable female-only matching for added safety, and set your preferred search radius (750m default, expandable to 1km).',
+  },
+  {
+    icon: Users,
+    title: 'Find Verified Matches',
+    description: 'Connect with nearby verified riders',
+    details: 'Our algorithm instantly finds KYC-verified users heading your way. View profiles, ratings, and verification status before connecting.',
+  },
+  {
+    icon: MessageCircle,
+    title: 'Connect & Coordinate',
+    description: 'Chat securely with your co-riders',
+    details: 'Send ride requests to potential matches. Once accepted, a secure group chat opens for easy coordination of pickup time and location.',
+  },
+  {
+    icon: Navigation,
+    title: 'Meet at the Optimal Point',
+    description: 'Navigate to your suggested meetup',
+    details: 'The app calculates the most convenient meeting point for all riders. Use the built-in navigation to reach the pickup spot effortlessly.',
+  },
+  {
+    icon: Wallet,
+    title: 'Share & Save',
+    description: 'Split fare and save up to 75%',
+    details: 'Book your cab together, share the fare equally, and enjoy massive savings. Track your total savings over time in your profile.',
+  },
 ]
 
-const scheduledSearchSteps: StepData[] = [
-  { icon: MapPinIcon, title: 'Enter Trip Details', description: 'Source, destination, date, time' },
-  { icon: SearchIcon, title: 'Browse Available Rides', description: 'See rides within 2km radius matching schedule' },
-  { icon: ArrowRightIcon, title: 'Send Join Request', description: 'Request to join rides that match needs' },
-  { icon: UsersIcon, title: 'Get Confirmed', description: 'Host accepts request and you\'re in' },
+// Step data for scheduled rides
+const scheduledSteps = [
+  {
+    icon: Calendar,
+    title: 'Plan Your Trip',
+    description: 'Set date, time, and route details',
+    details: 'Enter your pickup location, destination, preferred date and time. Perfect for regular commutes or planned journeys.',
+  },
+  {
+    icon: Search,
+    title: 'Browse Available Rides',
+    description: 'Find existing rides matching your route',
+    details: 'Search within a 2km radius to find rides posted by other users. See ride details, host profiles, and available seats.',
+  },
+  {
+    icon: Users,
+    title: 'Request to Join or Create',
+    description: 'Join existing rides or host your own',
+    details: 'Send join requests to suitable rides, or create your own ride and let others find you. Set preferences like gender filter and additional notes.',
+  },
+  {
+    icon: Check,
+    title: 'Confirm & Connect',
+    description: 'Get confirmed and start chatting',
+    details: 'Once your request is accepted (or you accept joiners), connect via group chat to finalize details before the trip.',
+  },
 ]
 
-const scheduledCreateSteps: StepData[] = [
-  { icon: MapPinIcon, title: 'Set Ride Details', description: 'Pickup, destination, date, time, seats needed' },
-  { icon: UsersIcon, title: 'Add Preferences', description: 'Gender preference, additional notes' },
-  { icon: ZapIcon, title: 'Publish Ride', description: 'Your ride becomes visible to nearby users' },
-  { icon: TargetIcon, title: 'Accept Requests', description: 'Review and accept join requests' },
-]
-
-// Enhanced Step Card with asymmetric layout support
-function EnhancedStepCard({
-  step,
-  index,
-  isActive,
-  alignment = 'center',
-  color = 'teal',
-}: {
-  step: StepData
-  index: number
-  isActive: boolean
-  alignment?: 'left' | 'right' | 'center'
-  color?: 'teal' | 'primary'
-}) {
-  const Icon = step.icon
-  const isLeft = alignment === 'left'
-  const isRight = alignment === 'right'
-
-  const colorClasses = {
-    teal: {
-      icon: 'bg-teal/10 text-teal',
-      iconActive: 'bg-teal text-white shadow-lg shadow-teal/30',
-      border: 'border-teal/50',
-      glow: 'teal' as const,
-    },
-    primary: {
-      icon: 'bg-primary/10 text-primary',
-      iconActive: 'bg-primary text-white shadow-lg shadow-primary/30',
-      border: 'border-primary/50',
-      glow: 'primary' as const,
-    },
-  }
-
+// Hero section - clean, no decorative elements
+function HeroSection() {
   return (
-    <GlowHighlight isActive={isActive} color={colorClasses[color].glow} pulse={isActive}>
-      <Card className={`
-        h-full transition-all duration-500
-        ${isActive ? `border-2 ${colorClasses[color].border} shadow-xl` : 'border border-border/50'}
-        hover:shadow-xl
-      `}>
-        <CardContent className={`p-6 ${isRight ? 'text-right' : isLeft ? 'text-left' : 'text-center'}`}>
-          {/* Header with step number and icon */}
-          <div className={`flex items-center gap-4 mb-4 ${isRight ? 'flex-row-reverse' : ''}`}>
-            <StepCounter step={index + 1} isActive={isActive} size="md" color={color} />
-            <motion.div
-              className={`
-                w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300
-                ${isActive ? colorClasses[color].iconActive : colorClasses[color].icon}
-              `}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              animate={isActive ? { scale: [1, 1.1, 1] } : {}}
-              transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-            >
-              <Icon className="w-7 h-7" />
-            </motion.div>
+    <section className="hero-viewport bg-gradient-to-br from-primary via-primary/90 to-primary-800">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Title */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+            Two Ways to{' '}
+            <span className="text-white/90">Share Rides</span>
+          </h1>
+
+          {/* Description */}
+          <p className="text-xl text-white/70 max-w-2xl mx-auto mb-12">
+            Whether you need a ride right now or want to plan ahead, Snapgo has flexible options for every commuter.
+          </p>
+
+          {/* Simple stats row */}
+          <div className="flex flex-wrap justify-center gap-8 mb-12">
+            {[
+              { value: '30 sec', label: 'Average Match Time' },
+              { value: '100%', label: 'Verified Users' },
+              { value: '75%', label: 'Max Savings' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <span className="text-2xl font-bold text-white">{stat.value}</span>
+                <p className="text-white/50 text-sm">{stat.label}</p>
+              </div>
+            ))}
           </div>
 
-          {/* Content */}
-          <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-          <p className="text-muted-foreground text-sm">{step.description}</p>
-        </CardContent>
-      </Card>
-    </GlowHighlight>
+          {/* Mode toggle hint */}
+          <div className="flex justify-center gap-4">
+            <a
+              href="#real-time"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary rounded-xl font-medium hover:bg-white/90 transition-colors"
+            >
+              <Zap className="w-5 h-5" />
+              Real-Time Rides
+            </a>
+            <a
+              href="#scheduled"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors border border-white/20"
+            >
+              <Calendar className="w-5 h-5" />
+              Scheduled Rides
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 
-// Scheduled Step Item with vertical connection
-function ScheduledStepItem({
-  step,
-  index,
-  isActive,
-  color = 'teal',
-}: {
-  step: StepData
-  index: number
-  isActive: boolean
-  color?: 'teal' | 'primary'
-}) {
-  const Icon = step.icon
-
-  const colorClasses = {
-    teal: {
-      counter: 'bg-teal text-white',
-      counterInactive: 'bg-teal/20 text-teal',
-      icon: 'text-teal',
-    },
-    primary: {
-      counter: 'bg-primary text-white',
-      counterInactive: 'bg-primary/20 text-primary',
-      icon: 'text-primary',
-    },
-  }
+// Real-time rides section
+function RealTimeSection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <motion.div
-      className="flex items-start gap-4 relative"
-      initial={{ opacity: 0, x: color === 'teal' ? -20 : 20 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.15 }}
-      whileHover={{ x: color === 'teal' ? 5 : -5 }}
-    >
-      {/* Step number */}
-      <motion.div
-        className={`
-          w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm
-          transition-all duration-300
-          ${isActive ? colorClasses[color].counter : colorClasses[color].counterInactive}
-          ${isActive ? 'shadow-lg scale-110' : ''}
-        `}
-        animate={isActive ? { scale: [1, 1.15, 1] } : {}}
-        transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-      >
-        {index + 1}
-      </motion.div>
+    <section id="real-time" ref={ref} className="section-padding-lg bg-white">
+      <div className="container mx-auto px-4">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-2 bg-teal-50 rounded-full text-teal-600 text-sm font-medium mb-4">
+            <Zap className="w-4 h-4" />
+            Real-Time Rides
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Find a Ride{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-teal-600">
+              Instantly
+            </span>
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            Connect with verified riders within 750m radius in seconds. Perfect for spontaneous trips.
+          </p>
+        </motion.div>
 
-      {/* Content */}
-      <div className="flex-1 pb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className={`w-5 h-5 ${colorClasses[color].icon}`} />
-          <h4 className="font-semibold">{step.title}</h4>
+        {/* Interactive walkthrough */}
+        <div className="max-w-3xl mx-auto">
+          <InteractiveWalkthrough
+            steps={realTimeSteps}
+            color="teal"
+            autoPlay={true}
+            autoPlayDelay={5000}
+          />
         </div>
-        <p className="text-sm text-muted-foreground">{step.description}</p>
       </div>
+    </section>
+  )
+}
 
-      {/* Connection line to next step */}
-      {index < 3 && (
-        <div className="absolute left-5 top-12 w-0.5 h-[calc(100%-48px)] bg-gradient-to-b from-current to-transparent opacity-40" />
-      )}
-    </motion.div>
+// Scheduled rides section
+function ScheduledSection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-100px' })
+
+  return (
+    <section id="scheduled" ref={ref} className="section-padding-lg bg-gray-50">
+      <div className="container mx-auto px-4">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
+            <Calendar className="w-4 h-4" />
+            Scheduled Rides
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Plan Ahead for{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">
+              Better Matches
+            </span>
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            2km search radius for more options. Create or join rides for guaranteed matches.
+          </p>
+        </motion.div>
+
+        {/* Interactive walkthrough */}
+        <div className="max-w-3xl mx-auto">
+          <InteractiveWalkthrough
+            steps={scheduledSteps}
+            color="primary"
+            autoPlay={true}
+            autoPlayDelay={5000}
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Comparison section
+function ComparisonSection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-100px' })
+
+  const comparisons = [
+    {
+      feature: 'Match Speed',
+      realTime: 'Instant (30 sec)',
+      scheduled: 'Planned ahead',
+      icon: Clock,
+    },
+    {
+      feature: 'Search Radius',
+      realTime: '750m - 1km',
+      scheduled: 'Up to 2km',
+      icon: Target,
+    },
+    {
+      feature: 'Best For',
+      realTime: 'Spontaneous trips',
+      scheduled: 'Daily commutes',
+      icon: Zap,
+    },
+    {
+      feature: 'Flexibility',
+      realTime: 'High - ride now',
+      scheduled: 'Plan & confirm',
+      icon: Navigation,
+    },
+  ]
+
+  return (
+    <section ref={ref} className="section-padding-lg bg-white">
+      <div className="container mx-auto px-4">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Choose Your Style
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            Both options offer the same safety features and savings—pick what works for you.
+          </p>
+        </motion.div>
+
+        {/* Comparison cards */}
+        <div className="max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 gap-6">
+            {/* Real-time card */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ y: -5 }}
+              className="bg-gradient-to-br from-teal-50 to-white rounded-2xl p-8 border-2 border-teal-100 shadow-lg"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-teal-500 flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900">Real-Time</h3>
+                  <p className="text-teal-600 text-sm">Instant matching</p>
+                </div>
+              </div>
+              <ul className="space-y-4">
+                {comparisons.map((item) => (
+                  <li key={item.feature} className="flex items-center gap-3">
+                    <item.icon className="w-5 h-5 text-teal-500" />
+                    <div>
+                      <span className="text-gray-500 text-sm">{item.feature}</span>
+                      <p className="font-medium text-gray-900">{item.realTime}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Scheduled card */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ y: -5 }}
+              className="bg-gradient-to-br from-primary/10 to-white rounded-2xl p-8 border-2 border-primary/20 shadow-lg"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900">Scheduled</h3>
+                  <p className="text-primary text-sm">Plan ahead</p>
+                </div>
+              </div>
+              <ul className="space-y-4">
+                {comparisons.map((item) => (
+                  <li key={item.feature} className="flex items-center gap-3">
+                    <item.icon className="w-5 h-5 text-primary" />
+                    <div>
+                      <span className="text-gray-500 text-sm">{item.feature}</span>
+                      <p className="font-medium text-gray-900">{item.scheduled}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// CTA section
+function CTASection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-100px' })
+
+  return (
+    <section ref={ref} className="section-padding-lg bg-gradient-to-br from-primary via-primary/90 to-teal-600">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto"
+        >
+          {/* Badge */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={isInView ? { scale: 1 } : {}}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white text-sm font-medium mb-8"
+          >
+            <Sparkles className="w-4 h-4" />
+            Start Saving Today
+          </motion.div>
+
+          {/* Title */}
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            Ready to Transform Your{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-white">
+              Commute?
+            </span>
+          </h2>
+
+          {/* Description */}
+          <p className="text-xl text-white/80 mb-10">
+            Join thousands of smart commuters saving money and the environment with every ride.
+          </p>
+
+          {/* CTA buttons */}
+          <div className="flex flex-wrap justify-center gap-4">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                size="xl"
+                className="bg-white text-primary hover:bg-white/90 shadow-2xl shadow-white/20"
+                asChild
+              >
+                <Link href="/#download">
+                  <Download className="w-5 h-5 mr-2" />
+                  Download Snapgo
+                </Link>
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                size="xl"
+                className="bg-teal-500 text-white hover:bg-teal-600 shadow-lg shadow-teal-500/30"
+                asChild
+              >
+                <Link href="/features">
+                  Explore Features
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   )
 }
 
 export default function HowItWorksPage() {
-  const realTimeRef = useRef<HTMLDivElement>(null)
-  const scheduledRef = useRef<HTMLDivElement>(null)
-  const realTimeInView = useInView(realTimeRef, { once: true, margin: '-100px' })
-  const scheduledInView = useInView(scheduledRef, { once: true, margin: '-100px' })
-  const [activeRealTimeStep, setActiveRealTimeStep] = useState(0)
-
   return (
     <SiteLayout>
-      <PageHero
-        badge="How It Works"
-        title="Two Ways to"
-        titleHighlight="Share Rides"
-        description="Whether you need a ride right now or want to plan ahead, Snapgo has you covered with flexible options."
-        icon={<NavigationIcon className="w-5 h-5" />}
-      />
-
-      {/* Real-Time Rides - Enhanced with Step Sequence */}
-      <section ref={realTimeRef} className="py-20 bg-background relative overflow-hidden">
-        {/* Floating background orbs */}
-        <FloatingOrb
-          className="absolute top-20 right-10 opacity-30"
-          size="lg"
-          color="teal"
-          speed={0.3}
-        />
-        <FloatingOrb
-          className="absolute bottom-40 left-20 opacity-20"
-          size="md"
-          color="purple"
-          speed={0.5}
-        />
-
-        <div className="container mx-auto px-4 relative z-10">
-          <ScrollReveal direction="up" className="text-center mb-12">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-teal/10 rounded-full mb-4"
-            >
-              <ZapIcon className="w-5 h-5 text-teal" />
-              <span className="text-teal font-medium">Real-Time Rides</span>
-            </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Find a Ride <span className="text-teal">Instantly</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-              Instant matching with nearby riders within 750m radius. Expand to 1km if no match found.
-            </p>
-
-            {/* Step progress dots */}
-            <div className="flex justify-center gap-2 mb-8">
-              {realTimeSteps.map((_, index) => (
-                <motion.button
-                  key={index}
-                  className={`
-                    h-2 rounded-full transition-all duration-300
-                    ${activeRealTimeStep === index ? 'w-8 bg-teal' : 'w-2 bg-teal/30'}
-                  `}
-                  onClick={() => setActiveRealTimeStep(index)}
-                  whileHover={{ scale: 1.2 }}
-                />
-              ))}
-            </div>
-          </ScrollReveal>
-
-          {/* Steps Grid with Asymmetric Layout */}
-          <StepSequence
-            steps={6}
-            direction="horizontal"
-            showConnections={true}
-            connectionStyle="flowing"
-            autoAdvance={true}
-            autoAdvanceDelay={3500}
-            className="max-w-7xl mx-auto"
-          >
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {realTimeSteps.map((step, index) => {
-                // Asymmetric: odd indices align right, even align left
-                const alignment = index % 2 === 0 ? 'left' : 'right'
-                return (
-                  <StepItem key={step.title} index={index}>
-                    {(isActive) => (
-                      <EnhancedStepCard
-                        step={step}
-                        index={index}
-                        isActive={isActive}
-                        alignment={alignment}
-                        color="teal"
-                      />
-                    )}
-                  </StepItem>
-                )
-              })}
-            </div>
-          </StepSequence>
-        </div>
-      </section>
-
-      {/* Scheduled Rides - Asymmetric Two-Column Layout */}
-      <section ref={scheduledRef} className="py-20 bg-muted/50 relative overflow-hidden">
-        {/* Floating background orbs */}
-        <FloatingOrb
-          className="absolute top-10 left-10 opacity-20"
-          size="xl"
-          color="gradient"
-          speed={0.4}
-        />
-
-        <div className="container mx-auto px-4 relative z-10">
-          <ScrollReveal direction="up" className="text-center mb-12">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4"
-            >
-              <CalendarIcon className="w-5 h-5 text-primary" />
-              <span className="text-primary font-medium">Scheduled Rides</span>
-            </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Plan Ahead for <span className="text-primary">Better Matches</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              2km search radius for more options. Create or join existing rides for guaranteed matches.
-            </p>
-          </ScrollReveal>
-
-          {/* Asymmetric Two-Column Layout */}
-          <AsymmetricSection index={0} gap="lg" className="max-w-5xl mx-auto">
-            {/* Search for Rides - Left Side */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={scheduledInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.2, delay: 0.05, ease: [0.34, 1.56, 0.64, 1] }}
-              whileHover={{ y: -5 }}
-            >
-              <Card className="hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-teal/30">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3">
-                    <motion.div
-                      className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                    >
-                      <SearchIcon className="w-5 h-5 text-teal" />
-                    </motion.div>
-                    <span>Search for Rides</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {scheduledSearchSteps.map((step, index) => (
-                    <ScheduledStepItem
-                      key={step.title}
-                      step={step}
-                      index={index}
-                      isActive={false}
-                      color="teal"
-                    />
-                  ))}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Create a Ride - Right Side */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={scheduledInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.2, delay: 0.08, ease: [0.34, 1.56, 0.64, 1] }}
-              whileHover={{ y: -5 }}
-            >
-              <Card className="hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-primary/30">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3">
-                    <motion.div
-                      className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"
-                      whileHover={{ scale: 1.1, rotate: -5 }}
-                    >
-                      <ZapIcon className="w-5 h-5 text-primary" />
-                    </motion.div>
-                    <span>Create a Ride</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {scheduledCreateSteps.map((step, index) => (
-                    <ScheduledStepItem
-                      key={step.title}
-                      step={step}
-                      index={index}
-                      isActive={false}
-                      color="primary"
-                    />
-                  ))}
-                </CardContent>
-              </Card>
-            </motion.div>
-          </AsymmetricSection>
-
-          {/* Connection indicator between cards */}
-          <motion.div
-            className="hidden md:flex justify-center my-8"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={scheduledInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-0.5 bg-gradient-to-r from-teal to-transparent" />
-              <motion.div
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-teal to-primary flex items-center justify-center"
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              >
-                <ArrowRightIcon className="w-5 h-5 text-white" />
-              </motion.div>
-              <div className="w-16 h-0.5 bg-gradient-to-l from-primary to-transparent" />
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-24 bg-gradient-to-br from-primary to-primary/90 relative overflow-hidden">
-        {/* Animated mesh background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <motion.div
-            className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-white/10 blur-[100px]"
-            animate={{ scale: [1, 1.3, 1], x: [0, 50, 0] }}
-            transition={{ duration: 12, repeat: Infinity }}
-          />
-          <motion.div
-            className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-white/10 blur-[80px]"
-            animate={{ scale: [1.2, 1, 1.2], y: [0, -50, 0] }}
-            transition={{ duration: 10, repeat: Infinity }}
-          />
-        </div>
-
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }} />
-
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <ScrollReveal direction="up">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-              className="inline-flex items-center gap-2 px-4 py-2 glass-dark rounded-full mb-6"
-            >
-              <SparklesIcon className="w-4 h-4 text-teal-300" />
-              <span className="text-white text-sm font-semibold">Start Your Journey</span>
-            </motion.div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Start{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-teal-100">Saving?</span>
-            </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Download Snapgo now and join thousands of users already saving on their daily commute.
-            </p>
-            <motion.div
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-            >
-              <Button size="xl" className="bg-white text-primary hover:bg-white/90 shadow-2xl shadow-white/20" asChild>
-                <Link href="/#download">
-                  <DownloadIcon className="w-5 h-5 mr-2" />
-                  Download App
-                </Link>
-              </Button>
-            </motion.div>
-          </ScrollReveal>
-        </div>
-      </section>
+      <HeroSection />
+      <RealTimeSection />
+      <ScheduledSection />
+      <ComparisonSection />
+      <CTASection />
     </SiteLayout>
   )
 }

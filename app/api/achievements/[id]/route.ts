@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/api-auth'
 
 interface RouteParams {
   params: { id: string }
@@ -38,6 +39,10 @@ export async function PUT(
   request: NextRequest,
   { params }: RouteParams
 ) {
+  // Require admin authentication
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
     const { id } = params
     const body = await request.json()
@@ -69,6 +74,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: RouteParams
 ) {
+  // Require admin authentication
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
     const { id } = params
     await prisma.achievement.delete({

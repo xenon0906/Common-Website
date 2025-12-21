@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
+import { FileUpload } from '@/components/ui/FileUpload'
 import {
   Save,
   Loader2,
@@ -1039,15 +1040,20 @@ export default function AdminSettingsPage() {
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex items-center gap-2 mb-4">
                   <Upload className="w-5 h-5 text-teal" />
-                  <Label className="text-base font-semibold">Image Upload</Label>
+                  <Label className="text-base font-semibold">Quick Image Upload</Label>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Upload images to your public folder and enter the path above. Image upload functionality coming soon.
+                  Upload images directly to use across your website. The uploaded URL will be copied automatically.
                 </p>
-                <Button variant="outline" disabled className="opacity-50">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Image (Coming Soon)
-                </Button>
+                <FileUpload
+                  category="logo"
+                  label="Upload Logo or Image"
+                  description="Drag and drop or click to upload (PNG, JPG, WebP up to 5MB)"
+                  onUploadComplete={(url) => {
+                    navigator.clipboard.writeText(url)
+                    alert(`Image uploaded! URL copied to clipboard: ${url}`)
+                  }}
+                />
               </div>
             </CardContent>
           </Card>

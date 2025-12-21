@@ -6,12 +6,23 @@ import { Quote, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { TESTIMONIALS } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { TestimonialData } from '@/lib/content'
 
-export function TestimonialCarousel() {
+// Testimonial type for compatibility
+type TestimonialType = TestimonialData | typeof TESTIMONIALS[0]
+
+interface TestimonialCarouselProps {
+  testimonials?: TestimonialType[]
+}
+
+export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(0)
+
+  // Use provided testimonials or fall back to constants
+  const displayTestimonials = testimonials || TESTIMONIALS
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -42,8 +53,8 @@ export function TestimonialCarousel() {
     setDirection(newDirection)
     setCurrentIndex((prev) => {
       let next = prev + newDirection
-      if (next < 0) next = TESTIMONIALS.length - 1
-      if (next >= TESTIMONIALS.length) next = 0
+      if (next < 0) next = displayTestimonials.length - 1
+      if (next >= displayTestimonials.length) next = 0
       return next
     })
   }
@@ -128,16 +139,16 @@ export function TestimonialCarousel() {
 
                   {/* Quote text */}
                   <blockquote className="text-xl md:text-2xl text-white text-center mb-8 leading-relaxed">
-                    "{TESTIMONIALS[currentIndex].quote}"
+                    "{displayTestimonials[currentIndex].quote}"
                   </blockquote>
 
                   {/* Author */}
                   <div className="text-center">
                     <div className="text-primary font-semibold">
-                      {TESTIMONIALS[currentIndex].author}
+                      {displayTestimonials[currentIndex].author}
                     </div>
                     <div className="text-white/80 text-sm">
-                      {TESTIMONIALS[currentIndex].location}
+                      {displayTestimonials[currentIndex].location}
                     </div>
                   </div>
                 </div>
@@ -147,7 +158,7 @@ export function TestimonialCarousel() {
 
           {/* Pagination dots */}
           <div className="flex justify-center gap-2 mt-8">
-            {TESTIMONIALS.map((_, index) => (
+            {displayTestimonials.map((_, index) => (
               <button
                 key={index}
                 onClick={() => {

@@ -19,13 +19,34 @@ import {
   ChevronRight,
   Home,
   Users,
+  Layers,
+  Sparkles,
+  BarChart3,
+  Star,
+  MessageSquare,
+  Info,
+  Smartphone,
+  Mail,
+  Share2,
+  Search,
+  Globe,
 } from 'lucide-react'
 
 const sidebarLinks = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/admin/content', icon: Layers, label: 'Content Manager', isSection: true },
+  { href: '/admin/content/hero', icon: Sparkles, label: 'Hero Section', parent: '/admin/content' },
+  { href: '/admin/content/stats', icon: BarChart3, label: 'Statistics', parent: '/admin/content' },
+  { href: '/admin/content/features', icon: Star, label: 'Features', parent: '/admin/content' },
+  { href: '/admin/content/testimonials', icon: MessageSquare, label: 'Testimonials', parent: '/admin/content' },
+  { href: '/admin/content/about', icon: Info, label: 'About Content', parent: '/admin/content' },
+  { href: '/admin/content/apps', icon: Smartphone, label: 'App Store Links', parent: '/admin/content' },
+  { href: '/admin/content/contact', icon: Mail, label: 'Contact Info', parent: '/admin/content' },
+  { href: '/admin/content/social', icon: Share2, label: 'Social Links', parent: '/admin/content' },
   { href: '/admin/blogs', icon: FileText, label: 'Blog Manager' },
   { href: '/admin/team', icon: Users, label: 'Team Manager' },
   { href: '/admin/achievements', icon: Award, label: 'Achievements' },
+  { href: '/admin/seo', icon: Search, label: 'SEO & Optimization' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
 
@@ -86,25 +107,30 @@ export default function AdminLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
           {sidebarLinks.map((link) => {
             const Icon = link.icon
             const isActive = pathname === link.href ||
               (link.href !== '/admin' && pathname.startsWith(link.href))
+            const isParentActive = link.parent && pathname.startsWith(link.parent)
+            const hasParent = 'parent' in link
 
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
+                  'flex items-center gap-3 py-2.5 rounded-lg transition-all duration-200',
+                  hasParent ? 'pl-8 pr-4' : 'px-4',
+                  hasParent && !sidebarOpen && 'pl-4',
                   isActive
                     ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  'isSection' in link && 'font-semibold text-foreground mt-4 first:mt-0'
                 )}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {sidebarOpen && <span>{link.label}</span>}
+                <Icon className={cn('flex-shrink-0', hasParent ? 'w-4 h-4' : 'w-5 h-5')} />
+                {sidebarOpen && <span className={hasParent ? 'text-sm' : ''}>{link.label}</span>}
               </Link>
             )
           })}

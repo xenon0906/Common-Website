@@ -15,6 +15,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+      },
     ],
     // Use unoptimized for static hosting on Hostinger
     // Set to true if not using Vercel or other platforms with image optimization

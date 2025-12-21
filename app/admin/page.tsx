@@ -1,15 +1,12 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -32,90 +29,53 @@ import {
   Award,
   ArrowUpRight,
   ArrowDownRight,
-  TrendingUp,
   ExternalLink,
   Settings,
   Sparkles,
   Zap,
-  BarChart3,
-  PieChart as PieChartIcon,
   UserPlus,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 
-// Website Analytics Stats
-const websiteStats = [
-  {
-    title: 'Page Views',
-    value: '24,567',
-    change: '+18%',
-    trend: 'up',
-    icon: Eye,
-    description: 'This month',
-  },
-  {
-    title: 'Unique Visitors',
-    value: '8,432',
-    change: '+12%',
-    trend: 'up',
-    icon: Users,
-    description: 'This month',
-  },
-  {
-    title: 'Avg. Session',
-    value: '3m 24s',
-    change: '+5%',
-    trend: 'up',
-    icon: Clock,
-    description: 'Duration',
-  },
-  {
-    title: 'Bounce Rate',
-    value: '42.3%',
-    change: '-8%',
-    trend: 'down',
-    icon: MousePointerClick,
-    description: 'Lower is better',
-  },
-]
+interface AnalyticsData {
+  overview: {
+    totalVisitors: number
+    totalPageViews: number
+    avgSessionDuration: number
+    bounceRate: number
+    visitorChange: number
+    pageViewChange: number
+    durationChange: number
+    bounceChange: number
+  }
+  dailyVisitors: Array<{
+    date: string
+    visitors: number
+    pageViews: number
+  }>
+  topPages: Array<{
+    path: string
+    title: string
+    views: number
+    percentage: number
+  }>
+  trafficSources: Array<{
+    source: string
+    visitors: number
+    percentage: number
+  }>
+}
 
-// Page Views Over Time
-const pageViewsData = [
-  { date: 'Nov 1', views: 820, visitors: 320 },
-  { date: 'Nov 5', views: 1240, visitors: 480 },
-  { date: 'Nov 10', views: 1680, visitors: 620 },
-  { date: 'Nov 15', views: 2100, visitors: 780 },
-  { date: 'Nov 20', views: 2450, visitors: 920 },
-  { date: 'Nov 25', views: 2890, visitors: 1050 },
-  { date: 'Nov 30', views: 3200, visitors: 1180 },
-]
-
-// Traffic Sources
-const trafficSourcesData = [
-  { name: 'Organic Search', value: 45, color: '#0066B3' },
-  { name: 'Direct', value: 25, color: '#0d9488' },
-  { name: 'Social Media', value: 18, color: '#7c3aed' },
-  { name: 'Referral', value: 12, color: '#3399CC' },
-]
-
-// Device Breakdown
+// Device Breakdown (static for now - GA4 requires different API call)
 const deviceData = [
   { name: 'Mobile', value: 62, color: '#0066B3' },
   { name: 'Desktop', value: 32, color: '#0d9488' },
   { name: 'Tablet', value: 6, color: '#7c3aed' },
 ]
 
-// Top Pages
-const topPagesData = [
-  { page: 'Home', views: 8420, change: '+15%' },
-  { page: 'How It Works', views: 3250, change: '+22%' },
-  { page: 'Features', views: 2890, change: '+8%' },
-  { page: 'About', views: 2140, change: '+12%' },
-  { page: 'Safety', views: 1680, change: '+18%' },
-  { page: 'Blog', views: 1420, change: '+25%' },
-]
-
-// Geographic Data
+// Geographic Data (static for now)
 const geoData = [
   { city: 'Greater Noida', visitors: 2840, percentage: 34 },
   { city: 'Delhi', visitors: 1680, percentage: 20 },
@@ -126,7 +86,7 @@ const geoData = [
 
 // Recent Blogs
 const recentBlogs = [
-  { title: 'How to Save ₹6000 Monthly on Your Commute', status: 'published', views: 1240 },
+  { title: 'How to Save Rs 6000 Monthly on Your Commute', status: 'published', views: 1240 },
   { title: 'Top 5 Ride-Sharing Tips for College Students', status: 'draft', views: 0 },
   { title: 'Why Aadhaar Verification Makes Travel Safer', status: 'published', views: 890 },
 ]
@@ -138,7 +98,127 @@ const recentAchievements = [
   { title: '7000+ Downloads Milestone', type: 'POST', date: 'Dec 2025' },
 ]
 
+// Traffic source colors
+const trafficColors = ['#0066B3', '#0d9488', '#7c3aed', '#3399CC', '#f59e0b']
+
+function formatDuration(seconds: number): string {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}m ${secs}s`
+}
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+  return num.toLocaleString()
+}
+
 export default function AdminDashboard() {
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchAnalytics() {
+      try {
+        const res = await fetch('/api/analytics/data')
+        if (!res.ok) {
+          if (res.status === 401) {
+            setError('Please log in to view analytics')
+          } else {
+            throw new Error('Failed to fetch analytics')
+          }
+          return
+        }
+        const data = await res.json()
+        setAnalytics(data)
+      } catch (err) {
+        console.error('Error fetching analytics:', err)
+        setError('Failed to load analytics data')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAnalytics()
+  }, [])
+
+  // Build stats from analytics data
+  const websiteStats = analytics ? [
+    {
+      title: 'Page Views',
+      value: formatNumber(analytics.overview.totalPageViews),
+      change: `${analytics.overview.pageViewChange > 0 ? '+' : ''}${analytics.overview.pageViewChange}%`,
+      trend: analytics.overview.pageViewChange >= 0 ? 'up' : 'down',
+      icon: Eye,
+      description: 'Last 30 days',
+    },
+    {
+      title: 'Unique Visitors',
+      value: formatNumber(analytics.overview.totalVisitors),
+      change: `${analytics.overview.visitorChange > 0 ? '+' : ''}${analytics.overview.visitorChange}%`,
+      trend: analytics.overview.visitorChange >= 0 ? 'up' : 'down',
+      icon: Users,
+      description: 'Last 30 days',
+    },
+    {
+      title: 'Avg. Session',
+      value: formatDuration(analytics.overview.avgSessionDuration),
+      change: `${analytics.overview.durationChange > 0 ? '+' : ''}${analytics.overview.durationChange}%`,
+      trend: analytics.overview.durationChange >= 0 ? 'up' : 'down',
+      icon: Clock,
+      description: 'Duration',
+    },
+    {
+      title: 'Bounce Rate',
+      value: `${analytics.overview.bounceRate}%`,
+      change: `${analytics.overview.bounceChange > 0 ? '+' : ''}${analytics.overview.bounceChange}%`,
+      trend: analytics.overview.bounceChange >= 0 ? 'up' : 'down',
+      icon: MousePointerClick,
+      description: 'Lower is better',
+    },
+  ] : []
+
+  // Transform daily visitors for chart
+  const pageViewsData = analytics?.dailyVisitors.map(d => ({
+    date: d.date,
+    views: d.pageViews,
+    visitors: d.visitors,
+  })) || []
+
+  // Transform traffic sources for pie chart
+  const trafficSourcesData = analytics?.trafficSources.map((s, i) => ({
+    name: s.source,
+    value: s.percentage,
+    color: trafficColors[i % trafficColors.length],
+  })) || []
+
+  // Transform top pages
+  const topPagesData = analytics?.topPages.map(p => ({
+    page: p.title || p.path,
+    views: p.views,
+    change: `${p.percentage}%`,
+  })) || []
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <AlertCircle className="w-12 h-12 text-destructive" />
+        <p className="text-lg text-muted-foreground">{error}</p>
+        <Link href="/admin/login" className="text-primary hover:underline">
+          Go to Login
+        </Link>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
       {/* Header with gradient background */}
@@ -250,10 +330,10 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-teal" />
+                <Eye className="w-5 h-5 text-teal" />
                 Traffic Overview
               </CardTitle>
-              <CardDescription>Page views and unique visitors over time</CardDescription>
+              <CardDescription>Page views and unique visitors (last 7 days)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -327,11 +407,11 @@ export default function AdminDashboard() {
                       <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
                         {index + 1}
                       </span>
-                      <span className="font-medium">{page.page}</span>
+                      <span className="font-medium truncate max-w-[180px]">{page.page}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-muted-foreground">{page.views.toLocaleString()} views</span>
-                      <span className="text-green-600 text-sm">{page.change}</span>
+                      <Badge variant="outline" className="text-xs">{page.change}</Badge>
                     </div>
                   </div>
                 ))}
@@ -586,11 +666,11 @@ export default function AdminDashboard() {
                   Manage Team
                 </Link>
                 <Link
-                  href="/admin/achievements"
+                  href="/admin/content"
                   className="group flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300"
                 >
-                  <Award className="w-5 h-5" />
-                  Achievements
+                  <FileText className="w-5 h-5" />
+                  Content Manager
                 </Link>
                 <Link
                   href="/admin/settings"

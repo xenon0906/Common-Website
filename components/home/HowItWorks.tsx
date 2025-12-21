@@ -7,6 +7,10 @@ import { cn } from '@/lib/utils'
 import { GlowHighlight, StepCounter } from '@/components/shared/animations'
 import { ANIMATION_CONFIG } from '@/lib/animation-config'
 import { IconMap, ArrowRightIcon, SparklesIcon } from '@/components/ui/icon'
+import { HowItWorksStepData } from '@/lib/content'
+
+// Step type for compatibility
+type StepType = HowItWorksStepData | typeof HOW_IT_WORKS[0]
 
 const stepColors = [
   { bg: 'from-primary to-primary/70', glow: 'shadow-primary/20', color: 'primary' as const },
@@ -14,22 +18,29 @@ const stepColors = [
   { bg: 'from-primary/80 to-teal/80', glow: 'shadow-primary/20', color: 'primary' as const },
 ]
 
-export function HowItWorks() {
+interface HowItWorksProps {
+  steps?: StepType[]
+}
+
+export function HowItWorks({ steps }: HowItWorksProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
   const [activeStep, setActiveStep] = useState(0)
   const [hoveredStep, setHoveredStep] = useState<number | null>(null)
+
+  // Use provided steps or fall back to constants
+  const displaySteps = steps || HOW_IT_WORKS
 
   // Auto-advance active step for sequential glow effect
   useEffect(() => {
     if (!isInView) return
 
     const interval = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % HOW_IT_WORKS.length)
+      setActiveStep((prev) => (prev + 1) % displaySteps.length)
     }, ANIMATION_CONFIG.highlight.autoAdvanceDelay)
 
     return () => clearInterval(interval)
-  }, [isInView])
+  }, [isInView, displaySteps.length])
 
   return (
     <section ref={containerRef} className="py-20 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
@@ -79,7 +90,7 @@ export function HowItWorks() {
           transition={{ delay: 0.2 }}
         >
           <div className="flex items-center gap-3">
-            {HOW_IT_WORKS.map((_, index) => (
+            {displaySteps.map((_, index) => (
               <div key={index} className="flex items-center">
                 <motion.button
                   onClick={() => setActiveStep(index)}
@@ -92,7 +103,7 @@ export function HowItWorks() {
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
                 />
-                {index < HOW_IT_WORKS.length - 1 && (
+                {index < displaySteps.length - 1 && (
                   <div className="w-8 h-0.5 mx-1 bg-muted-foreground/20 relative overflow-hidden">
                     <motion.div
                       className="absolute inset-y-0 left-0 bg-primary"
@@ -137,7 +148,7 @@ export function HowItWorks() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-10 relative z-10">
-            {HOW_IT_WORKS.map((step, index) => {
+            {displaySteps.map((step, index) => {
               const Icon = IconMap[step.icon]
               const colors = stepColors[index]
               const isActive = activeStep === index
@@ -244,7 +255,7 @@ export function HowItWorks() {
                   </GlowHighlight>
 
                   {/* Arrow connector - mobile/tablet */}
-                  {index < HOW_IT_WORKS.length - 1 && (
+                  {index < displaySteps.length - 1 && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={isInView ? { opacity: 1 } : {}}

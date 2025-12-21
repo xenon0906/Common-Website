@@ -136,7 +136,7 @@ export const staggerItem = {
   },
 }
 
-// Glow colors - Updated to SnapGo blue theme
+// Glow colors - Updated to Snapgo blue theme
 export const GLOW_COLORS = {
   teal: {
     base: 'rgba(13, 148, 136, 0.35)',
