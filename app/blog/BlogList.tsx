@@ -38,19 +38,19 @@ function BlogHero({ onScrollDown }: { onScrollDown: () => void }) {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           {/* Title */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 flex items-center justify-center gap-4 flex-wrap">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 flex items-baseline justify-center gap-3 flex-wrap">
             Latest from
             <Image
               src="/images/logo/Snapgo Logo White.png"
               alt="Snapgo"
-              width={180}
-              height={70}
-              className="object-contain inline-block"
+              width={160}
+              height={40}
+              className="object-contain inline-block h-[46px] sm:h-[60px] md:h-[76px] lg:h-[90px] w-auto translate-y-10"
             />
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl text-white/70 max-w-2xl mx-auto mb-12">
+          <p className="text-xl text-white/70 max-w-2xl mx-auto mb-12 mt-8">
             Tips, stories, and insights about ride-sharing, saving money, and sustainable travel.
           </p>
 
