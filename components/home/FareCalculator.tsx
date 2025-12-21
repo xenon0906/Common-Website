@@ -31,7 +31,7 @@ export function FareCalculator() {
       segments.push({
         startAngle,
         endAngle: startAngle + angle,
-        color: i === 0 ? '#0066B3' : `hsl(${207 + i * 20}, 72%, ${35 + i * 10}%)`,
+        color: i === 0 ? '#0e4493' : `hsl(${213 + i * 20}, 72%, ${32 + i * 10}%)`,
       })
       startAngle += angle
     }
@@ -40,7 +40,7 @@ export function FareCalculator() {
 
   return (
     <section ref={containerRef} className="py-20 bg-background">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

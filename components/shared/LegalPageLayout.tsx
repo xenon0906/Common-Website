@@ -78,7 +78,7 @@ export function LegalPageLayout({
 
       {/* Last Updated Banner */}
       <div className="bg-muted/50 border-b">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32 py-3">
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Calendar className="w-4 h-4" />
             <span>Last Updated: {lastUpdated}</span>
@@ -86,7 +86,7 @@ export function LegalPageLayout({
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32 py-12">
         <div className="grid lg:grid-cols-[280px_1fr] gap-8 max-w-6xl mx-auto">
           {/* Table of Contents - Desktop Sidebar */}
           <aside className="hidden lg:block">

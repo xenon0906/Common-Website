@@ -111,7 +111,7 @@ function ContactHero() {
 
   return (
     <section className="hero-viewport bg-gradient-to-br from-slate-900 to-primary">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left - Contact Info */}
           <div className="text-center lg:text-left">
@@ -231,7 +231,7 @@ function CompanyInfo() {
 
   return (
     <section ref={ref} className="section-padding-sm bg-gradient-to-br from-primary via-primary/90 to-teal/80">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

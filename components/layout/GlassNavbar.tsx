@@ -68,7 +68,7 @@ export function GlassNavbar() {
             : 'bg-white/95 backdrop-blur-md border-b border-gray-100'
         )}
       >
-        <div className="container mx-auto px-4 md:px-6">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           <div className="flex items-center justify-between h-16 md:h-18">
             {/* Logo */}
             <Link href="/" className="flex items-center group">
@@ -97,7 +97,7 @@ export function GlassNavbar() {
                     'nav-link-underline px-4 py-2 text-sm font-medium transition-colors duration-200',
                     pathname === link.href
                       ? 'text-primary active'
-                      : 'text-gray-600 hover:text-primary'
+                      : 'text-gray-800 hover:text-primary'
                   )}
                 >
                   <motion.span
@@ -162,7 +162,7 @@ export function GlassNavbar() {
                                 'flex items-center px-4 py-3 mx-2 rounded-xl text-base font-medium transition-all duration-200',
                                 pathname === link.href
                                   ? 'bg-primary/10 text-primary'
-                                  : 'text-gray-700 hover:bg-gray-50 hover:text-primary'
+                                  : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
                               )}
                             >
                               {link.label}

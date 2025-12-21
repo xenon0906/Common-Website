@@ -47,7 +47,7 @@ export function BlogPost({ blog }: { blog: Blog }) {
     <>
       {/* Hero */}
       <section className="pt-32 pb-12 bg-gradient-to-b from-primary to-primary/80 text-white">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -85,7 +85,7 @@ export function BlogPost({ blog }: { blog: Blog }) {
       {/* Featured Image */}
       {blog.imageUrl && (
         <div className="relative -mt-8 z-10">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -108,7 +108,7 @@ export function BlogPost({ blog }: { blog: Blog }) {
 
       {/* Content */}
       <section className="py-12 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}

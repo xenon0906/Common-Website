@@ -10,23 +10,23 @@
     --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 0%;
-    --primary: 207 100% 35%;
+    --primary: 213 82% 32%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 0 0% 0%;
     --muted: 210 40% 96%;
     --muted-foreground: 0 0% 40%;
-    --accent: 207 100% 35%;
+    --accent: 213 82% 32%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 207 100% 35%;
+    --ring: 213 82% 32%;
     --radius: 0.75rem;
 
     /* Snapgo Brand Colors - Clean Professional */
-    --snapgo-blue: 207 100% 35%;
+    --snapgo-blue: 213 82% 32%;
     --snapgo-teal: 173 58% 29%;
     --snapgo-purple: 263 70% 58%;
 
@@ -89,7 +89,7 @@
     right: 0;
     width: 50%;
     height: 100%;
-    background: linear-gradient(135deg, transparent 0%, rgba(0, 102, 179, 0.03) 100%);
+    background: linear-gradient(135deg, transparent 0%, rgba(14, 68, 147, 0.03) 100%);
     pointer-events: none;
   }
 
@@ -100,7 +100,7 @@
 
   /* Dark hero option (for CTAs, special sections) */
   .bg-snapgo-hero-dark {
-    background: linear-gradient(135deg, #0066B3 0%, #004B87 100%);
+    background: linear-gradient(135deg, #0e4493 0%, #0a3577 100%);
   }
 
   /* Clean card style */
@@ -110,7 +110,7 @@
 
   /* Text gradient */
   .text-snapgo-gradient {
-    background: linear-gradient(90deg, #0066B3 0%, #0d9488 100%);
+    background: linear-gradient(90deg, #0e4493 0%, #0d9488 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -132,7 +132,7 @@
 
   /* Glow Effects - Subtle */
   .glow-primary {
-    box-shadow: 0 0 30px rgba(0, 102, 179, 0.15);
+    box-shadow: 0 0 30px rgba(14, 68, 147, 0.15);
   }
 
   .glow-teal {
@@ -160,7 +160,7 @@
 
   .animate-shimmer {
     animation: shimmer 1.5s linear infinite;
-    background: linear-gradient(90deg, transparent, rgba(0, 102, 179, 0.05), transparent);
+    background: linear-gradient(90deg, transparent, rgba(14, 68, 147, 0.05), transparent);
     background-size: 200% 100%;
   }
 
@@ -481,7 +481,7 @@
   left: 50%;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #0066B3, #0d9488);
+  background: linear-gradient(90deg, #0e4493, #0d9488);
   transition: all 0.3s ease-out;
   transform: translateX(-50%);
   border-radius: 1px;
@@ -500,7 +500,7 @@
 
 .input-premium:focus {
   @apply border-primary ring-4 ring-primary/10;
-  box-shadow: 0 0 0 4px rgba(0, 102, 179, 0.1);
+  box-shadow: 0 0 0 4px rgba(14, 68, 147, 0.1);
 }
 
 /* Floating Label Input */
@@ -577,7 +577,7 @@
 .gamification-card:hover {
   @apply border-primary/20;
   box-shadow:
-    0 8px 40px rgba(0, 102, 179, 0.1),
+    0 8px 40px rgba(14, 68, 147, 0.1),
     0 2px 6px rgba(0, 0, 0, 0.04);
   transform: translateY(-4px);
 }
@@ -631,7 +631,7 @@
 
 .feature-dot.active {
   @apply bg-primary scale-125;
-  box-shadow: 0 0 10px rgba(0, 102, 179, 0.4);
+  box-shadow: 0 0 10px rgba(14, 68, 147, 0.4);
 }
 
 /* YouTube Embed Container */

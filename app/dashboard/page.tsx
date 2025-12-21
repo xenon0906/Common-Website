@@ -10,7 +10,7 @@ import { Lock, Download, Smartphone } from 'lucide-react'
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 pt-32 pb-20">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

@@ -23,7 +23,7 @@ export default function FAQPage() {
 
       {/* FAQ Section */}
       <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           <FAQAccordion
             items={FAQ_ITEMS}
             categories={[...FAQ_CATEGORIES]}
@@ -33,7 +33,7 @@ export default function FAQPage() {
 
       {/* Still Have Questions CTA */}
       <section className="py-16 bg-gradient-to-br from-primary/5 to-teal/5">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -75,7 +75,7 @@ export default function FAQPage() {
 
       {/* Quick Links */}
       <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

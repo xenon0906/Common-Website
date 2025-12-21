@@ -69,14 +69,14 @@ export function HeroPremium({ hero }: HeroPremiumProps = {}) {
 
   return (
     <section className="hero-viewport bg-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left content */}
           <div className="text-center lg:text-left">
             {/* Bold stacked headline - Rapido inspired */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6">
               <span className="text-gray-900 block">Share Rides.</span>
-              <span className="text-[#0066B3] block">Save ₹12,000/year.</span>
+              <span className="text-[#0e4493] block">Save ₹12,000/year.</span>
             </h1>
 
             {/* Subheadline - clean, single paragraph */}
@@ -100,7 +100,7 @@ export function HeroPremium({ hero }: HeroPremiumProps = {}) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
               <Button
                 size="xl"
-                className="w-full sm:w-auto bg-[#0066B3] hover:bg-[#005299] text-white px-8"
+                className="w-full sm:w-auto bg-[#0e4493] hover:bg-[#0a3577] text-white px-8"
                 asChild
               >
                 <Link href="#download">
@@ -127,13 +127,13 @@ export function HeroPremium({ hero }: HeroPremiumProps = {}) {
               <span>•</span>
               <span className="font-medium text-gray-700">Startup India</span>
               <span>•</span>
-              <span className="font-medium text-gray-700">4.8★ Rating</span>
+              <span className="font-medium text-gray-700">Startup Uttarakhand</span>
             </div>
           </div>
 
           {/* Right side - Phone mockup like App Preview section */}
           <div className="flex justify-center lg:justify-end">
-            <div className="relative w-[260px] md:w-[300px] lg:w-[320px] aspect-[9/19] rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="relative w-[247px] md:w-[285px] lg:w-[304px] aspect-[9/19] rounded-[2.5rem] overflow-hidden shadow-2xl">
               {/* Phone frame */}
               <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900 rounded-[2.5rem]" />
               {/* Screen */}

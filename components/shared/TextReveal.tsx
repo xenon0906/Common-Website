@@ -275,7 +275,7 @@ export function GradientText({
   children,
   className = '',
   from = '#4ECDC4',
-  to = '#004B87',
+  to = '#0a3577',
 }: GradientTextProps) {
   const ref = useRef<HTMLSpanElement>(null)
   const { scrollYProgress } = useScroll({

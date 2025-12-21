@@ -37,7 +37,7 @@ export function Navbar() {
           : 'bg-transparent'
       )}
     >
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32 py-4">
         <div className="flex items-center justify-between">
           {/* Logo - Only image, no text */}
           <Link href="/" className="flex items-center group">

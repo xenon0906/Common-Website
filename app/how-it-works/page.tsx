@@ -96,7 +96,7 @@ const scheduledSteps = [
 function HeroSection() {
   return (
     <section className="hero-viewport bg-gradient-to-br from-primary via-primary/90 to-primary-800">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="max-w-4xl mx-auto text-center">
           {/* Title */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
@@ -153,7 +153,7 @@ function RealTimeSection() {
 
   return (
     <section id="real-time" ref={ref} className="section-padding-lg bg-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -197,7 +197,7 @@ function ScheduledSection() {
 
   return (
     <section id="scheduled" ref={ref} className="section-padding-lg bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -268,7 +268,7 @@ function ComparisonSection() {
 
   return (
     <section ref={ref} className="section-padding-lg bg-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -360,7 +360,7 @@ function CTASection() {
 
   return (
     <section ref={ref} className="section-padding-lg bg-gradient-to-br from-primary via-primary/90 to-teal-600">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

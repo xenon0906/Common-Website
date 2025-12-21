@@ -197,8 +197,8 @@ export const TEAM_MEMBERS = [
 ]
 
 export const COLORS = {
-  primary: '#0066B3',
-  secondary: '#3399CC',
+  primary: '#0e4493',
+  secondary: '#1a5cb8',
   teal: '#0d9488',
   tealDark: '#0f766e',
   purple: '#7c3aed',

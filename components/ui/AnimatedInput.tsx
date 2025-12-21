@@ -179,7 +179,7 @@ interface ConfettiBurstProps {
 }
 
 export function ConfettiBurst({ isActive }: ConfettiBurstProps) {
-  const colors = ['#0066B3', '#0d9488', '#7c3aed', '#f59e0b', '#10b981']
+  const colors = ['#0e4493', '#0d9488', '#7c3aed', '#f59e0b', '#10b981']
   const particles = Array.from({ length: 50 })
 
   if (!isActive) return null

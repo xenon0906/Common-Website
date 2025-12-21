@@ -35,17 +35,17 @@ function estimateReadTime(excerpt: string | null): string {
 function BlogHero({ onScrollDown }: { onScrollDown: () => void }) {
   return (
     <section className="hero-viewport bg-gradient-to-br from-primary via-primary/90 to-primary-800">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="max-w-4xl mx-auto text-center">
           {/* Title */}
-          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 flex items-baseline justify-center gap-2 sm:gap-3 md:gap-4 flex-wrap">
-            Latest from
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 flex items-center justify-center gap-3 sm:gap-4 md:gap-5 flex-wrap">
+            <span>Latest from</span>
             <Image
               src="/images/logo/Snapgo Logo White.png"
               alt="Snapgo"
               width={200}
               height={50}
-              className="object-contain inline-block h-[32px] xs:h-[40px] sm:h-[54px] md:h-[68px] lg:h-[80px] xl:h-[96px] w-auto translate-y-[6px] sm:translate-y-[8px] md:translate-y-[10px] lg:translate-y-[12px]"
+              className="object-contain h-[40px] xs:h-[47px] sm:h-[59px] md:h-[73px] lg:h-[87px] xl:h-[100px] w-auto translate-y-[30px]"
             />
           </h1>
 
@@ -276,7 +276,7 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
 
       {/* Blog Content */}
       <section ref={contentRef} className="py-16 md:py-24 bg-gray-50">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           {blogs.length > 0 ? (
             <div className="max-w-5xl mx-auto">
               {/* Featured article */}

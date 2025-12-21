@@ -35,6 +35,7 @@ import {
   HelpCircle,
   FileStack,
   Navigation,
+  AlertTriangle,
 } from 'lucide-react'
 
 const sidebarLinks = [
@@ -187,6 +188,19 @@ export default function AdminLayout({
           </Button>
           <span className="ml-4 font-semibold">Admin Panel</span>
         </header>
+
+        {/* Static Mode Banner */}
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
+          <div className="flex items-center gap-3 max-w-7xl mx-auto">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm text-amber-800">
+                <span className="font-semibold">Static Mode Active:</span> Database is not connected.
+                Content changes will not be saved. To enable persistence, configure DATABASE_URL and update lib/config.ts.
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div className="p-6 lg:p-8">
           {children}

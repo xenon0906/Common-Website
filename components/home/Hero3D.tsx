@@ -34,7 +34,7 @@ export function Hero3D() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[120px]" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32 relative z-10">
         <div className="min-h-screen flex items-center py-20 pt-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
 

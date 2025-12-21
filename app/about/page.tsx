@@ -34,7 +34,7 @@ const timelineIcons: Record<string, React.ElementType> = {
 function AboutHero() {
   return (
     <section className="hero-viewport bg-gradient-to-br from-slate-900 via-primary to-primary/90">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
             Revolutionizing Urban{' '}
@@ -96,7 +96,7 @@ function FounderStory() {
 
   return (
     <section ref={ref} className="section-padding bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Visual Side - simple gradient box */}
@@ -179,7 +179,7 @@ function MissionVisionValues() {
 
   return (
     <section ref={ref} className="section-padding bg-white relative">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -232,7 +232,7 @@ function Timeline() {
 
   return (
     <section ref={ref} className="section-padding bg-gradient-to-br from-primary to-teal-600 text-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="text-center mb-16">
           <p className="text-white/60 text-sm font-medium mb-2">Our Journey</p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
@@ -272,7 +272,7 @@ function TeamCTA() {
 
   return (
     <section ref={ref} className="section-padding bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

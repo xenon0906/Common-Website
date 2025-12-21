@@ -58,7 +58,7 @@ export function PhoneModel({ isInteracting }: PhoneModelProps) {
         smoothness={4}
         position={[0, 0, 0.14]}
       >
-        <meshBasicMaterial color="#0066B3" />
+        <meshBasicMaterial color="#0e4493" />
       </RoundedBox>
 
       {/* Screen Content - App UI Mock */}
@@ -78,7 +78,7 @@ export function PhoneModel({ isInteracting }: PhoneModelProps) {
           style={{
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(180deg, #0066B3 0%, #004B87 100%)',
+            background: 'linear-gradient(180deg, #0e4493 0%, #0a3577 100%)',
             borderRadius: '40px',
             overflow: 'hidden',
             display: 'flex',
@@ -152,7 +152,7 @@ export function PhoneModel({ isInteracting }: PhoneModelProps) {
             <div style={{
               padding: '15px 25px',
               background: 'white',
-              color: '#0066B3',
+              color: '#0e4493',
               borderRadius: '30px',
               fontSize: '14px',
               fontWeight: '600',

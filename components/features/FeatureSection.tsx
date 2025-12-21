@@ -344,7 +344,7 @@ export function FeatureSection({ feature, index, isActive, totalFeatures }: Feat
         />
       </div>
 
-      <div className="container mx-auto px-4 h-full flex items-center relative z-10">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32 h-full flex items-center relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
           {/* Content Side */}
           <motion.div

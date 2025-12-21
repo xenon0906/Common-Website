@@ -1,96 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { requireAuth } from '@/lib/api-auth'
+import { getFAQs, DEFAULT_FAQS } from '@/lib/content'
 
-// GET all FAQs
+// Static mode - returns static FAQ data
 export async function GET() {
   try {
-    const faqs = await prisma.fAQ.findMany({
-      orderBy: { order: 'asc' },
-    })
-    return NextResponse.json(faqs)
+    const faqs = await getFAQs()
+    // Transform to match expected format
+    const formattedFaqs = faqs.map(faq => ({
+      id: faq.id,
+      question: faq.question,
+      answer: faq.answer,
+      category: faq.category,
+      visible: faq.isActive,
+      order: faq.order,
+    }))
+    return NextResponse.json(formattedFaqs)
   } catch (error) {
     console.error('Error fetching FAQs:', error)
-    return NextResponse.json({ error: 'Failed to fetch FAQs' }, { status: 500 })
+    return NextResponse.json(DEFAULT_FAQS, { status: 200 })
   }
 }
 
-// POST create new FAQ
+// POST - Backend disabled in static mode
 export async function POST(request: NextRequest) {
-  try {
-    const authError = await requireAuth()
-    if (authError) return authError
-
-    const body = await request.json()
-    const { question, answer, category, visible, order } = body
-
-    const faq = await prisma.fAQ.create({
-      data: {
-        question,
-        answer,
-        category: category || 'general',
-        visible: visible ?? true,
-        order: order || 0,
-      },
-    })
-
-    return NextResponse.json(faq, { status: 201 })
-  } catch (error) {
-    console.error('Error creating FAQ:', error)
-    return NextResponse.json({ error: 'Failed to create FAQ' }, { status: 500 })
-  }
+  return NextResponse.json(
+    {
+      error: 'Backend not connected',
+      message: 'Write operations are disabled in static mode. Connect database to enable.',
+    },
+    { status: 503 }
+  )
 }
 
-// PUT update multiple FAQs (for reordering)
+// PUT - Backend disabled in static mode
 export async function PUT(request: NextRequest) {
-  try {
-    const authError = await requireAuth()
-    if (authError) return authError
-
-    const body = await request.json()
-    const { faqs } = body
-
-    // Update all FAQs in a transaction
-    await prisma.$transaction(
-      faqs.map((faq: any) =>
-        prisma.fAQ.update({
-          where: { id: faq.id },
-          data: {
-            question: faq.question,
-            answer: faq.answer,
-            category: faq.category,
-            visible: faq.visible,
-            order: faq.order,
-          },
-        })
-      )
-    )
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error updating FAQs:', error)
-    return NextResponse.json({ error: 'Failed to update FAQs' }, { status: 500 })
-  }
+  return NextResponse.json(
+    {
+      error: 'Backend not connected',
+      message: 'Write operations are disabled in static mode. Connect database to enable.',
+    },
+    { status: 503 }
+  )
 }
 
-// DELETE FAQ
+// DELETE - Backend disabled in static mode
 export async function DELETE(request: NextRequest) {
-  try {
-    const authError = await requireAuth()
-    if (authError) return authError
-
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-
-    if (!id) {
-      return NextResponse.json({ error: 'FAQ ID required' }, { status: 400 })
-    }
-
-    await prisma.fAQ.delete({ where: { id } })
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error deleting FAQ:', error)
-    return NextResponse.json({ error: 'Failed to delete FAQ' }, { status: 500 })
-  }
+  return NextResponse.json(
+    {
+      error: 'Backend not connected',
+      message: 'Write operations are disabled in static mode. Connect database to enable.',
+    },
+    { status: 503 }
+  )
 }

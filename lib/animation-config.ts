@@ -144,9 +144,9 @@ export const GLOW_COLORS = {
     subtle: 'rgba(13, 148, 136, 0.15)',
   },
   primary: {
-    base: 'rgba(0, 102, 179, 0.35)',
-    bright: 'rgba(0, 102, 179, 0.5)',
-    subtle: 'rgba(0, 102, 179, 0.15)',
+    base: 'rgba(14, 68, 147, 0.35)',
+    bright: 'rgba(14, 68, 147, 0.5)',
+    subtle: 'rgba(14, 68, 147, 0.15)',
   },
   purple: {
     base: 'rgba(124, 58, 237, 0.35)',

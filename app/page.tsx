@@ -53,15 +53,15 @@ function LoadingAnimation() {
           <Image
             src="/images/logo/Snapgo Logo White.png"
             alt="Snapgo"
-            width={100}
-            height={100}
+            width={160}
+            height={160}
             className="object-contain"
             priority
           />
         </motion.div>
 
         {/* Simple loading bar */}
-        <div className="w-32 h-1 bg-white/20 rounded-full overflow-hidden">
+        <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-white rounded-full"
             initial={{ x: '-100%' }}
@@ -126,7 +126,7 @@ function WhySnapgoSection() {
 
   return (
     <section ref={ref} className="section-padding bg-background">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -288,7 +288,7 @@ function DownloadSection() {
 
   return (
     <section ref={ref} className="section-padding-lg bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -434,8 +434,8 @@ function CTASection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section ref={ref} className="section-padding-lg bg-[#0066B3]">
-      <div className="container mx-auto px-4">
+    <section ref={ref} className="section-padding-lg bg-[#0e4493]">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -526,7 +526,7 @@ function AppPreviewSection() {
 
   return (
     <section ref={containerRef} className="section-padding-lg bg-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

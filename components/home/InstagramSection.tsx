@@ -101,7 +101,7 @@ export function InstagramSection() {
       />
 
       <section className="section-padding bg-gray-900">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32">
           {/* Header */}
           <div className="text-center mb-12">
             <Link

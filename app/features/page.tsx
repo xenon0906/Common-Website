@@ -130,7 +130,7 @@ export default function FeaturesPage() {
       >
         {/* Hero Section - Centered content like How It Works page */}
         <section className="scroll-snap-section relative bg-gradient-to-br from-primary via-primary/90 to-primary-800">
-          <div className="container mx-auto px-4 h-full flex flex-col justify-center text-center">
+          <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32 h-full flex flex-col justify-center text-center">
             {/* Title */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
               Features Built for{' '}
@@ -189,7 +189,7 @@ export default function FeaturesPage() {
 
         {/* Final CTA Section */}
         <section className="scroll-snap-section bg-gradient-to-br from-primary via-primary/90 to-teal-600">
-          <div className="container mx-auto px-4 h-full flex flex-col items-center justify-center text-center">
+          <div className="container mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 2xl:px-32 h-full flex flex-col items-center justify-center text-center">
             {/* Title */}
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               Start Your Smart Commute{' '}
