@@ -144,20 +144,25 @@ export function SavingsCalculator({ className }: SavingsCalculatorProps) {
         if (!blob) { setIsSharing(false); return }
         const file = new File([blob], 'snapgo-savings.png', { type: 'image/png' })
 
-        // Message to send separately (like Paytm style)
-        const shareMessage = `🚗 I'm saving ₹${formatIndianNumber(calculations.yearlySavings)}/year with Snapgo! 💰
+        // Enhanced share message (like Paytm style)
+        const shareMessage = `🚗 I just calculated my savings with Snapgo!
 
-${calculations.savingsPercent}% saved per trip 🔥
-${calculations.yearlyCO2Saved}kg CO₂ saved 🌱
+💰 Saving ₹${formatIndianNumber(calculations.yearlySavings)}/year
+📊 ${calculations.savingsPercent}% less than solo cabs
+🌱 Reducing ${calculations.yearlyCO2Saved}kg CO₂ emissions
+🎬 That's ${Math.round(calculations.yearlySavings / 500)} movie tickets!
 
-Join me & start saving 👇
-https://snapgo.co.in`
+Calculate yours too 👇
+https://snapgo.co.in
+
+#Snapgo #Carpooling #SaveMoney #GreenCommute`
 
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
               files: [file],
               text: shareMessage,
+              title: 'My Snapgo Savings',
             })
           } catch { downloadImage(blob) }
         } else { downloadImage(blob) }
