@@ -70,12 +70,15 @@ export function GlassNavbar() {
       >
         <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
           <div className="flex items-center justify-between h-16 md:h-18">
-            {/* Logo */}
-            <Link href="/" className="flex items-center group">
+            {/* Empty div for mobile balance - hidden on desktop */}
+            <div className="w-10 lg:hidden" />
+
+            {/* Logo - centered on mobile/tablet, left on desktop */}
+            <Link href="/" className="flex items-center group absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="relative w-28 h-10 md:w-36 md:h-12"
+                className="relative w-28 h-10 md:w-36 md:h-12 translate-y-[5px]"
               >
                 <Image
                   src="/images/logo/Snapgo%20Logo%20Blue.png"

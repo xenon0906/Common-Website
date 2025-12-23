@@ -264,17 +264,17 @@
    PREMIUM REDESIGN UTILITIES
    ==================================== */
 
-/* Premium Section Padding */
+/* Premium Section Padding - Mobile First */
 .section-padding {
-  @apply py-20 md:py-section-md lg:py-section-lg;
+  @apply py-12 xs:py-16 sm:py-20 md:py-section-md lg:py-section-lg;
 }
 
 .section-padding-lg {
-  @apply py-24 md:py-section-lg lg:py-section-xl;
+  @apply py-16 xs:py-20 sm:py-24 md:py-section-lg lg:py-section-xl;
 }
 
 .section-padding-sm {
-  @apply py-16 md:py-section-sm lg:py-section-md;
+  @apply py-10 xs:py-12 sm:py-16 md:py-section-sm lg:py-section-md;
 }
 
 /* ====================================
@@ -349,18 +349,18 @@
   padding-bottom: 2rem;
 }
 
-/* Hero viewport - accounts for fixed navbar with padding-top */
+/* Hero viewport - accounts for fixed navbar with padding-top + breathing room */
 .hero-viewport {
   min-height: 100dvh;
-  padding-top: var(--navbar-height);
+  padding-top: calc(var(--navbar-height) + 16px + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
 }
 
-/* Mobile hero viewport */
+/* Mobile hero viewport - extra padding for breathing room */
 @media (max-width: 1023px) {
   .hero-viewport {
-    padding-top: var(--navbar-height-mobile);
+    padding-top: calc(var(--navbar-height-mobile) + 24px + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -569,21 +569,70 @@
   transition: transform 0.1s ease-out;
 }
 
-/* Gamification Card */
+/* Gamification Card - Premium Design */
 .gamification-card {
-  @apply bg-white rounded-3xl p-8 border border-gray-100;
+  @apply bg-white/95 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-3 xs:p-4 sm:p-6 md:p-8 border border-gray-100/80;
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.05),
-    0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease-out;
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .gamification-card:hover {
-  @apply border-primary/20;
+  @apply border-primary/30 bg-white;
   box-shadow:
-    0 8px 40px rgba(14, 68, 147, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.04);
-  transform: translateY(-4px);
+    0 20px 60px rgba(14, 68, 147, 0.15),
+    0 8px 25px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-6px);
+}
+
+/* Premium Card with Accent Border */
+.gamification-card-accent {
+  @apply gamification-card relative overflow-hidden;
+}
+
+.gamification-card-accent::before {
+  content: '';
+  @apply absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-teal to-primary;
+  border-radius: 4px 0 0 4px;
+}
+
+/* Custom Range Slider Styling */
+.custom-slider {
+  @apply appearance-none w-full h-2 rounded-full bg-gray-200 outline-none;
+  background: linear-gradient(to right, #0e4493 0%, #0e4493 var(--slider-progress, 0%), #e5e7eb var(--slider-progress, 0%), #e5e7eb 100%);
+}
+
+.custom-slider::-webkit-slider-thumb {
+  @apply appearance-none w-6 h-6 rounded-full bg-primary cursor-pointer;
+  box-shadow: 0 2px 8px rgba(14, 68, 147, 0.4), 0 0 0 4px rgba(14, 68, 147, 0.1);
+  transition: all 0.2s ease;
+}
+
+.custom-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(14, 68, 147, 0.5), 0 0 0 6px rgba(14, 68, 147, 0.15);
+}
+
+.custom-slider::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(14, 68, 147, 0.6), 0 0 0 8px rgba(14, 68, 147, 0.2);
+}
+
+.custom-slider::-moz-range-thumb {
+  @apply w-6 h-6 rounded-full bg-primary cursor-pointer border-0;
+  box-shadow: 0 2px 8px rgba(14, 68, 147, 0.4), 0 0 0 4px rgba(14, 68, 147, 0.1);
+}
+
+/* Glow effect for large numbers */
+.glow-primary {
+  text-shadow: 0 0 20px rgba(14, 68, 147, 0.3), 0 0 40px rgba(14, 68, 147, 0.1);
+}
+
+.glow-success {
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.3), 0 0 40px rgba(16, 185, 129, 0.1);
 }
 
 /* Counter Animation */

@@ -38,14 +38,14 @@ function BlogHero({ onScrollDown }: { onScrollDown: () => void }) {
       <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
         <div className="max-w-4xl mx-auto text-center">
           {/* Title */}
-          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 flex items-center justify-center gap-3 sm:gap-4 md:gap-5 flex-wrap">
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 flex items-center justify-center gap-2 xs:gap-3 sm:gap-4 md:gap-5 flex-wrap">
             <span>Latest from</span>
             <Image
               src="/images/logo/Snapgo Logo White.png"
               alt="Snapgo"
               width={200}
               height={50}
-              className="object-contain h-[40px] xs:h-[47px] sm:h-[59px] md:h-[73px] lg:h-[87px] xl:h-[100px] w-auto translate-y-[30px]"
+              className="object-contain h-[40px] xs:h-[47px] sm:h-[59px] md:h-[73px] lg:h-[87px] xl:h-[100px] w-auto translate-y-[10px] xs:translate-y-[12px] sm:translate-y-[18px] md:translate-y-[22px] lg:translate-y-[26px] xl:translate-y-[30px]"
             />
           </h1>
 

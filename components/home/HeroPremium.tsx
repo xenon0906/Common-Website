@@ -74,7 +74,7 @@ export function HeroPremium({ hero }: HeroPremiumProps = {}) {
           {/* Left content */}
           <div className="text-center lg:text-left">
             {/* Bold stacked headline - Rapido inspired */}
-            <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6">
+            <h1 className="text-[1.5rem] xs:text-[1.65rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6">
               <span className="text-gray-900 block whitespace-nowrap">Pool Cabs.</span>
               <span className="text-[#0e4493] block whitespace-nowrap">Save ₹12,000/year.</span>
               <span className="text-emerald-500 block whitespace-nowrap text-lg sm:text-2xl md:text-3xl lg:text-4xl mt-2">Go Green.</span>
@@ -135,7 +135,7 @@ export function HeroPremium({ hero }: HeroPremiumProps = {}) {
 
           {/* Right side - Phone mockup (iPhone 15 frame already in image) */}
           <div className="flex justify-center lg:justify-end">
-            <div className="relative w-[190px] xs:w-[210px] sm:w-[230px] md:w-[275px] lg:w-[315px] max-w-[55vw] sm:max-w-[45vw] lg:max-w-[70vw]">
+            <div className="relative w-[170px] xs:w-[190px] sm:w-[230px] md:w-[275px] lg:w-[315px] max-w-[48vw] sm:max-w-[42vw] lg:max-w-[70vw]">
               <Image
                 src="/images/mockups/iphone15/home-screen.png"
                 alt="Snapgo App"

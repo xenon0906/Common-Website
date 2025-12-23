@@ -222,7 +222,7 @@ function WhySnapgoSection() {
                     >
                       {index + 1}
                     </motion.div>
-                    <CardContent className="p-6 h-full flex flex-col">
+                    <CardContent className="p-4 sm:p-6 h-full flex flex-col">
                       <motion.div
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         className={`w-14 h-14 rounded-2xl ${reason.iconBg} ${reason.iconBgHover} flex items-center justify-center mb-4 transition-colors relative`}
@@ -324,26 +324,26 @@ function DownloadSection() {
             className="group"
           >
             <Card className="h-full border-2 border-transparent hover:border-[#3DDC84]/50 transition-all duration-500 overflow-hidden">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-4 mb-6">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.15 }}
-                    className="w-16 h-16 rounded-2xl bg-[#3DDC84]/10 flex items-center justify-center"
+                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-[#3DDC84]/10 flex items-center justify-center"
                   >
-                    <svg className="w-10 h-10 text-[#3DDC84]" viewBox="0 0 24 24" fill="currentColor">
+                    <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 text-[#3DDC84]" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M17.6 11.4c-.3 0-.5-.2-.5-.5s.2-.5.5-.5.5.2.5.5-.2.5-.5.5m-11.2 0c-.3 0-.5-.2-.5-.5s.2-.5.5-.5.5.2.5.5-.2.5-.5.5M18.1 7l1.8-3.2c.1-.2 0-.4-.2-.5s-.4 0-.5.2l-1.8 3.3C15.7 5.7 13.9 5 12 5s-3.7.7-5.4 1.8L4.8 3.5c-.1-.2-.3-.3-.5-.2s-.3.3-.2.5L5.9 7C3.1 8.8 1.3 11.5 1 14.5h22c-.3-3-2.1-5.7-4.9-7.5"/>
                     </svg>
                   </motion.div>
                   <div>
-                    <h3 className="text-2xl font-bold">Android</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold">Android</h3>
                     <p className="text-muted-foreground">Google Play Store</p>
                   </div>
                 </div>
 
                 {/* QR Code - Android Live */}
                 <motion.div
-                  className="bg-white rounded-2xl p-4 w-52 h-52 mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 mx-auto mb-4 sm:mb-6 shadow-lg group-hover:shadow-xl transition-shadow"
                   whileHover={{ scale: 1.05 }}
                 >
                   <div className="relative w-full h-full rounded-xl overflow-hidden">
@@ -379,26 +379,26 @@ function DownloadSection() {
             className="group"
           >
             <Card className="h-full border-2 border-transparent hover:border-gray-400/50 transition-all duration-500 overflow-hidden">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-4 mb-6">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.15 }}
-                    className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center"
+                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center"
                   >
-                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
+                    <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                     </svg>
                   </motion.div>
                   <div>
-                    <h3 className="text-2xl font-bold">iOS</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold">iOS</h3>
                     <p className="text-muted-foreground">App Store</p>
                   </div>
                 </div>
 
                 {/* QR Code - iOS Live */}
                 <motion.div
-                  className="bg-white rounded-2xl p-4 w-52 h-52 mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 mx-auto mb-4 sm:mb-6 shadow-lg group-hover:shadow-xl transition-shadow"
                   whileHover={{ scale: 1.05 }}
                 >
                   <div className="relative w-full h-full rounded-xl overflow-hidden">
@@ -494,7 +494,7 @@ function CTASection() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.6 }}
-              className="flex flex-wrap justify-center gap-8 mt-12"
+              className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-10 md:mt-12"
             >
               {[
                 { value: '8500+', label: 'App Downloads' },

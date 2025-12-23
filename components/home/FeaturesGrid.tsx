@@ -52,7 +52,7 @@ function FeatureCard({ feature, index }: { feature: FeatureType; index: number }
       className="h-full transition-transform duration-200"
     >
       <GlowHighlight isActive={isHovered} color="primary" intensity="medium">
-        <Card className="h-full min-h-[200px] group hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-200 cursor-pointer relative">
+        <Card className="h-full min-h-[180px] sm:min-h-[200px] group hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-200 cursor-pointer relative">
           {/* Spotlight effect - contained in its own wrapper */}
           <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
             <div
@@ -150,7 +150,7 @@ export function FeaturesGrid({ features }: FeaturesGridProps = {}) {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-10 md:mb-12"
         >
           <motion.span
             initial={{ opacity: 0, scale: 0.9 }}
@@ -170,7 +170,7 @@ export function FeaturesGrid({ features }: FeaturesGridProps = {}) {
 
         {/* Feature count indicator */}
         <motion.div
-          className="flex justify-center mb-8"
+          className="flex justify-center mb-6 sm:mb-8"
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.2 }}
@@ -188,7 +188,7 @@ export function FeaturesGrid({ features }: FeaturesGridProps = {}) {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {displayFeatures.map((feature, index) => (
             <motion.div
               key={feature.title}

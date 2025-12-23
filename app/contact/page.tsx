@@ -143,7 +143,7 @@ function ContactHero() {
           </div>
 
           {/* Right - Form embedded in hero */}
-          <div className="bg-white rounded-2xl p-8 shadow-2xl">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
             {isSubmitted ? (
               <div className="text-center py-8">
                 <SuccessCheckmark />

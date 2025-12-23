@@ -180,7 +180,7 @@ export function CO2ImpactTracker({ className }: CO2ImpactTrackerProps) {
         </motion.div>
 
         {/* Impact Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
           {impactCards.map((card, index) => (
             <motion.div
               key={card.label}

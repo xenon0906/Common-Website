@@ -111,14 +111,14 @@ function HeroSection() {
           </p>
 
           {/* Simple stats row */}
-          <div className="flex flex-wrap justify-center gap-8 mb-12">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
             {[
               { value: '30 sec', label: 'Average Match Time' },
               { value: '100%', label: 'Verified Users' },
               { value: '75%', label: 'Max Savings' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <span className="text-2xl font-bold text-white">{stat.value}</span>
+                <span className="text-xl sm:text-2xl font-bold text-white">{stat.value}</span>
                 <p className="text-white/50 text-sm">{stat.label}</p>
               </div>
             ))}
@@ -336,7 +336,7 @@ function ComparisonSection() {
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.2 }}
               whileHover={{ y: -5 }}
-              className="bg-gradient-to-br from-teal-50 to-white rounded-2xl p-8 border-2 border-teal-100 shadow-lg"
+              className="bg-gradient-to-br from-teal-50 to-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-teal-100 shadow-lg"
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-xl bg-teal-500 flex items-center justify-center">
@@ -366,7 +366,7 @@ function ComparisonSection() {
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.3 }}
               whileHover={{ y: -5 }}
-              className="bg-gradient-to-br from-primary/10 to-white rounded-2xl p-8 border-2 border-primary/20 shadow-lg"
+              className="bg-gradient-to-br from-primary/10 to-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-primary/20 shadow-lg"
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">

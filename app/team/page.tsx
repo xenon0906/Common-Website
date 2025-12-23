@@ -23,7 +23,8 @@ import {
   Smartphone,
   BarChart3,
   Users2,
-  Brain
+  Brain,
+  Linkedin
 } from 'lucide-react'
 import Image from 'next/image'
 
@@ -32,7 +33,8 @@ const teamMembers = [
   {
     name: 'Mohit Purohit',
     role: 'Founder & CTO',
-    image: null, // Will add later
+    image: '/images/team/mohit.png',
+    linkedin: 'https://www.linkedin.com/in/mohitpurohitbr/',
     highlights: [
       { icon: Rocket, text: 'Serial Entrepreneur: Started multiple businesses since Class 12th' },
       { icon: Smartphone, text: 'App Development Expert: Built, scaled, and successfully sold multiple mobile applications' },
@@ -45,7 +47,8 @@ const teamMembers = [
   {
     name: 'Surya Prakash',
     role: 'Co-Founder & CEO',
-    image: null,
+    image: '/images/team/surya.png',
+    linkedin: 'https://www.linkedin.com/in/snapgosurya/',
     highlights: [
       { icon: Megaphone, text: 'Digital Marketing Specialist: Expert in Meta Ads, Google Ads, and performance marketing' },
       { icon: Handshake, text: 'Strategic Partnership: Long-term collaboration with Mohit across multiple ventures' },
@@ -58,7 +61,8 @@ const teamMembers = [
   {
     name: 'Anurag Tiwari',
     role: 'Chief Marketing Officer (CMO)',
-    image: null,
+    image: '/images/team/anurag.png',
+    linkedin: 'https://www.linkedin.com/in/snapgoanurag/',
     highlights: [
       { icon: Building, text: 'Multi-Business Founder: Successfully launched and operated 2 independent businesses' },
       { icon: BriefcaseBusiness, text: 'Offline Marketing Expert: Deep knowledge of traditional marketing channels and customer acquisition' },
@@ -113,14 +117,14 @@ function HeroSection() {
           </p>
 
           {/* Simple stats row */}
-          <div className="flex flex-wrap justify-center gap-8">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8">
             {[
               { value: '10+', label: 'Team Members' },
               { value: '2025', label: 'Founded' },
               { value: '8.5K+', label: 'Users' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <span className="text-2xl font-bold text-white">{stat.value}</span>
+                <span className="text-xl sm:text-2xl font-bold text-white">{stat.value}</span>
                 <p className="text-white/50 text-sm">{stat.label}</p>
               </div>
             ))}
@@ -198,9 +202,24 @@ function TeamMemberSection({
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2">
                 {member.name}
               </h2>
-              <p className="text-xl text-primary font-semibold mb-8">
+              <p className="text-xl text-primary font-semibold mb-6">
                 {member.role}
               </p>
+
+              {/* LinkedIn Connect Button */}
+              {member.linkedin && (
+                <motion.a
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 mb-8 bg-[#0A66C2] hover:bg-[#004182] text-white font-medium rounded-full transition-all shadow-lg shadow-[#0A66C2]/25 hover:shadow-xl hover:shadow-[#0A66C2]/30"
+                >
+                  <Linkedin className="w-5 h-5" />
+                  <span>Connect on LinkedIn</span>
+                </motion.a>
+              )}
 
               {/* Highlights */}
               <div className="space-y-4">
@@ -261,7 +280,7 @@ function TeamStrengthSection() {
         </motion.div>
 
         {/* Strengths grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {teamStrengths.map((strength, index) => {
             const Icon = strength.icon
             return (
@@ -271,7 +290,7 @@ function TeamStrengthSection() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all"
+                className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/20 hover:bg-white/15 transition-all"
               >
                 <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-4">
                   <Icon className="w-6 h-6 text-white" />
@@ -344,7 +363,7 @@ function ValuesSection() {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {values.map((value, index) => {
             const Icon = value.icon
             return (
@@ -356,7 +375,7 @@ function ValuesSection() {
                 whileHover={{ y: -8, scale: 1.02 }}
                 className="group"
               >
-                <div className="h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div className="h-full bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     className={`w-14 h-14 rounded-xl bg-gradient-to-br ${value.color} flex items-center justify-center mb-6 shadow-lg`}

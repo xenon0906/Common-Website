@@ -93,7 +93,7 @@ export function CabPoolingComparison() {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-10 mb-10"
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-10 mb-8 sm:mb-10"
           >
             <div className="grid md:grid-cols-2 gap-8 items-center">
               {/* Without Snapgo */}
@@ -164,13 +164,13 @@ export function CabPoolingComparison() {
           </motion.div>
 
           {/* Comparison Cards */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
             {/* Carpooling - Problems */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-white rounded-2xl p-6 border-2 border-red-100 relative overflow-hidden"
+              className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-red-100 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full" />
               <div className="relative">
@@ -199,7 +199,7 @@ export function CabPoolingComparison() {
               initial={{ opacity: 0, x: 30 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="bg-white rounded-2xl p-6 border-2 border-emerald-200 relative overflow-hidden shadow-lg shadow-emerald-100/50"
+              className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-emerald-200 relative overflow-hidden shadow-lg shadow-emerald-100/50"
             >
               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full" />
               <div className="absolute top-2 right-2 px-2 py-0.5 bg-emerald-500 rounded-full">
@@ -252,7 +252,7 @@ export function CabPoolingComparison() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                  className="bg-white rounded-2xl p-6 text-center border border-gray-100 hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border border-gray-100 hover:shadow-lg transition-shadow"
                 >
                   <div className={`w-14 h-14 ${colorClasses} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
                     <Icon className="w-7 h-7" />

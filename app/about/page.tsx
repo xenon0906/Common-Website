@@ -199,7 +199,7 @@ function MissionVisionValues() {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
           {items.map((item, index) => (
             <motion.div
               key={item.title}
@@ -209,7 +209,7 @@ function MissionVisionValues() {
               whileHover={{ y: -8, scale: 1.02 }}
               className="group"
             >
-              <div className={`h-full rounded-3xl bg-gradient-to-b ${item.gradient} p-8 border border-gray-100 hover:shadow-xl transition-all duration-300`}>
+              <div className={`h-full rounded-2xl sm:rounded-3xl bg-gradient-to-b ${item.gradient} p-4 sm:p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300`}>
                 <motion.div
                   whileHover={{ rotate: 5, scale: 1.1 }}
                   className={`w-16 h-16 rounded-2xl ${item.iconBg} flex items-center justify-center mb-6`}
@@ -245,13 +245,13 @@ function Timeline() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {JOURNEY_TIMELINE.map((item) => {
             const Icon = timelineIcons[item.icon]
             return (
               <div
                 key={item.title}
-                className="bg-white/10 rounded-2xl p-8 border border-white/10 hover:bg-white/15 transition-colors"
+                className="bg-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border border-white/10 hover:bg-white/15 transition-colors"
               >
                 <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-6">
                   <Icon className="w-6 h-6 text-white" />
@@ -282,7 +282,7 @@ function TeamCTA() {
           className="max-w-4xl mx-auto text-center"
         >
           <div className="flex justify-center mb-8">
-            <div className="flex -space-x-4">
+            <div className="flex -space-x-2 sm:-space-x-4">
               {SITE_CONFIG.founders.map((founder, index) => (
                 <motion.div
                   key={founder}
