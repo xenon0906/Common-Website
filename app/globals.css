@@ -332,6 +332,15 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding-top: 70px; /* Account for navbar on mobile */
+  padding-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .scroll-snap-section {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
 /* ====================================
@@ -597,6 +606,72 @@
   content: '';
   @apply absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-teal to-primary;
   border-radius: 4px 0 0 4px;
+}
+
+/* Gradient Mesh Background - Calculator Section (SnapGo Blue & Green) */
+.gradient-mesh-bg {
+  background: linear-gradient(135deg, #0e4493 0%, #0d7377 50%, #10b981 100%);
+  position: relative;
+}
+
+.gradient-mesh-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(at 40% 20%, hsla(173,70%,40%,0.4) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsla(213,82%,32%,0.5) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(160,84%,39%,0.3) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, hsla(173,58%,29%,0.4) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(145,63%,42%,0.4) 0px, transparent 50%);
+  pointer-events: none;
+}
+
+/* Glassmorphic Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.glass-card-solid {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  max-width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Carousel scroll container with fade edges */
+.carousel-container {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+/* Carousel infinite scroll animation */
+@keyframes carousel-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.carousel-scroll {
+  animation: carousel-scroll 25s linear infinite;
+}
+
+.carousel-scroll:hover {
+  animation-play-state: paused;
 }
 
 /* Custom Range Slider Styling */
