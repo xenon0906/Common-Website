@@ -1,0 +1,135 @@
+{
+  "site": {
+    "name": "Snapgo",
+    "legalName": "Snapgo Service Private Limited",
+    "tagline": "Share Rides, Save Money, Travel Together",
+    "description": "Connect with people going to the same destination. Save up to 75% on cab fares while making your journey safer and eco-friendly.",
+    "url": "https://snapgo.in"
+  },
+  "contact": {
+    "email": "info@snapgo.co.in",
+    "phone": "+91 6398786100",
+    "address": "Block 45, Sharda University, Knowledge Park 3, Greater Noida, Uttar Pradesh, India"
+  },
+  "social": {
+    "facebook": "https://www.facebook.com/profile.php?id=61578285621863",
+    "instagram": "https://www.instagram.com/snapgo.co.in/",
+    "linkedin": "https://www.linkedin.com/company/snapgo-service-private-limited/"
+  },
+  "founders": [
+    "Mohit Purohit",
+    "Surya Purohit"
+  ],
+  "hero": {
+    "headline": "Revolutionizing Urban Transportation, One Shared Ride at a Time.",
+    "subtext": "At Snapgo, we believe that getting around your city shouldn't break the bank or leave you stranded. By helping users connect with others traveling the same route, Snapgo enables ride-sharing, fare-splitting, and secure connections—making everyday travel not just cost-effective, but more social and sustainable too."
+  },
+  "stats": [
+    {
+      "label": "App Downloads",
+      "value": 7000,
+      "suffix": "+",
+      "prefix": ""
+    },
+    {
+      "label": "Peak Daily Rides",
+      "value": 110,
+      "suffix": "+",
+      "prefix": ""
+    },
+    {
+      "label": "Cost Savings",
+      "value": 75,
+      "suffix": "%",
+      "prefix": ""
+    },
+    {
+      "label": "Active Users",
+      "value": 400,
+      "suffix": "+",
+      "prefix": ""
+    }
+  ],
+  "features": [
+    {
+      "title": "Save Up to 75%",
+      "description": "Share cab fares and save significant money on your daily commute",
+      "icon": "Wallet"
+    },
+    {
+      "title": "Aadhaar Verified",
+      "description": "All users verified via Aadhaar KYC powered by DigiLocker",
+      "icon": "ShieldCheck"
+    },
+    {
+      "title": "Female-Only Option",
+      "description": "Women can connect only with verified female riders for added safety",
+      "icon": "Users"
+    },
+    {
+      "title": "Real-time & Scheduled",
+      "description": "Find rides instantly or plan ahead for your convenience",
+      "icon": "Clock"
+    },
+    {
+      "title": "Eco-Friendly",
+      "description": "Reduce carbon footprint by sharing rides with fellow travelers",
+      "icon": "Leaf"
+    },
+    {
+      "title": "Smart Matching",
+      "description": "Advanced algorithm matches within 750m radius for perfect routes",
+      "icon": "MapPin"
+    }
+  ],
+  "howItWorks": [
+    {
+      "step": 1,
+      "title": "Enter Your Destination",
+      "description": "Set your pickup and drop location in the app",
+      "icon": "MapPin"
+    },
+    {
+      "step": 2,
+      "title": "Find Your Match",
+      "description": "Our algorithm finds people going to the same destination within 750m",
+      "icon": "Search"
+    },
+    {
+      "step": 3,
+      "title": "Share & Save",
+      "description": "Connect, chat, meet at a common point, share the fare, and save money",
+      "icon": "Users"
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "Snapgo has saved me so much money! I used to spend Rs.400 for my daily commute, now I only pay Rs.100 by sharing with fellow students. Amazing concept!",
+      "author": "College Student",
+      "location": "Sharda University"
+    },
+    {
+      "quote": "As a working professional, Snapgo has made my daily travel both affordable and social. I have made great connections with fellow commuters.",
+      "author": "IT Professional",
+      "location": "Greater Noida"
+    },
+    {
+      "quote": "The female-only option makes me feel safe. I can now travel without worrying about security while saving money.",
+      "author": "Graduate Student",
+      "location": "Delhi NCR"
+    }
+  ],
+  "about": {
+    "origin": "It was a regular day when we, Mohit and Surya Purohit, were heading to Ghaziabad Railway Station from our society. We booked a cab and noticed another person also taking a cab from our area. When we reached the station, we saw the same person at the parking lot. That's when it hit us - we both paid Rs.300 separately for the same route. If we had known we were going to the same place, we could have shared the ride and paid just Rs.300 total, saving Rs.300 together!",
+    "spark": "This simple observation sparked an idea: What if there was an app that could connect people traveling to the same destination? And that's how Snapgo was born - from a personal experience that we knew thousands of others faced every day.",
+    "mission": "To make travel affordable and accessible for everyone by connecting people who share similar routes, reducing costs and environmental impact.",
+    "vision": "To become India's most trusted ride-sharing platform, creating a community where safety, affordability, and sustainability go hand in hand.",
+    "values": "Safety first, user-centric design, transparency, sustainability, and creating value for our community at every step."
+  },
+  "apps": {
+    "androidUrl": "https://play.google.com/store/apps/details?id=in.snapgo.app&hl=en_IN",
+    "iosUrl": "https://apps.apple.com/in/app/snapgo-connect-split-fare/id6748761741",
+    "androidLive": true,
+    "iosLive": true
+  }
+}

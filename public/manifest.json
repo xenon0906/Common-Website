@@ -1,0 +1,45 @@
+{
+  "name": "Snapgo - Share Rides, Save Money",
+  "short_name": "Snapgo",
+  "description": "Connect with verified users going your way. Split cab fares and save up to 75% on every ride.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0066B3",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-IN",
+  "categories": ["transportation", "travel", "lifestyle"],
+  "icons": [
+    {
+      "src": "/images/logo/Snapgo Logo Blue.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo/Snapgo Logo Blue.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo/Snapgo Logo White.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=in.snapgo.app&hl=en_IN",
+      "id": "in.snapgo.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/in/app/snapgo-connect-split-fare/id6748761741"
+    }
+  ],
+  "prefer_related_applications": true
+}

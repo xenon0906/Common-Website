@@ -1,0 +1,312 @@
+[debug] [2026-01-20T17:11:57.936Z] ----------------------------------------------------------------------
+[debug] [2026-01-20T17:11:57.938Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\siddh\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only firestore:rules,firestore:indexes,functions --debug
+[debug] [2026-01-20T17:11:57.938Z] CLI Version:   14.26.0
+[debug] [2026-01-20T17:11:57.938Z] Platform:      win32
+[debug] [2026-01-20T17:11:57.939Z] Node Version:  v25.2.1
+[debug] [2026-01-20T17:11:57.939Z] Time:          Tue Jan 20 2026 22:41:57 GMT+0530 (India Standard Time)
+[debug] [2026-01-20T17:11:57.939Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-20T17:11:58.090Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-20T17:11:58.091Z] > authorizing via signed-in user (info@snapgo.co.in)
+[debug] [2026-01-20T17:11:58.091Z] [iam] checking project snapgo-admin for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-01-20T17:11:58.094Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:11:58.094Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:11:58.095Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions [none]
+[debug] [2026-01-20T17:11:58.095Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions x-goog-quota-user=projects/snapgo-admin
+[debug] [2026-01-20T17:11:58.095Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-01-20T17:11:59.544Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions 200
+[debug] [2026-01-20T17:11:59.544Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-01-20T17:11:59.544Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:11:59.544Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:11:59.544Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/snapgo-admin/serviceAccounts/snapgo-admin@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-01-20T17:11:59.544Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/snapgo-admin/serviceAccounts/snapgo-admin@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-01-20T17:12:01.188Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/snapgo-admin/serviceAccounts/snapgo-admin@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-01-20T17:12:01.188Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/snapgo-admin/serviceAccounts/snapgo-admin@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'snapgo-admin'...
+[info] 
+[info] i  deploying firestore, functions 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-01-20T17:12:01.190Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:01.190Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:01.190Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default) [none]
+[debug] [2026-01-20T17:12:01.678Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default) 200
+[debug] [2026-01-20T17:12:01.678Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default) {"name":"projects/snapgo-admin/databases/(default)","uid":"a870a894-276a-420e-ad7d-2c118511e5bf","createTime":"2026-01-18T18:23:00.078210Z","updateTime":"2026-01-18T18:23:00.078210Z","locationId":"asia-south2","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-01-20T16:12:01.916551Z","appEngineIntegrationMode":"DISABLED","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IOGox7/OmpIDMPuQ2OjalZID"}
+[info] i  firestore: reading indexes from firestore.indexes.json... 
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2026-01-20T17:12:01.680Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:01.680Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:01.680Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/snapgo-admin:test [none]
+[debug] [2026-01-20T17:12:01.680Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/snapgo-admin:test [omitted]
+[debug] [2026-01-20T17:12:03.123Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/snapgo-admin:test 200
+[debug] [2026-01-20T17:12:03.124Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/snapgo-admin:test {}
+[info] +  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2026-01-20T17:12:03.125Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:03.125Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:03.125Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin [none]
+[debug] [2026-01-20T17:12:03.452Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin 200
+[debug] [2026-01-20T17:12:03.452Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin {"projectNumber":"644115168029","projectId":"snapgo-admin","lifecycleState":"ACTIVE","name":"snapgo admin","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-01-18T18:15:09.954733Z","parent":{"type":"organization","id":"842176818835"}}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2026-01-20T17:12:03.454Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:03.454Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:03.454Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/snapgo-admin/adminSdkConfig [none]
+[debug] [2026-01-20T17:12:04.061Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/snapgo-admin/adminSdkConfig 200
+[debug] [2026-01-20T17:12:04.061Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/snapgo-admin/adminSdkConfig {"projectId":"snapgo-admin","storageBucket":"snapgo-admin.firebasestorage.app"}
+[debug] [2026-01-20T17:12:04.062Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:04.062Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:04.062Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/snapgo-admin/configs [none]
+[debug] [2026-01-20T17:12:04.507Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/snapgo-admin/configs 200
+[debug] [2026-01-20T17:12:04.507Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/snapgo-admin/configs {}
+[debug] [2026-01-20T17:12:04.508Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-01-20T17:12:05.533Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "private": true
+}
+[debug] [2026-01-20T17:12:05.533Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2026-01-20T17:12:05.534Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-01-20T17:12:05.543Z] Found firebase-functions binary at 'C:\Users\siddh\OneDrive\Desktop\Snapgo\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8280
+
+[debug] [2026-01-20T17:12:06.089Z] Got response from /__/functions.yaml {"endpoints":{"helloWorld":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"helloWorld"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled... 
+[debug] [2026-01-20T17:12:10.118Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-20T17:12:10.119Z] > authorizing via signed-in user (info@snapgo.co.in)
+[debug] [2026-01-20T17:12:10.119Z] [iam] checking project snapgo-admin for permissions ["firebase.projects.get","firebaseextensions.instances.list"]
+[debug] [2026-01-20T17:12:10.119Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:10.119Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:10.119Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions [none]
+[debug] [2026-01-20T17:12:10.119Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions x-goog-quota-user=projects/snapgo-admin
+[debug] [2026-01-20T17:12:10.119Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2026-01-20T17:12:11.543Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions 200
+[debug] [2026-01-20T17:12:11.543Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2026-01-20T17:12:11.543Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:11.543Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:11.544Z] >>> [apiv2][query] GET https://firebaseextensions.googleapis.com/v1beta/projects/snapgo-admin/instances pageSize=100&pageToken=
+[debug] [2026-01-20T17:12:13.178Z] <<< [apiv2][status] GET https://firebaseextensions.googleapis.com/v1beta/projects/snapgo-admin/instances 200
+[debug] [2026-01-20T17:12:13.178Z] <<< [apiv2][body] GET https://firebaseextensions.googleapis.com/v1beta/projects/snapgo-admin/instances {}
+[info] i  functions: preparing functions directory for uploading... 
+[info] i  functions: packaged C:\Users\siddh\OneDrive\Desktop\Snapgo\functions (30.17 KB) for uploading 
+[debug] [2026-01-20T17:12:13.206Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:13.206Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:13.206Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/-/functions [none]
+[debug] [2026-01-20T17:12:13.981Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/-/functions 200
+[debug] [2026-01-20T17:12:13.981Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/-/functions {}
+[debug] [2026-01-20T17:12:13.982Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:13.982Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:13.982Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/snapgo-admin/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2026-01-20T17:12:14.601Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/snapgo-admin/locations/-/functions 200
+[debug] [2026-01-20T17:12:14.601Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/snapgo-admin/locations/-/functions {}
+[debug] [2026-01-20T17:12:14.604Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:14.604Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:14.604Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin [none]
+[debug] [2026-01-20T17:12:14.931Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin 200
+[debug] [2026-01-20T17:12:14.931Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin {"projectNumber":"644115168029","projectId":"snapgo-admin","lifecycleState":"ACTIVE","name":"snapgo admin","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-01-18T18:15:09.954733Z","parent":{"type":"organization","id":"842176818835"}}
+[debug] [2026-01-20T17:12:14.931Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:14.932Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:14.932Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/snapgo-admin/releases pageSize=10&pageToken=
+[debug] [2026-01-20T17:12:16.370Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/snapgo-admin/releases 200
+[debug] [2026-01-20T17:12:16.370Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/snapgo-admin/releases {"releases":[{"name":"projects/snapgo-admin/releases/cloud.firestore","rulesetName":"projects/snapgo-admin/rulesets/3a716b68-fb11-46ed-8ce3-8cb9a513b4fe","createTime":"2026-01-18T18:23:08.927325Z","updateTime":"2026-01-20T17:11:04.813789Z"}]}
+[debug] [2026-01-20T17:12:16.370Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:16.370Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:16.370Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/snapgo-admin/rulesets/3a716b68-fb11-46ed-8ce3-8cb9a513b4fe [none]
+[debug] [2026-01-20T17:12:17.673Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/snapgo-admin/rulesets/3a716b68-fb11-46ed-8ce3-8cb9a513b4fe 200
+[debug] [2026-01-20T17:12:17.673Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/snapgo-admin/rulesets/3a716b68-fb11-46ed-8ce3-8cb9a513b4fe [omitted]
+[info] i  firestore: latest version of firestore.rules already up to date, skipping upload... 
+[info] i  firestore: deploying indexes... 
+[debug] [2026-01-20T17:12:17.674Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:17.674Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:17.674Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2026-01-20T17:12:18.091Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2026-01-20T17:12:18.091Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default)/collectionGroups/-/indexes {}
+[debug] [2026-01-20T17:12:18.091Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:18.091Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:18.091Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2026-01-20T17:12:18.297Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2026-01-20T17:12:18.297Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/snapgo-admin/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[debug] [2026-01-20T17:12:18.297Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:18.297Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:18.297Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default) [none]
+[debug] [2026-01-20T17:12:18.410Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default) 200
+[debug] [2026-01-20T17:12:18.410Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/snapgo-admin/databases/(default) {"name":"projects/snapgo-admin/databases/(default)","uid":"a870a894-276a-420e-ad7d-2c118511e5bf","createTime":"2026-01-18T18:23:00.078210Z","updateTime":"2026-01-18T18:23:00.078210Z","locationId":"asia-south2","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-01-20T16:12:18.652384Z","appEngineIntegrationMode":"DISABLED","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IJblxMfOmpIDMPuQ2OjalZID"}
+[info] +  firestore: deployed indexes in firestore.indexes.json successfully for (default) database 
+[debug] [2026-01-20T17:12:18.411Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:18.411Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:18.411Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/snapgo-admin/billingInfo [none]
+[debug] [2026-01-20T17:12:19.854Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/snapgo-admin/billingInfo 200
+[debug] [2026-01-20T17:12:19.854Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/snapgo-admin/billingInfo {"name":"projects/snapgo-admin/billingInfo","projectId":"snapgo-admin","billingAccountName":"billingAccounts/013262-E9FF37-D9ECC4","billingEnabled":true}
+[debug] [2026-01-20T17:12:19.854Z] [functions] found 1 new HTTP functions, testing setIamPolicy permission...
+[debug] [2026-01-20T17:12:19.855Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:19.855Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:19.855Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions [none]
+[debug] [2026-01-20T17:12:19.855Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions x-goog-quota-user=projects/snapgo-admin
+[debug] [2026-01-20T17:12:19.855Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions {"permissions":["cloudfunctions.functions.setIamPolicy"]}
+[debug] [2026-01-20T17:12:20.128Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions 200
+[debug] [2026-01-20T17:12:20.128Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/snapgo-admin:testIamPermissions {"permissions":["cloudfunctions.functions.setIamPolicy"]}
+[debug] [2026-01-20T17:12:20.128Z] [functions] found setIamPolicy permission, proceeding with deploy
+[debug] [2026-01-20T17:12:20.129Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:20.129Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:20.129Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions:generateUploadUrl [none]
+[debug] [2026-01-20T17:12:20.129Z] >>> [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions:generateUploadUrl {}
+[debug] [2026-01-20T17:12:20.943Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions:generateUploadUrl 200
+[debug] [2026-01-20T17:12:20.943Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions:generateUploadUrl {"uploadUrl":"https://storage.googleapis.com/uploads-411012701289.us-central1.cloudfunctions.appspot.com/6bc0e78e-402d-40ed-b1a7-ad42a3b686ae.zip?GoogleAccessId=service-644115168029@gcf-admin-robot.iam.gserviceaccount.com&Expires=1768930941&Signature=Q8eIxLH1oSoPwaACuvpNAgFBuyyR2mD3iiAbUfuokxnijE%2BVqfmcggTymFQ1vy8P557qIu50bCG1dYlVGDpMCs4UI4Cjc%2BRucw7V%2BNNHXTfxA%2BP1MjhiAD5E9J20ELobc7HEos7Npl1ShJn%2B6NR9TM91fp9WFN4ccNJ%2BPQofoWTGdtSQen7%2F0SmhKKG2heg32Ip6MjTyAuxbMf9Kf5Os352SB8jKyV0CPHvGzRJXxEeW1AiSsNFyYXss5k7GTf18M5sxSWe8TzXG3v2lHTLEWYine3%2B6g5DtrlwWr72Otg32nQeHoQgXxkQ1xqibtr5izGyf8NYSCx2F5flE%2FbaXyw%3D%3D"}
+[debug] [2026-01-20T17:12:20.944Z] >>> [apiv2][query] PUT https://storage.googleapis.com/uploads-411012701289.us-central1.cloudfunctions.appspot.com/6bc0e78e-402d-40ed-b1a7-ad42a3b686ae.zip GoogleAccessId=service-644115168029%40gcf-admin-robot.iam.gserviceaccount.com&Expires=1768930941&Signature=Q8eIxLH1oSoPwaACuvpNAgFBuyyR2mD3iiAbUfuokxnijE%2BVqfmcggTymFQ1vy8P557qIu50bCG1dYlVGDpMCs4UI4Cjc%2BRucw7V%2BNNHXTfxA%2BP1MjhiAD5E9J20ELobc7HEos7Npl1ShJn%2B6NR9TM91fp9WFN4ccNJ%2BPQofoWTGdtSQen7%2F0SmhKKG2heg32Ip6MjTyAuxbMf9Kf5Os352SB8jKyV0CPHvGzRJXxEeW1AiSsNFyYXss5k7GTf18M5sxSWe8TzXG3v2lHTLEWYine3%2B6g5DtrlwWr72Otg32nQeHoQgXxkQ1xqibtr5izGyf8NYSCx2F5flE%2FbaXyw%3D%3D
+[debug] [2026-01-20T17:12:20.944Z] >>> [apiv2][body] PUT https://storage.googleapis.com/uploads-411012701289.us-central1.cloudfunctions.appspot.com/6bc0e78e-402d-40ed-b1a7-ad42a3b686ae.zip [stream]
+[debug] [2026-01-20T17:12:21.615Z] <<< [apiv2][status] PUT https://storage.googleapis.com/uploads-411012701289.us-central1.cloudfunctions.appspot.com/6bc0e78e-402d-40ed-b1a7-ad42a3b686ae.zip 200
+[debug] [2026-01-20T17:12:21.615Z] <<< [apiv2][body] PUT https://storage.googleapis.com/uploads-411012701289.us-central1.cloudfunctions.appspot.com/6bc0e78e-402d-40ed-b1a7-ad42a3b686ae.zip [omitted]
+[info] +  functions: functions source uploaded successfully 
+[debug] [2026-01-20T17:12:21.615Z] [rules] releasing cloud.firestore/(default) with ruleset projects/snapgo-admin/rulesets/3a716b68-fb11-46ed-8ce3-8cb9a513b4fe
+[debug] [2026-01-20T17:12:21.615Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:21.616Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:21.616Z] >>> [apiv2][query] PATCH https://firebaserules.googleapis.com/v1/projects/snapgo-admin/releases/cloud.firestore/(default) [none]
+[debug] [2026-01-20T17:12:21.616Z] >>> [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/snapgo-admin/releases/cloud.firestore/(default) {"release":{"name":"projects/snapgo-admin/releases/cloud.firestore/(default)","rulesetName":"projects/snapgo-admin/rulesets/3a716b68-fb11-46ed-8ce3-8cb9a513b4fe"}}
+[debug] [2026-01-20T17:12:21.952Z] <<< [apiv2][status] PATCH https://firebaserules.googleapis.com/v1/projects/snapgo-admin/releases/cloud.firestore/(default) 200
+[debug] [2026-01-20T17:12:21.952Z] <<< [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/snapgo-admin/releases/cloud.firestore/(default) {"name":"projects/snapgo-admin/releases/cloud.firestore","rulesetName":"projects/snapgo-admin/rulesets/3a716b68-fb11-46ed-8ce3-8cb9a513b4fe","createTime":"2026-01-18T18:23:08.927325Z","updateTime":"2026-01-20T17:12:22.087602Z"}
+[debug] [2026-01-20T17:12:21.953Z] [rules] updated release projects/snapgo-admin/releases/cloud.firestore
+[info] +  firestore: released rules firestore.rules to cloud.firestore 
+[info] i  functions: creating Node.js 20 (1st Gen) function helloWorld(us-central1)... 
+[debug] [2026-01-20T17:12:21.955Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:21.956Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:21.956Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions [none]
+[debug] [2026-01-20T17:12:21.956Z] >>> [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions {"name":"projects/snapgo-admin/locations/us-central1/functions/helloWorld","sourceUploadUrl":"https://storage.googleapis.com/uploads-411012701289.us-central1.cloudfunctions.appspot.com/6bc0e78e-402d-40ed-b1a7-ad42a3b686ae.zip?GoogleAccessId=service-644115168029@gcf-admin-robot.iam.gserviceaccount.com&Expires=1768930941&Signature=Q8eIxLH1oSoPwaACuvpNAgFBuyyR2mD3iiAbUfuokxnijE%2BVqfmcggTymFQ1vy8P557qIu50bCG1dYlVGDpMCs4UI4Cjc%2BRucw7V%2BNNHXTfxA%2BP1MjhiAD5E9J20ELobc7HEos7Npl1ShJn%2B6NR9TM91fp9WFN4ccNJ%2BPQofoWTGdtSQen7%2F0SmhKKG2heg32Ip6MjTyAuxbMf9Kf5Os352SB8jKyV0CPHvGzRJXxEeW1AiSsNFyYXss5k7GTf18M5sxSWe8TzXG3v2lHTLEWYine3%2B6g5DtrlwWr72Otg32nQeHoQgXxkQ1xqibtr5izGyf8NYSCx2F5flE%2FbaXyw%3D%3D","entryPoint":"helloWorld","runtime":"nodejs20","dockerRegistry":"ARTIFACT_REGISTRY","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"3566ebe21d4ae342146a564d0806fe89b51a54c0"},"httpsTrigger":{"securityLevel":"SECURE_ALWAYS"},"minInstances":null,"maxInstances":null,"ingressSettings":null,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"snapgo-admin\",\"storageBucket\":\"snapgo-admin.firebasestorage.app\"}","GCLOUD_PROJECT":"snapgo-admin","EVENTARC_CLOUD_EVENT_SOURCE":"projects/snapgo-admin/locations/us-central1/functions/helloWorld"},"serviceAccountEmail":null,"availableMemoryMb":null,"timeout":null,"vpcConnector":null,"vpcConnectorEgressSettings":null,"buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""}}
+[debug] [2026-01-20T17:12:23.498Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions 400
+[debug] [2026-01-20T17:12:23.498Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions {"error":{"code":400,"message":"Failed to create 1st Gen function projects/snapgo-admin/locations/us-central1/functions/helloWorld: Default service account '644115168029-compute@developer.gserviceaccount.com' doesn't exist. Please recreate this account or specify a different account. Please visit https://cloud.google.com/functions/docs/troubleshooting for in-depth troubleshooting documentation.","status":"FAILED_PRECONDITION"}}
+[warn] !  functions: failed to create function projects/snapgo-admin/locations/us-central1/functions/helloWorld 
+[error] Failed to create function projects/snapgo-admin/locations/us-central1/functions/helloWorld
+[debug] [2026-01-20T17:12:23.502Z] Total Function Deployment time: 1544
+[debug] [2026-01-20T17:12:23.503Z] 1 Functions Deployed
+[debug] [2026-01-20T17:12:23.503Z] 1 Functions Errored
+[debug] [2026-01-20T17:12:23.503Z] 0 Function Deployments Aborted
+[debug] [2026-01-20T17:12:23.503Z] Average Function Deployment time: 1544
+[info] 
+[info] Functions deploy had errors with the following functions:
+	helloWorld(us-central1)
+[debug] [2026-01-20T17:12:23.603Z] Not printing URL for HTTPS function. Typically this means it didn't match a filter or we failed deployment
+[debug] [2026-01-20T17:12:23.603Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:23.603Z] Checked if tokens are valid: true, expires at: 1768931517749
+[debug] [2026-01-20T17:12:23.603Z] >>> [apiv2][query] GET https://artifactregistry.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/repositories/gcf-artifacts [none]
+[debug] [2026-01-20T17:12:24.888Z] <<< [apiv2][status] GET https://artifactregistry.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/repositories/gcf-artifacts 404
+[debug] [2026-01-20T17:12:24.888Z] <<< [apiv2][body] GET https://artifactregistry.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/repositories/gcf-artifacts {"error":{"code":404,"message":"Requested entity was not found.","status":"NOT_FOUND"}}
+[debug] [2026-01-20T17:12:24.889Z] Failed to check artifact cleanup policy for region us-central1: Request to https://artifactregistry.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/repositories/gcf-artifacts had HTTP Error: 404, Requested entity was not found. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":404,"message":"Requested entity was not found.","status":"NOT_FOUND"}},"response":{"statusCode":404}},"exit":1,"message":"Request to https://artifactregistry.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/repositories/gcf-artifacts had HTTP Error: 404, Requested entity was not found.","status":404}
+[debug] [2026-01-20T17:12:24.889Z] Functions deploy failed.
+[debug] [2026-01-20T17:12:24.889Z] {
+  "endpoint": {
+    "id": "helloWorld",
+    "project": "snapgo-admin",
+    "region": "us-central1",
+    "entryPoint": "helloWorld",
+    "platform": "gcfv1",
+    "runtime": "nodejs20",
+    "httpsTrigger": {},
+    "serviceAccount": null,
+    "ingressSettings": null,
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "maxInstances": null,
+    "minInstances": null,
+    "vpc": null,
+    "environmentVariables": {
+      "FIREBASE_CONFIG": "{\"projectId\":\"snapgo-admin\",\"storageBucket\":\"snapgo-admin.firebasestorage.app\"}",
+      "GCLOUD_PROJECT": "snapgo-admin",
+      "EVENTARC_CLOUD_EVENT_SOURCE": "projects/snapgo-admin/locations/us-central1/functions/helloWorld"
+    },
+    "codebase": "default",
+    "targetedByOnly": false,
+    "hash": "3566ebe21d4ae342146a564d0806fe89b51a54c0",
+    "labels": {
+      "deployment-tool": "cli-firebase"
+    }
+  },
+  "op": "create",
+  "original": {
+    "name": "FirebaseError",
+    "children": [],
+    "context": {
+      "function": "projects/snapgo-admin/locations/us-central1/functions/helloWorld"
+    },
+    "exit": 1,
+    "message": "Failed to create function projects/snapgo-admin/locations/us-central1/functions/helloWorld",
+    "original": {
+      "name": "FirebaseError",
+      "children": [],
+      "context": {
+        "body": {
+          "error": {
+            "code": 400,
+            "message": "Failed to create 1st Gen function projects/snapgo-admin/locations/us-central1/functions/helloWorld: Default service account '644115168029-compute@developer.gserviceaccount.com' doesn't exist. Please recreate this account or specify a different account. Please visit https://cloud.google.com/functions/docs/troubleshooting for in-depth troubleshooting documentation.",
+            "status": "FAILED_PRECONDITION"
+          }
+        },
+        "response": {
+          "statusCode": 400
+        }
+      },
+      "exit": 1,
+      "message": "Request to https://cloudfunctions.googleapis.com/v1/projects/snapgo-admin/locations/us-central1/functions had HTTP Error: 400, Failed to create 1st Gen function projects/snapgo-admin/locations/us-central1/functions/helloWorld: Default service account '644115168029-compute@developer.gserviceaccount.com' doesn't exist. Please recreate this account or specify a different account. Please visit https://cloud.google.com/functions/docs/troubleshooting for in-depth troubleshooting documentation.",
+      "status": 400
+    },
+    "status": 400,
+    "code": 400
+  }
+}
+[debug] [2026-01-20T17:12:24.967Z] Error: Failed to create function helloWorld in region us-central1
+    at C:\Users\siddh\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:52:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Fabricator.createV1Function (C:\Users\siddh\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:194:32)
+    at async Fabricator.createEndpoint (C:\Users\siddh\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:134:13)
+    at async handle (C:\Users\siddh\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:89:17)
+[error] 
+[error] Error: There was an error deploying functions
+[debug] [2026-01-21T14:48:55.919Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-21T14:48:55.922Z] > authorizing via signed-in user (info@snapgo.co.in)
+[debug] [2026-01-21T14:48:55.922Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-21T14:48:55.922Z] > authorizing via signed-in user (info@snapgo.co.in)
+[debug] [2026-01-21T14:48:55.923Z] Checked if tokens are valid: false, expires at: 1768931517749
+[debug] [2026-01-21T14:48:55.924Z] Checked if tokens are valid: false, expires at: 1768931517749
+[debug] [2026-01-21T14:48:55.924Z] > refreshing access token with scopes: []
+[debug] [2026-01-21T14:48:55.926Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-21T14:48:55.927Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-21T14:48:55.929Z] Checked if tokens are valid: false, expires at: 1768931517749
+[debug] [2026-01-21T14:48:55.929Z] Checked if tokens are valid: false, expires at: 1768931517749
+[debug] [2026-01-21T14:48:55.929Z] > refreshing access token with scopes: []
+[debug] [2026-01-21T14:48:55.929Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-21T14:48:55.930Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-21T14:48:55.931Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-21T14:48:55.931Z] > authorizing via signed-in user (info@snapgo.co.in)
+[debug] [2026-01-21T14:48:55.931Z] Checked if tokens are valid: false, expires at: 1768931517749
+[debug] [2026-01-21T14:48:55.931Z] Checked if tokens are valid: false, expires at: 1768931517749
+[debug] [2026-01-21T14:48:55.931Z] > refreshing access token with scopes: []
+[debug] [2026-01-21T14:48:55.931Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-21T14:48:55.932Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-21T14:48:56.158Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2026-01-21T14:48:56.158Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[debug] [2026-01-21T14:48:56.165Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400

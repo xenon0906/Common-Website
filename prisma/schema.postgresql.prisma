@@ -1,0 +1,281 @@
+// ============================================
+// POSTGRESQL SCHEMA FOR VERCEL POSTGRES
+// ============================================
+// To use this schema:
+// 1. Copy this file to schema.prisma (or rename)
+// 2. Run: npx prisma generate
+// 3. Run: npx prisma db push
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Blog {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String
+  metaDesc  String?
+  keywords  String?
+  excerpt   String?
+  imageUrl  String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([createdAt])
+}
+
+model Achievement {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  content   String?
+  mediaUrl  String?
+  embedCode String?
+  metrics   String?
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  lastLogin    DateTime?
+
+  @@index([username])
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  adminId   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model SiteSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  category    String   @default("general")
+  label       String?
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+}
+
+model TeamMember {
+  id          String   @id @default(cuid())
+  name        String
+  bio         String?
+  details     String?
+  imageUrl    String?
+  portraitUrl String?
+  email       String?
+  linkedin    String?
+  twitter     String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+  @@index([isActive])
+}
+
+model HeroContent {
+  id           String   @id @default(cuid())
+  headline     String
+  subtext      String
+  badge        String?
+  ctaPrimary   String?
+  ctaSecondary String?
+  isActive     Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
+
+model Statistic {
+  id        String   @id @default(cuid())
+  label     String
+  value     Int
+  prefix    String   @default("")
+  suffix    String   @default("+")
+  icon      String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model HowItWorksStep {
+  id          String   @id @default(cuid())
+  step        Int
+  title       String
+  description String
+  icon        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  quote     String
+  author    String
+  role      String?
+  location  String?
+  avatarUrl String?
+  rating    Int      @default(5)
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+  @@index([isActive])
+}
+
+model AboutContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String?
+  content   String
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model AppStoreLink {
+  id        String   @id @default(cuid())
+  platform  String   @unique
+  url       String
+  isLive    Boolean  @default(false)
+  qrCodeUrl String?
+  updatedAt DateTime @updatedAt
+}
+
+model ContactInfo {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  label     String?
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String   @unique
+  url       String
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([platform])
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   @default("general")
+  visible   Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([order])
+  @@index([visible])
+}
+
+model InstagramReel {
+  id          String   @id @default(cuid())
+  reelId      String
+  title       String
+  description String?
+  visible     Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+  @@index([visible])
+}
+
+model NavigationItem {
+  id        String   @id @default(cuid())
+  label     String
+  href      String
+  icon      String?
+  location  String   @default("header")
+  section   String?
+  visible   Boolean  @default(true)
+  external  Boolean  @default(false)
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([location])
+  @@index([order])
+}
+
+model MediaFile {
+  id         String   @id @default(cuid())
+  filename   String
+  url        String
+  category   String   @default("general")
+  mimeType   String
+  size       Int      @default(0)
+  alt        String?
+  uploadedAt DateTime @default(now())
+
+  @@index([category])
+  @@index([uploadedAt])
+}
