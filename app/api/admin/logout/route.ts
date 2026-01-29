@@ -3,9 +3,10 @@ import { cookies } from 'next/headers'
 
 export async function POST() {
   try {
-    // Clear session cookies
+    // Clear all session cookies
     cookies().delete('admin_session')
     cookies().delete('admin_token_hash')
+    cookies().delete('firebase_token_hash')
 
     return NextResponse.json({
       success: true,

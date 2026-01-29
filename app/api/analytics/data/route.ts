@@ -5,9 +5,9 @@ import {
   getDailyVisitors,
   getTopPages,
   getTrafficSources,
+  getDeviceBreakdown,
+  getGeographicData,
 } from '@/lib/ga-server'
-
-// Removed 'force-dynamic' for static export compatibility
 
 export async function GET() {
   // Require admin authentication
@@ -16,11 +16,13 @@ export async function GET() {
 
   try {
     // Fetch all analytics data in parallel
-    const [overview, dailyVisitors, topPages, trafficSources] = await Promise.all([
+    const [overview, dailyVisitors, topPages, trafficSources, deviceBreakdown, geoData] = await Promise.all([
       getAnalyticsOverview(),
       getDailyVisitors(7),
       getTopPages(5),
       getTrafficSources(),
+      getDeviceBreakdown(),
+      getGeographicData(5),
     ])
 
     return NextResponse.json({
@@ -28,6 +30,8 @@ export async function GET() {
       dailyVisitors,
       topPages,
       trafficSources,
+      deviceBreakdown,
+      geoData,
     })
   } catch (error) {
     console.error('Error fetching analytics:', error)

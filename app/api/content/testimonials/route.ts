@@ -8,7 +8,7 @@ export async function GET() {
     // If Firebase is configured, try to fetch from Firestore
     if (isFirebaseConfigured()) {
       const testimonials = await getFirestoreCollection<TestimonialData>(
-        'content/testimonials',
+        'testimonials',
         DEFAULT_TESTIMONIALS,
         'order'
       )

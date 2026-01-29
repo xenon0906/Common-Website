@@ -1,6 +1,7 @@
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyIdToken } from '@/lib/firebase-admin'
 
 /**
  * Hash a string using SHA-256
@@ -10,10 +11,23 @@ function hashString(str: string): string {
 }
 
 /**
- * Verify if the current request has a valid admin session
- * Uses the same cookie-based auth as the middleware
+ * Constant-time string comparison to prevent timing attacks
  */
-export async function verifyAdminSession(): Promise<boolean> {
+function timingSafeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false
+  }
+
+  const aBuf = Buffer.from(a, 'utf-8')
+  const bBuf = Buffer.from(b, 'utf-8')
+
+  return crypto.timingSafeEqual(aBuf, bBuf)
+}
+
+/**
+ * Verify cookie-based admin session
+ */
+function verifyCookieSession(): boolean {
   try {
     const cookieStore = cookies()
     const sessionToken = cookieStore.get('admin_session')?.value
@@ -23,13 +37,70 @@ export async function verifyAdminSession(): Promise<boolean> {
       return false
     }
 
-    // Hash the session token and compare with stored hash
+    // Hash the session token and compare with stored hash (timing-safe)
     const calculatedHash = hashString(sessionToken)
-    return calculatedHash === storedTokenHash
+    return timingSafeCompare(calculatedHash, storedTokenHash)
   } catch (error) {
-    console.error('Error verifying admin session:', error)
+    console.error('Error verifying cookie session:', error)
     return false
   }
+}
+
+/**
+ * Verify Firebase token from Authorization header
+ * Accepts: "Bearer <firebase-id-token>"
+ * Uses Firebase Admin SDK for server-side verification when available
+ */
+async function verifyFirebaseToken(): Promise<boolean> {
+  try {
+    const headersList = headers()
+    const authHeader = headersList.get('authorization')
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      return false
+    }
+
+    const token = authHeader.slice(7) // Remove "Bearer " prefix
+
+    // Attempt server-side verification with Admin SDK
+    const decoded = await verifyIdToken(token)
+    if (decoded) {
+      return true
+    }
+
+    // If Admin SDK is not configured (returns null without env var),
+    // fall back to cookie-based check
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+      const cookieStore = cookies()
+      const firebaseTokenHash = cookieStore.get('firebase_token_hash')?.value
+      if (firebaseTokenHash) {
+        return true
+      }
+    }
+
+    return false
+  } catch (error) {
+    console.error('Error verifying Firebase token:', error)
+    return false
+  }
+}
+
+/**
+ * Verify if the current request has a valid admin session
+ * Supports both cookie-based auth and Firebase token auth (hybrid approach)
+ */
+export async function verifyAdminSession(): Promise<boolean> {
+  // Check cookie-based session first (traditional login)
+  if (verifyCookieSession()) {
+    return true
+  }
+
+  // Fallback: check Firebase token from Authorization header
+  if (await verifyFirebaseToken()) {
+    return true
+  }
+
+  return false
 }
 
 /**

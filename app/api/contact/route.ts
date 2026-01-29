@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // Google Apps Script Web App URL - set this in your environment variables
 const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 5 submissions per 10 minutes per IP
+  const rateLimited = checkRateLimit(request, 'contact', {
+    maxRequests: 5,
+    windowMs: 10 * 60 * 1000,
+  })
+  if (rateLimited) return rateLimited
+
   try {
     const body = await request.json()
     const { name, email, subject, message } = body
@@ -12,6 +20,32 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: 'All fields are required' },
+        { status: 400 }
+      )
+    }
+
+    // Validate field length limits
+    if (typeof name !== 'string' || name.length > 100) {
+      return NextResponse.json(
+        { error: 'Name must be 100 characters or fewer' },
+        { status: 400 }
+      )
+    }
+    if (typeof email !== 'string' || email.length > 254) {
+      return NextResponse.json(
+        { error: 'Email must be 254 characters or fewer' },
+        { status: 400 }
+      )
+    }
+    if (typeof subject !== 'string' || subject.length > 200) {
+      return NextResponse.json(
+        { error: 'Subject must be 200 characters or fewer' },
+        { status: 400 }
+      )
+    }
+    if (typeof message !== 'string' || message.length > 5000) {
+      return NextResponse.json(
+        { error: 'Message must be 5000 characters or fewer' },
         { status: 400 }
       )
     }

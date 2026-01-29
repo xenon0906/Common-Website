@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Instagram, ChevronLeft, ChevronRight, ExternalLink, RefreshCw } from 'lucide-react'
+import { Instagram, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Script from 'next/script'
 
@@ -26,31 +26,6 @@ import Script from 'next/script'
 // 5. Get business ID from: GET /me?fields=id,username
 //
 // ============================================================================
-
-// Fallback manual reels (used when API is not configured)
-// Ordered from latest to oldest
-const MANUAL_REELS = [
-  {
-    id: 'DSsQJk-AfxN',
-    title: 'Latest from Snapgo',
-  },
-  {
-    id: 'DQ_2YXYjNTK',
-    title: 'Snapgo Updates',
-  },
-  {
-    id: 'DSS0Z7jEwrY',
-    title: 'Ride Sharing Made Easy',
-  },
-  {
-    id: 'DQoqD40D1OJ',
-    title: 'Save on Your Commute',
-  },
-  {
-    id: 'DSkjYgSD4kc',
-    title: 'Join the Snapgo Community',
-  },
-]
 
 const INSTAGRAM_USERNAME = 'snapgo.co.in'
 
@@ -108,71 +83,40 @@ function InstagramEmbed({ reelId, isActive }: { reelId: string; isActive: boolea
 }
 
 export function InstagramSection() {
-  const [reels, setReels] = useState<InstagramReel[]>(MANUAL_REELS)
+  const [reels, setReels] = useState<InstagramReel[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [apiEnabled, setApiEnabled] = useState(false)
-
-  // Check if Instagram API is configured
-  const accessToken = process.env.NEXT_PUBLIC_INSTAGRAM_ACCESS_TOKEN
-  const businessId = process.env.NEXT_PUBLIC_INSTAGRAM_BUSINESS_ID
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setMounted(true)
-
-    // If API credentials are available, fetch latest reels
-    if (accessToken && businessId) {
-      setApiEnabled(true)
-      fetchLatestReels()
-    }
+    fetchReelsFromFirestore()
   }, [])
 
-  // Fetch latest reels from Instagram Graph API
-  const fetchLatestReels = async () => {
-    if (!accessToken || !businessId) return
-
+  // Fetch reels from our API (backed by Firestore)
+  const fetchReelsFromFirestore = async () => {
     setIsLoading(true)
     try {
-      // Fetch latest media (reels/videos) from Instagram Graph API
-      const response = await fetch(
-        `https://graph.instagram.com/${businessId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url&access_token=${accessToken}&limit=10`
-      )
-
+      const response = await fetch('/api/instagram')
       if (!response.ok) {
-        console.error('Instagram API error:', response.status)
+        console.error('Failed to fetch reels:', response.status)
         return
       }
-
       const data = await response.json()
-
-      if (data.data && data.data.length > 0) {
-        // Filter for reels/videos and map to our format
-        const instagramReels: InstagramReel[] = data.data
-          .filter((item: any) => item.media_type === 'VIDEO')
-          .slice(0, 5)
-          .map((item: any) => ({
-            id: extractReelId(item.permalink),
-            title: item.caption?.substring(0, 50) || 'Watch on Instagram',
-            mediaUrl: item.media_url,
-            permalink: item.permalink,
+      if (Array.isArray(data) && data.length > 0) {
+        const visibleReels: InstagramReel[] = data
+          .filter((reel: any) => reel.visible !== false && reel.reelId)
+          .map((reel: any) => ({
+            id: reel.reelId,
+            title: reel.title || 'Watch on Instagram',
           }))
-
-        if (instagramReels.length > 0) {
-          setReels(instagramReels)
-        }
+        setReels(visibleReels)
       }
     } catch (error) {
       console.error('Failed to fetch Instagram reels:', error)
     } finally {
       setIsLoading(false)
     }
-  }
-
-  // Extract reel ID from permalink
-  const extractReelId = (permalink: string): string => {
-    const match = permalink.match(/\/reel\/([^/?]+)/)
-    return match ? match[1] : permalink
   }
 
   // Process Instagram embeds after script loads
@@ -227,23 +171,23 @@ export function InstagramSection() {
               See real stories of commuters saving money and sharing rides with Snapgo.
             </p>
 
-            {/* API Status Indicator */}
-            {apiEnabled && (
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-green-400 text-xs">Live from Instagram</span>
-                <button
-                  onClick={fetchLatestReels}
-                  disabled={isLoading}
-                  className="ml-2 p-1 rounded hover:bg-white/10 transition-colors"
-                >
-                  <RefreshCw className={`w-4 h-4 text-white/60 ${isLoading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Reels Carousel */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="animate-pulse flex flex-col items-center gap-4">
+                <Instagram className="w-12 h-12 text-white/50" />
+                <p className="text-white/50 text-sm">Loading reels...</p>
+              </div>
+            </div>
+          ) : reels.length === 0 ? (
+            <div className="text-center py-16">
+              <Instagram className="w-12 h-12 mx-auto text-white/30 mb-4" />
+              <p className="text-white/50">No reels to display yet.</p>
+            </div>
+          ) : (
+          <>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative px-2">
             {/* Main Reel Display */}
             <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black min-h-[350px] sm:min-h-[400px] md:min-h-[500px]">
@@ -304,7 +248,7 @@ export function InstagramSection() {
           {/* Direct Link to Instagram */}
           <div className="text-center mt-8 sm:mt-10 space-y-3 sm:space-y-4">
             <Link
-              href={`https://www.instagram.com/reel/${reels[currentIndex].id}/`}
+              href={`https://www.instagram.com/reel/${reels[currentIndex]?.id}/`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white/10 text-white rounded-full font-medium hover:bg-white/20 transition-colors border border-white/20 text-sm sm:text-base"
@@ -324,6 +268,8 @@ export function InstagramSection() {
               </Link>
             </div>
           </div>
+          </>
+          )}
         </div>
       </section>
     </>

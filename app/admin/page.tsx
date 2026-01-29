@@ -54,6 +54,8 @@ interface AnalyticsData {
     pageViewChange: number
     durationChange: number
     bounceChange: number
+    isError?: boolean
+    errorMessage?: string
   }
   dailyVisitors: Array<{
     date: string
@@ -71,37 +73,36 @@ interface AnalyticsData {
     visitors: number
     percentage: number
   }>
+  deviceBreakdown?: Array<{
+    name: string
+    value: number
+    color: string
+  }>
+  geoData?: Array<{
+    city: string
+    visitors: number
+    percentage: number
+  }>
 }
 
-// Device Breakdown (static for now - GA4 requires different API call)
-const deviceData = [
-  { name: 'Mobile', value: 62, color: '#0066B3' },
-  { name: 'Desktop', value: 32, color: '#0d9488' },
-  { name: 'Tablet', value: 6, color: '#7c3aed' },
-]
+interface RecentBlog {
+  title: string
+  status: string
+  views: number
+}
 
-// Geographic Data (static for now)
-const geoData = [
-  { city: 'Greater Noida', visitors: 2840, percentage: 34 },
-  { city: 'Delhi', visitors: 1680, percentage: 20 },
-  { city: 'Mumbai', visitors: 1240, percentage: 15 },
-  { city: 'Bangalore', visitors: 920, percentage: 11 },
-  { city: 'Other', visitors: 1752, percentage: 20 },
-]
+interface RecentAchievement {
+  title: string
+  type: string
+  date: string
+}
 
-// Recent Blogs
-const recentBlogs = [
-  { title: 'How to Save Rs 6000 Monthly on Your Commute', status: 'published', views: 1240 },
-  { title: 'Top 5 Ride-Sharing Tips for College Students', status: 'draft', views: 0 },
-  { title: 'Why Aadhaar Verification Makes Travel Safer', status: 'published', views: 890 },
-]
-
-// Recent Achievements
-const recentAchievements = [
-  { title: 'DPIIT Certificate', type: 'CERT', date: '2024' },
-  { title: 'Startup India Recognition', type: 'CERT', date: '2024' },
-  { title: '7000+ Downloads Milestone', type: 'POST', date: 'Dec 2025' },
-]
+// Device colors mapping
+const DEVICE_COLORS: Record<string, string> = {
+  mobile: '#0066B3',
+  desktop: '#0d9488',
+  tablet: '#7c3aed',
+}
 
 // Traffic source colors
 const trafficColors = ['#0066B3', '#0d9488', '#7c3aed', '#3399CC', '#f59e0b']
@@ -122,6 +123,8 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [recentBlogs, setRecentBlogs] = useState<RecentBlog[]>([])
+  const [recentAchievements, setRecentAchievements] = useState<RecentAchievement[]>([])
 
   // Firestore collection counts
   const { counts: firestoreCounts, loading: countsLoading } = useCollectionCounts(
@@ -129,9 +132,13 @@ export default function AdminDashboard() {
   )
 
   useEffect(() => {
+    const controller = new AbortController()
+    const { signal } = controller
+
     async function fetchAnalytics() {
       try {
-        const res = await fetch('/api/analytics/data')
+        const res = await fetch('/api/analytics/data', { signal })
+        if (signal.aborted) return
         if (!res.ok) {
           if (res.status === 401) {
             setError('Please log in to view analytics')
@@ -141,15 +148,72 @@ export default function AdminDashboard() {
           return
         }
         const data = await res.json()
+        if (signal.aborted) return
         setAnalytics(data)
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === 'AbortError') return
         console.error('Error fetching analytics:', err)
-        setError('Failed to load analytics data')
+        if (!signal.aborted) setError('Failed to load analytics data')
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     }
+
+    async function fetchRecentBlogs() {
+      if (!USE_FIREBASE) return
+      try {
+        const { getFirebaseDb, getAppId, collection, getDocs, query, orderBy } = await import('@/lib/firebase')
+        if (signal.aborted) return
+        const db = getFirebaseDb()
+        const appId = getAppId()
+        const blogsRef = collection(db, 'artifacts', appId, 'public', 'data', 'blogs')
+        const blogsQuery = query(blogsRef, orderBy('createdAt', 'desc'))
+        const snapshot = await getDocs(blogsQuery)
+        if (signal.aborted) return
+        const blogs = snapshot.docs.slice(0, 3).map(d => {
+          const data = d.data()
+          return {
+            title: data.title || 'Untitled',
+            status: data.published ? 'published' : 'draft',
+            views: data.views || 0,
+          }
+        })
+        setRecentBlogs(blogs)
+      } catch (err) {
+        if (!signal.aborted) console.error('Error fetching recent blogs:', err)
+      }
+    }
+
+    async function fetchRecentAchievements() {
+      if (!USE_FIREBASE) return
+      try {
+        const { getFirebaseDb, getAppId, collection, getDocs, query, orderBy } = await import('@/lib/firebase')
+        if (signal.aborted) return
+        const db = getFirebaseDb()
+        const appId = getAppId()
+        const achievementsRef = collection(db, 'artifacts', appId, 'public', 'data', 'achievements')
+        const achievementsQuery = query(achievementsRef, orderBy('order', 'desc'))
+        const snapshot = await getDocs(achievementsQuery)
+        if (signal.aborted) return
+        const achievements = snapshot.docs.slice(0, 3).map(d => {
+          const data = d.data()
+          return {
+            title: data.title || 'Untitled',
+            type: data.type || 'POST',
+            date: data.date || '',
+          }
+        })
+        setRecentAchievements(achievements)
+      } catch (err) {
+        if (!signal.aborted) console.error('Error fetching recent achievements:', err)
+      }
+    }
+
     fetchAnalytics()
+    fetchRecentBlogs()
+    fetchRecentAchievements()
+
+    return () => { controller.abort() }
   }, [])
 
   // Build stats from analytics data
@@ -272,6 +336,19 @@ export default function AdminDashboard() {
           </Link>
         </div>
       </motion.div>
+
+      {/* Analytics error banner */}
+      {analytics?.overview.isError && (
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Analytics unavailable</p>
+            <p className="text-sm text-amber-600">
+              {analytics.overview.errorMessage || 'Could not load analytics data. Showing placeholder values.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid with enhanced cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -496,27 +573,33 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {deviceData.map((device) => (
-                  <div key={device.name} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        {device.name === 'Mobile' && <Smartphone className="w-4 h-4" />}
-                        {device.name === 'Desktop' && <Monitor className="w-4 h-4" />}
-                        {device.name === 'Tablet' && <Smartphone className="w-4 h-4" />}
-                        <span>{device.name}</span>
+              {analytics?.deviceBreakdown && analytics.deviceBreakdown.length > 0 ? (
+                <div className="space-y-4">
+                  {analytics.deviceBreakdown.map((device) => (
+                    <div key={device.name} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          {device.name.toLowerCase() === 'mobile' && <Smartphone className="w-4 h-4" />}
+                          {device.name.toLowerCase() === 'desktop' && <Monitor className="w-4 h-4" />}
+                          {device.name.toLowerCase() === 'tablet' && <Smartphone className="w-4 h-4" />}
+                          <span>{device.name}</span>
+                        </div>
+                        <span className="font-medium">{device.value}%</span>
                       </div>
-                      <span className="font-medium">{device.value}%</span>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${device.value}%`, backgroundColor: device.color }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${device.value}%`, backgroundColor: device.color }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No device data available. Configure GA4 to see device breakdown.
+                </p>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -535,21 +618,27 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {geoData.map((location) => (
-                  <div key={location.city} className="flex items-center justify-between">
-                    <span className="text-sm">{location.city}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        {location.visitors.toLocaleString()}
-                      </span>
-                      <Badge variant="outline" className="text-xs">
-                        {location.percentage}%
-                      </Badge>
+              {analytics?.geoData && analytics.geoData.length > 0 ? (
+                <div className="space-y-3">
+                  {analytics.geoData.map((location) => (
+                    <div key={location.city} className="flex items-center justify-between">
+                      <span className="text-sm">{location.city}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {location.visitors.toLocaleString()}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {location.percentage}%
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No geographic data available. Configure GA4 to see location breakdown.
+                </p>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -574,21 +663,27 @@ export default function AdminDashboard() {
               </Link>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentBlogs.map((blog) => (
-                  <div key={blog.title} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{blog.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {blog.views > 0 ? `${blog.views.toLocaleString()} views` : 'Not published'}
-                      </p>
+              {recentBlogs.length > 0 ? (
+                <div className="space-y-4">
+                  {recentBlogs.map((blog) => (
+                    <div key={blog.title} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{blog.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {blog.views > 0 ? `${blog.views.toLocaleString()} views` : 'Not published'}
+                        </p>
+                      </div>
+                      <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
+                        {blog.status}
+                      </Badge>
                     </div>
-                    <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
-                      {blog.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No blog posts yet. <Link href="/admin/blogs/create" className="text-primary hover:underline">Create one</Link>.
+                </p>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -610,17 +705,23 @@ export default function AdminDashboard() {
               </Link>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentAchievements.map((achievement) => (
-                  <div key={achievement.title} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{achievement.title}</p>
-                      <p className="text-sm text-muted-foreground">{achievement.date}</p>
+              {recentAchievements.length > 0 ? (
+                <div className="space-y-4">
+                  {recentAchievements.map((achievement) => (
+                    <div key={achievement.title} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{achievement.title}</p>
+                        <p className="text-sm text-muted-foreground">{achievement.date}</p>
+                      </div>
+                      <Badge variant="outline">{achievement.type}</Badge>
                     </div>
-                    <Badge variant="outline">{achievement.type}</Badge>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No achievements yet. <Link href="/admin/achievements" className="text-primary hover:underline">Add one</Link>.
+                </p>
+              )}
             </CardContent>
           </Card>
         </motion.div>

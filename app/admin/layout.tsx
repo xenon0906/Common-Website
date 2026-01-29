@@ -43,6 +43,7 @@ import {
   Flame,
   Loader2,
 } from 'lucide-react'
+import { Toaster } from '@/components/ui/toaster'
 
 const sidebarLinks = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -98,11 +99,6 @@ export default function AdminLayout({
       setUser(currentUser)
       setFirebaseConnected(true)
       setAuthLoading(false)
-
-      // Redirect to login if not authenticated and not already on login page
-      if (!currentUser && !pathname?.includes('/admin/login')) {
-        router.push('/admin/login')
-      }
     })
 
     return () => unsubscribe()
@@ -137,18 +133,6 @@ export default function AdminLayout({
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Checking authentication...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // If Firebase is enabled and user is not authenticated, don't render the layout
-  if (USE_FIREBASE && !user) {
-    return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Redirecting to login...</p>
         </div>
       </div>
     )
@@ -325,6 +309,9 @@ export default function AdminLayout({
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Toast Notifications */}
+      <Toaster />
     </div>
   )
 }

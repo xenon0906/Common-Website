@@ -31,6 +31,8 @@ export interface AnalyticsData {
   pageViewChange: number
   durationChange: number
   bounceChange: number
+  isError?: boolean
+  errorMessage?: string
 }
 
 export interface DailyVisitors {
@@ -48,6 +50,18 @@ export interface TopPage {
 
 export interface TrafficSource {
   source: string
+  visitors: number
+  percentage: number
+}
+
+export interface DeviceData {
+  name: string
+  value: number
+  color: string
+}
+
+export interface GeoData {
+  city: string
   visitors: number
   percentage: number
 }
@@ -109,7 +123,12 @@ export async function getAnalyticsOverview(): Promise<AnalyticsData> {
     }
   } catch (error) {
     console.error('Error fetching analytics overview:', error)
-    return getMockAnalyticsData()
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+    return {
+      ...getMockAnalyticsData(),
+      isError: true,
+      errorMessage: `Failed to fetch analytics: ${errorMsg}`,
+    }
   }
 }
 
@@ -219,6 +238,87 @@ export async function getTrafficSources(): Promise<TrafficSource[]> {
   }
 }
 
+// Device colors mapping
+const DEVICE_COLORS: Record<string, string> = {
+  mobile: '#0066B3',
+  desktop: '#0d9488',
+  tablet: '#7c3aed',
+  other: '#6b7280',
+}
+
+export async function getDeviceBreakdown(): Promise<DeviceData[]> {
+  const client = getAnalyticsClient()
+
+  if (!client || !propertyId) {
+    return []
+  }
+
+  try {
+    const [response] = await client.runReport({
+      property: propertyId,
+      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dimensions: [{ name: 'deviceCategory' }],
+      metrics: [{ name: 'activeUsers' }],
+    })
+
+    const totalUsers = (response.rows || []).reduce(
+      (sum, row) => sum + parseInt(row.metricValues?.[0]?.value || '0'),
+      0
+    )
+
+    return (response.rows || []).map(row => {
+      const name = row.dimensionValues?.[0]?.value || 'Unknown'
+      const users = parseInt(row.metricValues?.[0]?.value || '0')
+      return {
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value: totalUsers > 0 ? Math.round((users / totalUsers) * 100) : 0,
+        color: DEVICE_COLORS[name.toLowerCase()] || DEVICE_COLORS.other,
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching device breakdown:', error)
+    return []
+  }
+}
+
+export async function getGeographicData(limit: number = 5): Promise<GeoData[]> {
+  const client = getAnalyticsClient()
+
+  if (!client || !propertyId) {
+    return []
+  }
+
+  try {
+    const [response] = await client.runReport({
+      property: propertyId,
+      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dimensions: [{ name: 'city' }],
+      metrics: [{ name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+      limit,
+    })
+
+    const totalUsers = (response.rows || []).reduce(
+      (sum, row) => sum + parseInt(row.metricValues?.[0]?.value || '0'),
+      0
+    )
+
+    return (response.rows || [])
+      .filter(row => row.dimensionValues?.[0]?.value !== '(not set)')
+      .map(row => {
+        const visitors = parseInt(row.metricValues?.[0]?.value || '0')
+        return {
+          city: row.dimensionValues?.[0]?.value || 'Unknown',
+          visitors,
+          percentage: totalUsers > 0 ? Math.round((visitors / totalUsers) * 100) : 0,
+        }
+      })
+  } catch (error) {
+    console.error('Error fetching geographic data:', error)
+    return []
+  }
+}
+
 // Helper functions
 function calculateChange(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0
@@ -232,56 +332,28 @@ function formatDate(dateStr: string): string {
   return `${month}/${day}`
 }
 
-// Mock data for development/when GA is not configured
+// Placeholder data for when GA4 is not configured - returns zeros to indicate no real data
 function getMockAnalyticsData(): AnalyticsData {
   return {
-    totalVisitors: 12543,
-    totalPageViews: 45231,
-    avgSessionDuration: 185,
-    bounceRate: 42.5,
-    visitorChange: 12.5,
-    pageViewChange: 8.3,
-    durationChange: 5.2,
-    bounceChange: -3.1,
+    totalVisitors: 0,
+    totalPageViews: 0,
+    avgSessionDuration: 0,
+    bounceRate: 0,
+    visitorChange: 0,
+    pageViewChange: 0,
+    durationChange: 0,
+    bounceChange: 0,
   }
 }
 
 function getMockDailyVisitors(days: number): DailyVisitors[] {
-  const data: DailyVisitors[] = []
-  const today = new Date()
-
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-
-    data.push({
-      date: `${month}/${day}`,
-      visitors: Math.floor(Math.random() * 500) + 300,
-      pageViews: Math.floor(Math.random() * 1500) + 800,
-    })
-  }
-
-  return data
+  return []
 }
 
 function getMockTopPages(): TopPage[] {
-  return [
-    { path: '/', title: 'Home', views: 15234, percentage: 35 },
-    { path: '/features', title: 'Features', views: 8432, percentage: 20 },
-    { path: '/about', title: 'About Us', views: 6521, percentage: 15 },
-    { path: '/contact', title: 'Contact', views: 4312, percentage: 10 },
-    { path: '/blog', title: 'Blog', views: 3421, percentage: 8 },
-  ]
+  return []
 }
 
 function getMockTrafficSources(): TrafficSource[] {
-  return [
-    { source: 'Organic Search', visitors: 5234, percentage: 42 },
-    { source: 'Direct', visitors: 3521, percentage: 28 },
-    { source: 'Social', visitors: 1876, percentage: 15 },
-    { source: 'Referral', visitors: 1234, percentage: 10 },
-    { source: 'Email', visitors: 678, percentage: 5 },
-  ]
+  return []
 }

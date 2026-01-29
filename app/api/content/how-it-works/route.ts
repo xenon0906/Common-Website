@@ -8,7 +8,7 @@ export async function GET() {
     // If Firebase is configured, try to fetch from Firestore
     if (isFirebaseConfigured()) {
       const steps = await getFirestoreCollection<HowItWorksStepData>(
-        'content/howItWorks',
+        'howItWorks',
         DEFAULT_STEPS,
         'order'
       )

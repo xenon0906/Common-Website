@@ -8,7 +8,7 @@ export async function GET() {
     // If Firebase is configured, try to fetch from Firestore
     if (isFirebaseConfigured()) {
       const stats = await getFirestoreCollection<StatisticData>(
-        'content/stats',
+        'stats',
         DEFAULT_STATS,
         'order'
       )

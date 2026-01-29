@@ -154,3 +154,48 @@ export const GLOW_COLORS = {
     subtle: 'rgba(124, 58, 237, 0.15)',
   },
 }
+
+// Simplified animation constants for quick reference
+export const ANIMATION = {
+  duration: {
+    fast: 0.15,
+    normal: 0.25,
+    slow: 0.5,
+    verySlow: 0.8,
+  },
+  ease: {
+    smooth: [0.34, 1.56, 0.64, 1] as const,
+    standard: [0.4, 0, 0.2, 1] as const,
+    bounce: [0.68, -0.55, 0.265, 1.55] as const,
+    easeOut: 'easeOut' as const,
+    easeInOut: 'easeInOut' as const,
+  },
+  stagger: {
+    fast: 0.03,
+    normal: 0.05,
+    slow: 0.1,
+  },
+  spring: {
+    bouncy: { type: 'spring' as const, stiffness: 250, damping: 12 },
+    smooth: { type: 'spring' as const, stiffness: 200, damping: 20 },
+    stiff: { type: 'spring' as const, stiffness: 300, damping: 25 },
+  },
+} as const
+
+export const slideUp = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -30 },
+}
+
+export const slideInLeft = {
+  initial: { opacity: 0, x: -50 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: 50 },
+}
+
+export const slideInRight = {
+  initial: { opacity: 0, x: 50 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -50 },
+}

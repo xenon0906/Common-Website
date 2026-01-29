@@ -38,13 +38,43 @@ export default function AdminLoginPage() {
     setFirebaseStatus('checking')
     const auth = getFirebaseAuth()
 
+    // Helper function to create session cookies after Firebase auth
+    // Returns true if cookies were created successfully, false otherwise
+    const createSessionCookies = async (user: any): Promise<boolean> => {
+      try {
+        const idToken = await user.getIdToken()
+        const res = await fetch('/api/admin/firebase-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        })
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          console.error('Session cookie creation failed:', data.error || res.statusText)
+          return false
+        }
+        return true
+      } catch (err) {
+        console.error('Failed to create session cookies:', err)
+        return false
+      }
+    }
+
     // Check if already authenticated
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Already logged in, redirect to admin
+        // Already logged in, create session cookies and redirect to admin
+        const cookiesCreated = await createSessionCookies(user)
+        if (!cookiesCreated) {
+          setFirebaseStatus('error')
+          setFirebaseLoading(false)
+          setError('Session cookie creation failed. Please try the traditional login.')
+          return
+        }
         setFirebaseStatus('success')
         setFirebaseLoading(false)
-        // Use router.replace for more reliable navigation
+        // Refresh to ensure cookies are registered before middleware checks
+        router.refresh()
         router.replace('/admin')
         return
       }
@@ -52,16 +82,29 @@ export default function AdminLoginPage() {
       // Not logged in, try auto-login
       const token = getInitialAuthToken()
       try {
+        let loggedInUser
         if (token) {
           // Try custom token auth
-          await signInWithCustomToken(auth, token)
-          setFirebaseStatus('success')
+          const userCredential = await signInWithCustomToken(auth, token)
+          loggedInUser = userCredential.user
         } else {
           // Fall back to anonymous auth
-          await signInAnonymously(auth)
-          setFirebaseStatus('success')
+          const userCredential = await signInAnonymously(auth)
+          loggedInUser = userCredential.user
         }
-        // Use router.replace for more reliable navigation
+        // Create session cookies for API auth
+        if (loggedInUser) {
+          const cookiesCreated = await createSessionCookies(loggedInUser)
+          if (!cookiesCreated) {
+            setFirebaseStatus('error')
+            setFirebaseLoading(false)
+            setError('Session cookie creation failed. Please try the traditional login.')
+            return
+          }
+        }
+        setFirebaseStatus('success')
+        // Refresh to ensure cookies are registered before middleware checks
+        router.refresh()
         router.replace('/admin')
       } catch (err: any) {
         console.error('Firebase auto-login error:', err)

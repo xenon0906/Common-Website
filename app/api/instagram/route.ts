@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api-auth'
+import {
+  getServerDb,
+  getServerAppId,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  doc,
+  getDoc,
+} from '@/lib/firebase-server'
+
+function getInstagramCollectionPath() {
+  const appId = getServerAppId()
+  return `artifacts/${appId}/public/data/instagram`
+}
 
 // GET all Instagram reels
 export async function GET() {
   try {
-    const reels = await prisma.instagramReel.findMany({
-      orderBy: { order: 'asc' },
-    })
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 500 })
+    }
+
+    const collRef = collection(db, getInstagramCollectionPath())
+    const q = query(collRef, orderBy('order', 'asc'))
+    const snapshot = await getDocs(q)
+
+    const reels = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+    }))
+
     return NextResponse.json(reels)
   } catch (error) {
     console.error('Error fetching reels:', error)
@@ -21,20 +46,29 @@ export async function POST(request: NextRequest) {
     const authError = await requireAuth()
     if (authError) return authError
 
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 500 })
+    }
+
     const body = await request.json()
     const { reelId, title, description, visible, order } = body
 
-    const reel = await prisma.instagramReel.create({
-      data: {
-        reelId,
-        title,
-        description,
-        visible: visible ?? true,
-        order: order || 0,
-      },
-    })
+    const { addDoc } = await import('firebase/firestore')
+    const collRef = collection(db, getInstagramCollectionPath())
 
-    return NextResponse.json(reel, { status: 201 })
+    const newReel = {
+      reelId: reelId || '',
+      title: title || 'New Reel',
+      description: description || '',
+      visible: visible ?? true,
+      order: order || 0,
+      createdAt: new Date(),
+    }
+
+    const docRef = await addDoc(collRef, newReel)
+
+    return NextResponse.json({ id: docRef.id, ...newReel }, { status: 201 })
   } catch (error) {
     console.error('Error creating reel:', error)
     return NextResponse.json({ error: 'Failed to create reel' }, { status: 500 })
@@ -47,31 +81,29 @@ export async function PUT(request: NextRequest) {
     const authError = await requireAuth()
     if (authError) return authError
 
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 500 })
+    }
+
     const body = await request.json()
     const { reels } = body
 
-    // Update all reels in a transaction
-    await prisma.$transaction(
-      reels.map((reel: any) =>
-        prisma.instagramReel.upsert({
-          where: { id: reel.id || 'new' },
-          update: {
-            reelId: reel.reelId,
-            title: reel.title,
-            description: reel.description,
-            visible: reel.visible,
-            order: reel.order,
-          },
-          create: {
-            reelId: reel.reelId,
-            title: reel.title,
-            description: reel.description,
-            visible: reel.visible ?? true,
-            order: reel.order || 0,
-          },
-        })
-      )
-    )
+    const { setDoc } = await import('firebase/firestore')
+
+    for (const reel of reels) {
+      if (!reel.id) continue
+      const docRef = doc(db, getInstagramCollectionPath(), reel.id)
+      const { id, ...reelData } = reel
+      await setDoc(docRef, {
+        reelId: reelData.reelId || '',
+        title: reelData.title || '',
+        description: reelData.description || '',
+        visible: reelData.visible ?? true,
+        order: reelData.order || 0,
+        updatedAt: new Date(),
+      }, { merge: true })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -86,6 +118,11 @@ export async function DELETE(request: NextRequest) {
     const authError = await requireAuth()
     if (authError) return authError
 
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 500 })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -93,7 +130,9 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Reel ID required' }, { status: 400 })
     }
 
-    await prisma.instagramReel.delete({ where: { id } })
+    const { deleteDoc } = await import('firebase/firestore')
+    const docRef = doc(db, getInstagramCollectionPath(), id)
+    await deleteDoc(docRef)
 
     return NextResponse.json({ success: true })
   } catch (error) {

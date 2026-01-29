@@ -98,8 +98,15 @@ export default function SocialPage() {
       const docSnap = await getDoc(docRef)
 
       if (docSnap.exists()) {
-        const data = docSnap.data() as Partial<SocialLinks>
-        setSocial({ ...defaultSocial, ...data })
+        const data = docSnap.data() as Record<string, string | undefined>
+        // Filter out undefined values and merge with defaults
+        const filteredData: Record<string, string> = {}
+        for (const [key, value] of Object.entries(data)) {
+          if (value !== undefined) {
+            filteredData[key] = value
+          }
+        }
+        setSocial({ ...defaultSocial, ...filteredData })
       } else {
         setSocial(defaultSocial)
       }

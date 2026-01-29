@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadFile, FileCategory, validateUpload, formatFileSize, UPLOAD_CONFIG } from '@/lib/upload'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   try {
-    // Note: In production, add proper authentication middleware
-    // For now, uploads are allowed from authenticated admin pages only
 
     // Parse form data
     const formData = await request.formData()

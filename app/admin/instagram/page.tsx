@@ -52,6 +52,13 @@ interface InstagramSettings {
   maxReels: number
 }
 
+interface InstagramConnection {
+  connected: boolean
+  userId?: string
+  connectedAt?: Date
+  expiresAt?: Date
+}
+
 const defaultSettings: InstagramSettings = {
   username: 'snapgo.co.in',
   profileUrl: 'https://www.instagram.com/snapgo.co.in',
@@ -65,11 +72,63 @@ export default function InstagramManagerPage() {
   const [settings, setSettings] = useState<InstagramSettings>(defaultSettings)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [activeTab, setActiveTab] = useState<'reels' | 'settings'>('reels')
+  const [connection, setConnection] = useState<InstagramConnection>({ connected: false })
 
   useEffect(() => {
-    fetchData()
+    let isCancelled = false
+
+    const fetchInitialData = async () => {
+      try {
+        setLoading(true)
+        const db = getFirebaseDb()
+        const appId = getAppId()
+
+        // Fetch reels
+        const reelsRef = collection(db, 'artifacts', appId, 'public', 'data', 'instagram')
+        const reelsSnap = await getDocs(reelsRef)
+        if (isCancelled) return
+        const reelsData = reelsSnap.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        })) as InstagramReel[]
+        setReels(reelsData.sort((a, b) => a.order - b.order))
+
+        // Fetch settings
+        const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'instagramSettings', 'config')
+        const settingsSnap = await getDoc(settingsRef)
+        if (isCancelled) return
+        if (settingsSnap.exists()) {
+          setSettings({ ...defaultSettings, ...settingsSnap.data() })
+        }
+
+        // Check Instagram connection status
+        const tokenRef = doc(db, 'artifacts', appId, 'instagramAuth', 'token')
+        const tokenSnap = await getDoc(tokenRef)
+        if (isCancelled) return
+        if (tokenSnap.exists()) {
+          const tokenData = tokenSnap.data()
+          setConnection({
+            connected: true,
+            userId: tokenData.userId,
+            connectedAt: tokenData.connectedAt?.toDate?.() || tokenData.connectedAt,
+            expiresAt: tokenData.expiresAt?.toDate?.() || tokenData.expiresAt,
+          })
+        }
+      } catch (error) {
+        if (isCancelled) return
+        console.error('Error fetching Instagram data:', error)
+        setMessage({ type: 'error', text: 'Failed to load Instagram data from Firestore' })
+      } finally {
+        if (!isCancelled) setLoading(false)
+      }
+    }
+
+    fetchInitialData()
+
+    return () => { isCancelled = true }
   }, [])
 
   const fetchData = async () => {
@@ -92,6 +151,19 @@ export default function InstagramManagerPage() {
       const settingsSnap = await getDoc(settingsRef)
       if (settingsSnap.exists()) {
         setSettings({ ...defaultSettings, ...settingsSnap.data() })
+      }
+
+      // Check Instagram connection status
+      const tokenRef = doc(db, 'artifacts', appId, 'instagramAuth', 'token')
+      const tokenSnap = await getDoc(tokenRef)
+      if (tokenSnap.exists()) {
+        const tokenData = tokenSnap.data()
+        setConnection({
+          connected: true,
+          userId: tokenData.userId,
+          connectedAt: tokenData.connectedAt?.toDate?.() || tokenData.connectedAt,
+          expiresAt: tokenData.expiresAt?.toDate?.() || tokenData.expiresAt,
+        })
       }
     } catch (error) {
       console.error('Error fetching Instagram data:', error)
@@ -169,6 +241,41 @@ export default function InstagramManagerPage() {
     } catch (error) {
       console.error('Error deleting reel:', error)
       setMessage({ type: 'error', text: 'Failed to delete reel' })
+    }
+  }
+
+  const handleConnectInstagram = async () => {
+    try {
+      const res = await fetch('/api/instagram/auth')
+      const data = await res.json()
+      if (data.authUrl) {
+        window.location.href = data.authUrl
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to start Instagram connection' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to connect to Instagram' })
+    }
+  }
+
+  const handleSyncFromInstagram = async () => {
+    setSyncing(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/instagram/sync', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        setMessage({ type: 'success', text: data.message })
+        if (data.synced > 0) {
+          fetchData() // Reload reels
+        }
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to sync' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to sync from Instagram' })
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -259,6 +366,51 @@ export default function InstagramManagerPage() {
                 <p className="text-2xl font-bold">{reels.length}</p>
                 <p className="text-xs text-muted-foreground">Total Reels</p>
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Instagram API Connection */}
+      <Card className={connection.connected ? 'border-green-500/30 bg-green-500/5' : 'border-dashed'}>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${connection.connected ? 'bg-green-500' : 'bg-gray-300'}`} />
+              <div>
+                <p className="font-medium">
+                  {connection.connected ? 'Instagram Connected' : 'Instagram Not Connected'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {connection.connected
+                    ? `Connected. Token expires ${connection.expiresAt ? new Date(connection.expiresAt).toLocaleDateString() : 'unknown'}.`
+                    : 'Connect your Instagram account to auto-sync reels.'}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {connection.connected ? (
+                <Button
+                  variant="outline"
+                  onClick={handleSyncFromInstagram}
+                  disabled={syncing}
+                >
+                  {syncing ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Syncing...</>
+                  ) : (
+                    <><RefreshCw className="w-4 h-4 mr-2" />Sync Reels</>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={handleConnectInstagram}
+                  className="border-pink-500/50 text-pink-500 hover:bg-pink-500/10"
+                >
+                  <Instagram className="w-4 h-4 mr-2" />
+                  Connect Instagram
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>

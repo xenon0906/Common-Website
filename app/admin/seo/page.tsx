@@ -1,13 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -18,123 +14,110 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  Save,
   RefreshCw,
-  ExternalLink,
-  Eye,
-  Sparkles,
   Target,
-  BarChart3,
 } from 'lucide-react'
-
-interface PageSEO {
-  page: string
-  title: string
-  description: string
-  keywords: string
-  score: number
-  issues: string[]
-}
-
-const defaultPagesSEO: PageSEO[] = [
-  {
-    page: 'Home',
-    title: 'Snapgo - Share Rides, Save Money, Travel Together',
-    description: 'Join thousands of verified users sharing cab rides across India. Save up to 75% on your daily commute with Snapgo ride-sharing.',
-    keywords: 'snapgo, ride sharing, cab sharing, carpool india, save money commute',
-    score: 92,
-    issues: [],
-  },
-  {
-    page: 'About',
-    title: 'About Snapgo - Our Story & Mission',
-    description: 'Learn about Snapgo, the DPIIT certified startup revolutionizing urban mobility in India through safe and affordable ride-sharing.',
-    keywords: 'snapgo about, ride sharing startup, dpiit certified, indian startup',
-    score: 88,
-    issues: ['Add more unique keywords'],
-  },
-  {
-    page: 'Features',
-    title: 'Snapgo Features - Safe & Affordable Ride Sharing',
-    description: 'Discover Snapgo features: KYC verification, female-only rides, SOS alerts, real-time matching, and up to 75% savings.',
-    keywords: 'snapgo features, kyc verification, female only rides, sos alert',
-    score: 95,
-    issues: [],
-  },
-  {
-    page: 'Safety',
-    title: 'Safety First - Snapgo Verified Ride Sharing',
-    description: 'Your safety is our priority. 100% KYC verified users, SOS alerts, female-only option, and 24/7 support.',
-    keywords: 'safe ride sharing, verified users, sos alert, women safety',
-    score: 90,
-    issues: [],
-  },
-  {
-    page: 'How It Works',
-    title: 'How Snapgo Works - Easy Ride Sharing Guide',
-    description: 'Learn how to use Snapgo for real-time and scheduled rides. Match with verified users and save up to 75%.',
-    keywords: 'how snapgo works, ride sharing guide, carpool tutorial',
-    score: 85,
-    issues: ['Description could be longer'],
-  },
-  {
-    page: 'Blog',
-    title: 'Snapgo Blog - Ride Sharing Tips & News',
-    description: 'Read the latest tips, stories, and insights about ride-sharing, saving money, and sustainable travel in India.',
-    keywords: 'snapgo blog, ride sharing tips, carpool news, travel stories',
-    score: 82,
-    issues: ['Add more keywords'],
-  },
-  {
-    page: 'Contact',
-    title: 'Contact Snapgo - Get in Touch',
-    description: 'Have questions? Contact Snapgo support team for help with ride-sharing, partnerships, or feedback.',
-    keywords: 'contact snapgo, snapgo support, ride sharing help',
-    score: 78,
-    issues: ['Add local keywords'],
-  },
-]
-
-function SEOScoreIndicator({ score }: { score: number }) {
-  const getColor = () => {
-    if (score >= 90) return 'text-green-500 bg-green-100'
-    if (score >= 70) return 'text-yellow-500 bg-yellow-100'
-    return 'text-red-500 bg-red-100'
-  }
-
-  return (
-    <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold ${getColor()}`}>
-      {score >= 90 ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-      {score}/100
-    </div>
-  )
-}
+import { useSEOData } from './hooks/useSEOData'
+import {
+  SEOScoreCard,
+  SEOScoreIndicator,
+  PageSEOEditor,
+  GlobalSEOSettings,
+  KeywordAnalyzer,
+} from './components'
+import { PageSEO } from '@/lib/types/seo'
+import { useToast } from '@/components/ui/use-toast'
+import { StatCardSkeleton, SEOCardSkeleton } from '@/components/ui/skeleton'
 
 export default function SEOSettingsPage() {
-  const [pages, setPages] = useState<PageSEO[]>(defaultPagesSEO)
-  const [selectedPage, setSelectedPage] = useState<PageSEO | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const {
+    pages,
+    globalSEO,
+    isLoading,
+    isSaving,
+    error,
+    saveGlobalSEO,
+    savePageSEO,
+    analyzeAllPages,
+    clearError,
+  } = useSEOData()
 
-  const averageScore = Math.round(pages.reduce((sum, p) => sum + p.score, 0) / pages.length)
+  const [selectedPage, setSelectedPage] = useState<PageSEO | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const { toast } = useToast()
+
+  const averageScore = pages.length > 0
+    ? Math.round(pages.reduce((sum, p) => sum + p.score, 0) / pages.length)
+    : 0
   const pagesWithIssues = pages.filter(p => p.issues.length > 0).length
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true)
-    // Simulate SEO analysis
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsAnalyzing(false)
+    try {
+      await analyzeAllPages()
+      toast({
+        title: 'Analysis complete',
+        description: `All ${pages.length} pages have been analyzed.`,
+      })
+    } catch (err) {
+      toast({
+        title: 'Analysis failed',
+        description: 'Could not analyze all pages. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    // Simulate saving
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsSaving(false)
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        {/* Header Skeleton */}
+        <div className="rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5 p-8">
+          <div className="space-y-4">
+            <div className="h-6 w-32 bg-white/20 rounded animate-pulse" />
+            <div className="h-10 w-48 bg-white/20 rounded animate-pulse" />
+            <div className="h-4 w-80 bg-white/20 rounded animate-pulse" />
+          </div>
+        </div>
+
+        {/* Stats Skeleton */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <StatCardSkeleton key={i} />
+          ))}
+        </div>
+
+        {/* Content Skeleton */}
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SEOCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-8">
+      {/* Error Toast */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between"
+        >
+          <div className="flex items-center gap-2 text-red-700">
+            <AlertCircle className="w-5 h-5" />
+            {error}
+          </div>
+          <Button variant="ghost" size="sm" onClick={clearError}>
+            Dismiss
+          </Button>
+        </motion.div>
+      )}
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -173,7 +156,7 @@ export default function SEOSettingsPage() {
             ) : (
               <>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Analyze Site
+                Analyze All
               </>
             )}
           </Button>
@@ -240,10 +223,10 @@ export default function SEOSettingsPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="pages" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="pages">Page SEO</TabsTrigger>
-          <TabsTrigger value="global">Global Settings</TabsTrigger>
-          <TabsTrigger value="ai">AI Optimization</TabsTrigger>
+          <TabsTrigger value="global">Global</TabsTrigger>
+          <TabsTrigger value="keywords">Keywords</TabsTrigger>
         </TabsList>
 
         {/* Page SEO Tab */}
@@ -262,7 +245,7 @@ export default function SEOSettingsPage() {
               <div className="space-y-4">
                 {pages.map((page, index) => (
                   <motion.div
-                    key={page.page}
+                    key={page.pageSlug}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -272,9 +255,9 @@ export default function SEOSettingsPage() {
                     <div className="flex items-center gap-4">
                       <Globe className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <p className="font-medium">{page.page}</p>
+                        <p className="font-medium">{page.pageName}</p>
                         <p className="text-sm text-muted-foreground truncate max-w-md">
-                          {page.title}
+                          {page.metaTitle}
                         </p>
                       </div>
                     </div>
@@ -294,276 +277,29 @@ export default function SEOSettingsPage() {
 
           {/* Edit Selected Page */}
           {selectedPage && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>Edit: {selectedPage.page}</CardTitle>
-                  <CardDescription>
-                    Update SEO settings for this page
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Page Title</Label>
-                    <Input defaultValue={selectedPage.title} />
-                    <p className="text-xs text-muted-foreground">
-                      {selectedPage.title.length}/60 characters (recommended: 50-60)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Meta Description</Label>
-                    <Textarea defaultValue={selectedPage.description} rows={3} />
-                    <p className="text-xs text-muted-foreground">
-                      {selectedPage.description.length}/160 characters (recommended: 150-160)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Keywords</Label>
-                    <Input defaultValue={selectedPage.keywords} />
-                    <p className="text-xs text-muted-foreground">
-                      Comma-separated list of target keywords
-                    </p>
-                  </div>
-
-                  {selectedPage.issues.length > 0 && (
-                    <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                      <p className="font-medium text-orange-800 mb-2">Issues to fix:</p>
-                      <ul className="list-disc list-inside text-sm text-orange-700">
-                        {selectedPage.issues.map((issue, i) => (
-                          <li key={i}>{issue}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <Button onClick={handleSave} disabled={isSaving}>
-                      {isSaving ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4 mr-2" />
-                      )}
-                      Save Changes
-                    </Button>
-                    <Button variant="outline" onClick={() => setSelectedPage(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <PageSEOEditor
+              page={selectedPage}
+              onSave={savePageSEO}
+              onCancel={() => setSelectedPage(null)}
+              isSaving={isSaving}
+            />
           )}
         </TabsContent>
 
         {/* Global Settings Tab */}
         <TabsContent value="global" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="w-5 h-5 text-primary" />
-                Global SEO Settings
-              </CardTitle>
-              <CardDescription>
-                Site-wide SEO configuration
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>Site Name</Label>
-                  <Input defaultValue="Snapgo" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Site Tagline</Label>
-                  <Input defaultValue="Share Rides, Save Money, Travel Together" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Default Meta Description</Label>
-                <Textarea
-                  defaultValue="Snapgo is India's trusted ride-sharing platform. Join verified users, save up to 75% on cab fares, and travel safely with KYC-verified co-riders."
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Default Keywords</Label>
-                <Input defaultValue="snapgo, ride sharing, cab sharing, carpool india, save money, verified rides, safe travel" />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>Google Analytics ID</Label>
-                  <Input placeholder="G-XXXXXXXXXX" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Google Search Console</Label>
-                  <Input placeholder="Verification code" />
-                </div>
-              </div>
-
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                Save Global Settings
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Sitemap & Robots */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Sitemap & Robots.txt</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Sitemap.xml</p>
-                    <p className="text-sm text-muted-foreground">Auto-generated, includes all pages and blogs</p>
-                  </div>
-                </div>
-                <a
-                  href="/sitemap.xml"
-                  target="_blank"
-                  className="flex items-center gap-1 text-primary hover:underline"
-                >
-                  View <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Robots.txt</p>
-                    <p className="text-sm text-muted-foreground">Configured for optimal crawling</p>
-                  </div>
-                </div>
-                <a
-                  href="/robots.txt"
-                  target="_blank"
-                  className="flex items-center gap-1 text-primary hover:underline"
-                >
-                  View <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            </CardContent>
-          </Card>
+          <GlobalSEOSettings
+            globalSEO={globalSEO}
+            onSave={saveGlobalSEO}
+            isSaving={isSaving}
+          />
         </TabsContent>
 
-        {/* AI Optimization Tab */}
-        <TabsContent value="ai" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                AI SEO Optimization
-              </CardTitle>
-              <CardDescription>
-                Optimize your content for AI assistants and search engines
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* AI-friendly features */}
-              <div className="grid md:grid-cols-2 gap-4">
-                {[
-                  {
-                    title: 'Structured Data (JSON-LD)',
-                    status: 'Active',
-                    description: 'Organization and Article schemas implemented',
-                    active: true,
-                  },
-                  {
-                    title: 'Semantic HTML',
-                    status: 'Active',
-                    description: 'Proper heading hierarchy and landmarks',
-                    active: true,
-                  },
-                  {
-                    title: 'Alt Text for Images',
-                    status: 'Review Needed',
-                    description: '12 images may need alt text updates',
-                    active: false,
-                  },
-                  {
-                    title: 'Mobile Optimization',
-                    status: 'Active',
-                    description: 'Fully responsive design',
-                    active: true,
-                  },
-                  {
-                    title: 'Page Speed',
-                    status: 'Good',
-                    description: 'Core Web Vitals passing',
-                    active: true,
-                  },
-                  {
-                    title: 'Content Readability',
-                    status: 'Active',
-                    description: 'Clear and concise content structure',
-                    active: true,
-                  },
-                ].map((feature, index) => (
-                  <motion.div
-                    key={feature.title}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`p-4 rounded-lg border ${
-                      feature.active ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-medium">{feature.title}</p>
-                      <Badge variant={feature.active ? 'default' : 'outline'}>
-                        {feature.status}
-                      </Badge>
-                    </div>
-                    <p className={`text-sm ${feature.active ? 'text-green-700' : 'text-orange-700'}`}>
-                      {feature.description}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* AI Content Tips */}
-              <div className="p-6 bg-primary/5 rounded-xl border border-primary/20">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  AI SEO Best Practices
-                </h3>
-                <ul className="space-y-3">
-                  {[
-                    'Use clear, descriptive headings (H1, H2, H3)',
-                    'Include relevant keywords naturally in content',
-                    'Add comprehensive alt text to all images',
-                    'Structure content with bullet points and lists',
-                    'Keep paragraphs short and scannable',
-                    'Include FAQ sections for voice search optimization',
-                    'Use schema markup for rich snippets',
-                    'Ensure fast page load times',
-                  ].map((tip, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>{tip}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Keywords Tab */}
+        <TabsContent value="keywords" className="space-y-6">
+          <KeywordAnalyzer />
         </TabsContent>
+
       </Tabs>
     </div>
   )

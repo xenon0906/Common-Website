@@ -67,6 +67,14 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.instagram.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://img.youtube.com https://www.instagram.com; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google-analytics.com wss://*.firebaseio.com; frame-src https://www.instagram.com; object-src 'none'; base-uri 'self';"
+          },
         ],
       },
       {

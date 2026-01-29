@@ -8,7 +8,7 @@ export async function GET() {
     // If Firebase is configured, try to fetch from Firestore
     if (isFirebaseConfigured()) {
       const features = await getFirestoreCollection<FeatureData>(
-        'content/features',
+        'features',
         DEFAULT_FEATURES,
         'order'
       )

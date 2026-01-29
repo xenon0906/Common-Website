@@ -67,7 +67,31 @@ export function isFirebaseConfigured(): boolean {
 let serverApp: FirebaseApp | null = null
 let serverDb: Firestore | null = null
 
+function validateFirebaseConfig(): void {
+  const envVars = {
+    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  }
+
+  const missing = Object.entries(envVars)
+    .filter(([, value]) => !value)
+    .map(([key]) => key)
+
+  if (missing.length > 0) {
+    console.warn(
+      `[firebase-server] Missing environment variables: ${missing.join(', ')}. ` +
+      'Firebase features that depend on these will not work.'
+    )
+  }
+}
+
 function initializeServerFirebase(): FirebaseApp | null {
+  validateFirebaseConfig()
+
   if (!isFirebaseConfigured()) {
     console.warn('Firebase not configured for server-side use')
     return null
@@ -155,3 +179,72 @@ export async function getFirestoreCollection<T extends { id?: string }>(
 
 // Re-export Firestore functions
 export { doc, getDoc, collection, getDocs, query, orderBy, where }
+
+// Admin Firestore access - returns a Firestore-like object for API routes
+// This is a compatibility layer for routes that use Admin SDK patterns
+export function getAdminFirestore() {
+  const db = getServerDb()
+  if (!db) {
+    throw new Error('Firebase not configured')
+  }
+
+  return {
+    collection: (path: string) => {
+      const collRef = collection(db, path)
+      return {
+        doc: (docId: string) => {
+          const docRef = doc(db, path, docId)
+          return {
+            get: async () => {
+              const snap = await getDoc(docRef)
+              return {
+                exists: snap.exists(),
+                id: snap.id,
+                data: () => snap.data(),
+              }
+            },
+            update: async (data: Record<string, unknown>) => {
+              const { setDoc } = await import('firebase/firestore')
+              await setDoc(docRef, data, { merge: true })
+            },
+            delete: async () => {
+              const { deleteDoc } = await import('firebase/firestore')
+              await deleteDoc(docRef)
+            },
+          }
+        },
+        add: async (data: Record<string, unknown>) => {
+          const { addDoc } = await import('firebase/firestore')
+          const newDoc = await addDoc(collRef, data)
+          return { id: newDoc.id }
+        },
+        orderBy: (field: string, direction: 'asc' | 'desc' = 'asc') => {
+          return {
+            limit: (n: number) => {
+              return {
+                get: async () => {
+                  const { query: firestoreQuery, orderBy: firestoreOrderBy, limit: firestoreLimit } = await import('firebase/firestore')
+                  const q = firestoreQuery(collRef, firestoreOrderBy(field, direction), firestoreLimit(n))
+                  const snapshot = await getDocs(q)
+                  return {
+                    empty: snapshot.empty,
+                    docs: snapshot.docs.map(d => ({
+                      id: d.id,
+                      data: () => d.data(),
+                    })),
+                  }
+                },
+              }
+            },
+          }
+        },
+      }
+    },
+  }
+}
+
+// Get collection path with app ID prefix
+export function getCollectionPath(collectionName: string): string {
+  const appId = getServerAppId()
+  return `artifacts/${appId}/public/data/${collectionName}`
+}

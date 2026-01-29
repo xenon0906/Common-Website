@@ -20,7 +20,6 @@ import {
   ArrowLeft,
   Save,
   Eye,
-  Sparkles,
   Loader2,
   Flame,
 } from 'lucide-react'
@@ -45,8 +44,6 @@ type BlogFormData = z.infer<typeof blogSchema>
 export default function CreateBlogPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [aiTopic, setAiTopic] = useState('')
 
   const {
     register,
@@ -76,65 +73,6 @@ export default function CreateBlogPage() {
     const newTitle = e.target.value
     setValue('title', newTitle)
     setValue('slug', slugify(newTitle))
-  }
-
-  // AI Blog Generation (mock for now)
-  const handleAIGenerate = async () => {
-    if (!aiTopic.trim()) return
-
-    setIsGenerating(true)
-
-    // Mock AI generation - in production, this would call the Claude API
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    const mockContent = `# ${aiTopic}
-
-## Introduction
-
-In today's fast-paced urban environment, finding affordable and reliable transportation is more important than ever. At **snapgo**, we're revolutionizing how Indians commute by connecting people traveling the same route.
-
-## Why Ride-Sharing Matters
-
-- **Save up to 75%** on your daily commute costs
-- **Reduce carbon footprint** by sharing rides
-- **Make meaningful connections** with fellow commuters
-- **Verified users** through Aadhaar KYC
-
-## How snapgo Makes It Easy
-
-Our smart matching algorithm finds riders within 750m of your route, ensuring convenient pickups and significant savings.
-
-### Real-Time Matching
-Find rides instantly when you need them most.
-
-### Scheduled Rides
-Plan ahead for guaranteed matches on your regular routes.
-
-## The snapgo Difference
-
-Unlike other platforms, snapgo is built specifically for Indian commuters:
-- **Female-only option** for women's safety
-- **SOS feature** for emergencies
-- **DPIIT certified** startup you can trust
-
-## Get Started Today
-
-Download snapgo and join thousands of users already saving money on their daily commute.
-
-[Download snapgo](/download) | [Learn More](/about) | [Contact Us](/contact)
-
----
-
-*snapgo - Share Rides, Save Money, Travel Together*`
-
-    setValue('title', aiTopic)
-    setValue('slug', slugify(aiTopic))
-    setValue('content', mockContent)
-    setValue('metaDesc', `Learn about ${aiTopic.toLowerCase()} and how snapgo helps Indian commuters save money through ride-sharing.`)
-    setValue('excerpt', `Discover how ${aiTopic.toLowerCase()} is changing the way Indians commute with snapgo's innovative ride-sharing platform.`)
-    setValue('keywords', 'snapgo, ride sharing, carpool india, save money commute')
-
-    setIsGenerating(false)
   }
 
   const onSubmit = async (data: BlogFormData) => {
@@ -198,46 +136,6 @@ Download snapgo and join thousands of users already saving money on their daily 
           </p>
         </div>
       </div>
-
-      {/* AI Generator */}
-      <Card className="border-teal/50 bg-teal/5">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-teal" />
-            AI Blog Generator
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <Input
-              placeholder="Enter a topic (e.g., 'How Students Save ₹10,000/Month with snapgo')"
-              value={aiTopic}
-              onChange={(e) => setAiTopic(e.target.value)}
-              className="flex-1"
-            />
-            <Button
-              variant="gradient"
-              onClick={handleAIGenerate}
-              disabled={isGenerating || !aiTopic.trim()}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Generate
-                </>
-              )}
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            AI will generate a full SEO-optimized blog post based on your topic.
-          </p>
-        </CardContent>
-      </Card>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid lg:grid-cols-3 gap-6">

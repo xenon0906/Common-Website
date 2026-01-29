@@ -37,21 +37,21 @@ export const DEFAULT_IMAGES: SiteImagesConfig = {
   logos: {
     white: '/images/logo/Snapgo Logo White.png',
     blue: '/images/logo/Snapgo Logo Blue.png',
-    favicon: '/favicon.ico',
+    favicon: '/favicon.png',
   },
   qrCodes: {
     android: '/images/qr code/playstore-qr.png',
     ios: '/images/qr code/appstore-qr.png',
   },
   mockups: {
-    homeScreen: '/images/app mockups/1 - home screen.png',
-    tripDetails: '/images/app mockups/2 - trip details.png',
-    tripChat: '/images/app mockups/3 - trip chat.png',
-    inAppCalling: '/images/app mockups/4 - in app calling.png',
-    profileVerified: '/images/app mockups/5 - profile verified.png',
-    createTrip: '/images/app mockups/6 - create trip.png',
-    emergencySos: '/images/app mockups/7 - emergency sos.png',
-    splashScreen: '/images/app mockups/Splash screen.png',
+    homeScreen: '/images/mockups/iphone15/home-screen.png',
+    tripDetails: '/images/mockups/iphone15/trip-details.png',
+    tripChat: '/images/mockups/iphone15/trip-chat.png',
+    inAppCalling: '/images/mockups/iphone15/in-app-calling.png',
+    profileVerified: '/images/mockups/iphone15/profile-verified.png',
+    createTrip: '/images/mockups/iphone15/create-trip.png',
+    emergencySos: '/images/mockups/iphone15/emergency-sos.png',
+    splashScreen: '/images/mockups/iphone15/home-screen.png',
   },
   appStoreBadges: {
     apple: '/images/badges/apple-store-badge.svg',
@@ -61,7 +61,7 @@ export const DEFAULT_IMAGES: SiteImagesConfig = {
     ogImage: '/images/og-image.png',
   },
   hero: {
-    appMockup: '/images/app mockups/1 - home screen.png',
+    appMockup: '/images/mockups/iphone15/home-screen.png',
     background: '',
   },
 }

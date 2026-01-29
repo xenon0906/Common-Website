@@ -131,8 +131,12 @@ export interface TeamMemberData {
   id: string
   name: string
   role: string
+  category?: string
   bio: string
+  details?: string
   imageUrl: string | null
+  portraitUrl?: string | null
+  email?: string | null
   linkedin: string | null
   twitter: string | null
   order: number
@@ -218,49 +222,8 @@ const DEFAULT_SITE_CONFIG: SiteConfigData = {
   social: DEFAULT_SOCIAL,
 }
 
-const DEFAULT_BLOGS: BlogData[] = [
-  {
-    id: '1',
-    title: 'How Carpooling Saves You Money Every Month',
-    slug: 'carpooling-saves-money',
-    excerpt: 'Learn how sharing rides can reduce your travel costs by up to 75% and put more money back in your pocket.',
-    content: `Carpooling has become one of the most effective ways to cut down on daily commute expenses. With Snapgo, users are saving an average of ₹3,000-5,000 per month on their travel costs.
-
-## The Math Behind Savings
-
-When you share a cab with 3 other verified riders:
-- A ₹400 solo cab ride becomes ₹100 per person
-- That's 75% savings on every single trip
-- Over 20 working days, that's ₹6,000 saved monthly
-
-## Getting Started
-
-Download Snapgo today and start matching with verified co-riders heading your way. Your wallet will thank you!`,
-    imageUrl: '/images/blog/carpooling-savings.jpg',
-    published: true,
-    createdAt: new Date('2024-12-01'),
-    updatedAt: new Date('2024-12-01'),
-  },
-  {
-    id: '2',
-    title: 'Safety First: How Snapgo Keeps You Protected',
-    slug: 'safety-first-snapgo',
-    excerpt: 'Discover the safety features that make Snapgo the most trusted ride-sharing platform in India.',
-    content: `At Snapgo, your safety is our top priority. We've built multiple layers of protection to ensure every ride is secure.
-
-## Aadhaar Verification
-
-Every user on Snapgo is verified through Aadhaar KYC powered by DigiLocker.
-
-## Female-Only Option
-
-Women riders can choose to match only with other verified female riders.`,
-    imageUrl: '/images/blog/safety-features.jpg',
-    published: true,
-    createdAt: new Date('2024-11-15'),
-    updatedAt: new Date('2024-11-15'),
-  },
-]
+// No default blogs - all blogs come from Firestore
+const DEFAULT_BLOGS: BlogData[] = []
 
 const DEFAULT_FAQS: FAQData[] = [
   { id: '1', question: 'How does Snapgo work?', answer: 'Snapgo offers two ways to pool: No car? Match with verified co-riders, book a cab together via any app (Ola, Uber, etc.), and split the fare. Have a car? Create a ride for others to join. Either way, save up to 75% while reducing your carbon footprint.', category: 'general', order: 1, isActive: true },
@@ -313,12 +276,15 @@ export async function getTestimonials(): Promise<TestimonialData[]> {
 export async function getAboutContent(): Promise<Record<string, AboutContentData>> {
   if (!isFirebaseConfigured()) return DEFAULT_ABOUT
 
+  // Firestore may store values as strings or as objects with {title, content}
+  type AboutValue = string | { title?: string; content?: string }
+
   interface AboutDoc {
-    origin: string
-    spark: string
-    mission: string
-    vision: string
-    values: string
+    origin: AboutValue
+    spark: AboutValue
+    mission: AboutValue
+    vision: AboutValue
+    values: AboutValue
   }
 
   const about = await getFirestoreDocument<AboutDoc>('content', 'about', {
@@ -329,12 +295,21 @@ export async function getAboutContent(): Promise<Record<string, AboutContentData
     values: DEFAULT_ABOUT.values.content,
   })
 
+  // Helper to extract content string from either format
+  const getContentString = (value: AboutValue, fallback: string): string => {
+    if (typeof value === 'string') return value
+    if (value && typeof value === 'object' && 'content' in value) {
+      return value.content || fallback
+    }
+    return fallback
+  }
+
   return {
-    origin: { id: 'origin', key: 'origin', title: 'Our Origin', content: about.origin, order: 1 },
-    spark: { id: 'spark', key: 'spark', title: 'The Spark', content: about.spark, order: 2 },
-    mission: { id: 'mission', key: 'mission', title: 'Our Mission', content: about.mission, order: 3 },
-    vision: { id: 'vision', key: 'vision', title: 'Our Vision', content: about.vision, order: 4 },
-    values: { id: 'values', key: 'values', title: 'Our Values', content: about.values, order: 5 },
+    origin: { id: 'origin', key: 'origin', title: 'Our Origin', content: getContentString(about.origin, DEFAULT_ABOUT.origin.content), order: 1 },
+    spark: { id: 'spark', key: 'spark', title: 'The Spark', content: getContentString(about.spark, DEFAULT_ABOUT.spark.content), order: 2 },
+    mission: { id: 'mission', key: 'mission', title: 'Our Mission', content: getContentString(about.mission, DEFAULT_ABOUT.mission.content), order: 3 },
+    vision: { id: 'vision', key: 'vision', title: 'Our Vision', content: getContentString(about.vision, DEFAULT_ABOUT.vision.content), order: 4 },
+    values: { id: 'values', key: 'values', title: 'Our Values', content: getContentString(about.values, DEFAULT_ABOUT.values.content), order: 5 },
   }
 }
 
@@ -398,8 +373,8 @@ export async function getSiteConfig(): Promise<SiteConfigData> {
 }
 
 export async function getBlogs(): Promise<BlogData[]> {
-  if (!isFirebaseConfigured()) return DEFAULT_BLOGS.filter(blog => blog.published)
-  const blogs = await getFirestoreCollection<BlogData>('blogs', DEFAULT_BLOGS, 'createdAt')
+  if (!isFirebaseConfigured()) return []
+  const blogs = await getFirestoreCollection<BlogData>('blogs', [], 'createdAt')
   return blogs.filter(blog => blog.published)
 }
 

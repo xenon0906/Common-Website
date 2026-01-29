@@ -80,4 +80,7 @@ export const USE_DATABASE = false
 //
 // ============================================================================
 
-export const USE_FIREBASE = true
+export const USE_FIREBASE = !!(
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+)
