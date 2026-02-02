@@ -44,7 +44,7 @@ const purchasableItems = [
   { icon: Pizza, name: 'Pizza Parties', cost: 5000, color: 'from-red-500 to-orange-500' },
 ]
 
-export function SavingsCalculator({ className }: SavingsCalculatorProps) {
+export default function SavingsCalculator({ className }: SavingsCalculatorProps) {
   const containerRef = useRef(null)
   const shareableRef = useRef<HTMLDivElement>(null)
   const sliderRef = useRef<HTMLInputElement>(null)

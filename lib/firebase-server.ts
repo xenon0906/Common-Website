@@ -38,10 +38,25 @@
 // ├─────────────────────────────────────────────────────────────────────────────┤
 // │ settings/config           (document)   - Site settings (/admin/settings/)   │
 // └─────────────────────────────────────────────────────────────────────────────┘
+//
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │ LEGAL PAGES                                                                │
+// ├─────────────────────────────────────────────────────────────────────────────┤
+// │ legal/terms               (document)   - Terms of Service                  │
+// │ legal/privacy             (document)   - Privacy Policy                    │
+// │ legal/refund              (document)   - Refund Policy                     │
+// └─────────────────────────────────────────────────────────────────────────────┘
+//
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │ PAGE CONTENT                                                               │
+// ├─────────────────────────────────────────────────────────────────────────────┤
+// │ content/safety            (document)   - Safety page content               │
+// │ content/homepage          (document)   - Homepage sections config          │
+// └─────────────────────────────────────────────────────────────────────────────┘
 // ==============================================================================
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app'
-import { getFirestore, Firestore, doc, getDoc, collection, getDocs, query, orderBy, where } from 'firebase/firestore'
+import { getFirestore, Firestore, doc, getDoc, collection, getDocs, query, orderBy, where, Timestamp } from 'firebase/firestore'
 
 // Firebase config from environment variables
 const serverConfig = {
@@ -170,7 +185,16 @@ export async function getFirestoreCollection<T extends { id?: string }>(
       return defaultValue
     }
 
-    return snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as T[]
+    return snapshot.docs.map(d => {
+      const data = d.data()
+      // Convert Firestore Timestamps to JS Dates
+      for (const key of Object.keys(data)) {
+        if (data[key] instanceof Timestamp) {
+          data[key] = data[key].toDate()
+        }
+      }
+      return { id: d.id, ...data }
+    }) as T[]
   } catch (error) {
     console.error(`Error fetching collection ${collectionPath}:`, error)
     return defaultValue

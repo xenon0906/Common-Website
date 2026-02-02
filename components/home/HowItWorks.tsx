@@ -22,7 +22,7 @@ interface HowItWorksProps {
   steps?: StepType[]
 }
 
-export function HowItWorks({ steps }: HowItWorksProps = {}) {
+export default function HowItWorks({ steps }: HowItWorksProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
   const [activeStep, setActiveStep] = useState(0)
@@ -149,7 +149,7 @@ export function HowItWorks({ steps }: HowItWorksProps = {}) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-10 relative z-10">
             {displaySteps.map((step, index) => {
-              const Icon = IconMap[step.icon]
+              const Icon = IconMap[step.icon] || IconMap['Star']
               const colors = stepColors[index]
               const isActive = activeStep === index
               const isHovered = hoveredStep === index

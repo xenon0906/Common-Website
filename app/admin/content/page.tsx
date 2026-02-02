@@ -13,6 +13,11 @@ import {
   Mail,
   Share2,
   ArrowRight,
+  Scale,
+  Shield,
+  LayoutGrid,
+  Layers,
+  Image as ImageIcon,
 } from 'lucide-react'
 
 const contentSections = [
@@ -71,6 +76,27 @@ const contentSections = [
     title: 'Social Links',
     description: 'Manage social media profile URLs',
     color: 'bg-indigo-100 text-indigo-600',
+  },
+  {
+    href: '/admin/content/legal',
+    icon: Scale,
+    title: 'Legal Pages',
+    description: 'Edit Terms of Service, Privacy Policy, and Refund Policy',
+    color: 'bg-slate-100 text-slate-600',
+  },
+  {
+    href: '/admin/content/safety',
+    icon: Shield,
+    title: 'Safety Page',
+    description: 'Edit safety features, SOS section, certifications, and hero',
+    color: 'bg-red-100 text-red-600',
+  },
+  {
+    href: '/admin/content/homepage',
+    icon: LayoutGrid,
+    title: 'Homepage Sections',
+    description: 'Control which sections show and their order on the homepage',
+    color: 'bg-emerald-100 text-emerald-600',
   },
 ]
 

@@ -167,6 +167,28 @@ const pages: PageInfo[] = [
     description: 'Terms and conditions',
     seoScore: 72,
   },
+  {
+    id: '12',
+    title: 'Refund Policy',
+    path: '/refund',
+    icon: FileText,
+    status: 'published',
+    lastModified: '2024-11-01',
+    views: 450,
+    description: 'Refund and cancellation policy',
+    seoScore: 70,
+  },
+  {
+    id: '13',
+    title: 'Green Calculator',
+    path: '/greencalculator',
+    icon: Star,
+    status: 'published',
+    lastModified: '2024-12-15',
+    views: 620,
+    description: 'Carbon savings calculator for users',
+    seoScore: 80,
+  },
 ]
 
 function formatNumber(num: number): string {
@@ -184,6 +206,26 @@ function getSeoLabel(score: number): string {
   if (score >= 90) return 'Excellent'
   if (score >= 70) return 'Good'
   return 'Needs Work'
+}
+
+const PAGE_EDIT_MAP: Record<string, string> = {
+  '/': '/admin/content/homepage',
+  '/features': '/admin/content/features',
+  '/how-it-works': '/admin/content/how-it-works',
+  '/safety': '/admin/content/safety',
+  '/about': '/admin/content/about',
+  '/team': '/admin/team',
+  '/blog': '/admin/blogs',
+  '/contact': '/admin/content/contact',
+  '/faq': '/admin/faq',
+  '/privacy': '/admin/content/legal',
+  '/terms': '/admin/content/legal',
+  '/refund': '/admin/content/legal',
+  '/greencalculator': '/admin/content',
+}
+
+function getEditLink(path: string): string {
+  return PAGE_EDIT_MAP[path] || '/admin/content'
 }
 
 export default function PagesOverviewPage() {
@@ -390,7 +432,7 @@ export default function PagesOverviewPage() {
                         View
                       </Button>
                     </Link>
-                    <Link href={`/admin/content${page.path === '/' ? '/hero' : ''}`} className="flex-1">
+                    <Link href={getEditLink(page.path)} className="flex-1">
                       <Button variant="default" size="sm" className="w-full">
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
@@ -418,22 +460,22 @@ export default function PagesOverviewPage() {
                 <p className="font-medium text-sm">Edit Hero</p>
               </div>
             </Link>
-            <Link href="/admin/content/features">
+            <Link href="/admin/content/homepage">
               <div className="p-4 rounded-xl bg-background hover:shadow-md transition-all border hover:border-primary/30 text-center">
                 <Star className="w-6 h-6 mx-auto mb-2 text-teal" />
-                <p className="font-medium text-sm">Edit Features</p>
+                <p className="font-medium text-sm">Homepage Sections</p>
               </div>
             </Link>
-            <Link href="/admin/content/testimonials">
+            <Link href="/admin/content/legal">
               <div className="p-4 rounded-xl bg-background hover:shadow-md transition-all border hover:border-primary/30 text-center">
-                <Users className="w-6 h-6 mx-auto mb-2 text-purple" />
-                <p className="font-medium text-sm">Testimonials</p>
+                <Scale className="w-6 h-6 mx-auto mb-2 text-purple" />
+                <p className="font-medium text-sm">Legal Pages</p>
               </div>
             </Link>
-            <Link href="/admin/seo">
+            <Link href="/admin/content/safety">
               <div className="p-4 rounded-xl bg-background hover:shadow-md transition-all border hover:border-primary/30 text-center">
-                <BarChart3 className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                <p className="font-medium text-sm">SEO Settings</p>
+                <Shield className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                <p className="font-medium text-sm">Safety Page</p>
               </div>
             </Link>
           </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, memo, Component, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import { HeroPremium } from '@/components/home/HeroPremium'
@@ -25,44 +25,70 @@ import {
 import type { SiteImagesConfig } from '@/lib/types/images'
 import { DEFAULT_IMAGES } from '@/lib/types/images'
 
+// Error boundary to isolate section crashes from taking down the whole page
+class SectionErrorBoundary extends Component<
+  { children: ReactNode; name?: string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; name?: string }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error) {
+    console.error(`[SectionErrorBoundary] ${this.props.name || 'Section'} crashed:`, error)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null
+    }
+    return this.props.children
+  }
+}
+
 // Dynamic imports for heavy components (loaded only when needed)
 const StatsCounter = dynamic(
-  () => import('@/components/home/StatsCounter').then(mod => ({ default: mod.StatsCounter })),
+  () => import('@/components/home/StatsCounter'),
   { loading: () => <SectionLoader /> }
 )
 
 const FeaturesGrid = dynamic(
-  () => import('@/components/home/FeaturesGrid').then(mod => ({ default: mod.FeaturesGrid })),
+  () => import('@/components/home/FeaturesGrid'),
   { loading: () => <SectionLoader /> }
 )
 
 const HowItWorks = dynamic(
-  () => import('@/components/home/HowItWorks').then(mod => ({ default: mod.HowItWorks })),
+  () => import('@/components/home/HowItWorks'),
   { loading: () => <SectionLoader /> }
 )
 
 const TestimonialCarousel = dynamic(
-  () => import('@/components/home/TestimonialCarousel').then(mod => ({ default: mod.TestimonialCarousel })),
+  () => import('@/components/home/TestimonialCarousel'),
   { loading: () => <SectionLoader /> }
 )
 
 const CO2ImpactTracker = dynamic(
-  () => import('@/components/gamification/CO2ImpactTracker').then(mod => ({ default: mod.CO2ImpactTracker })),
+  () => import('@/components/gamification/CO2ImpactTracker'),
   { loading: () => <SectionLoader /> }
 )
 
 const SavingsCalculator = dynamic(
-  () => import('@/components/gamification/SavingsCalculator').then(mod => ({ default: mod.SavingsCalculator })),
+  () => import('@/components/gamification/SavingsCalculator'),
   { loading: () => <SectionLoader /> }
 )
 
 const InstagramSection = dynamic(
-  () => import('@/components/home/InstagramSection').then(mod => ({ default: mod.InstagramSection })),
+  () => import('@/components/home/InstagramSection'),
   { loading: () => <SectionLoader />, ssr: false }
 )
 
 const CabPoolingComparison = dynamic(
-  () => import('@/components/home/CabPoolingComparison').then(mod => ({ default: mod.CabPoolingComparison })),
+  () => import('@/components/home/CabPoolingComparison'),
   { loading: () => <SectionLoader /> }
 )
 
@@ -164,68 +190,82 @@ export function HomePageClient({
         <WhySnapgoSection />
       </motion.div>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.25}
-        variants={sectionVariants}
-      >
-        <CabPoolingComparison />
-      </motion.div>
+      <SectionErrorBoundary name="CabPoolingComparison">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.25}
+          variants={sectionVariants}
+        >
+          <CabPoolingComparison />
+        </motion.div>
+      </SectionErrorBoundary>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.3}
-        variants={sectionVariants}
-      >
-        <StatsCounter stats={stats} />
-      </motion.div>
+      <SectionErrorBoundary name="StatsCounter">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.3}
+          variants={sectionVariants}
+        >
+          <StatsCounter stats={stats} />
+        </motion.div>
+      </SectionErrorBoundary>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.35}
-        variants={sectionVariants}
-      >
-        <CO2ImpactTracker />
-      </motion.div>
+      <SectionErrorBoundary name="CO2ImpactTracker">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.35}
+          variants={sectionVariants}
+        >
+          <CO2ImpactTracker />
+        </motion.div>
+      </SectionErrorBoundary>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.4}
-        variants={sectionVariants}
-      >
-        <SavingsCalculator />
-      </motion.div>
+      <SectionErrorBoundary name="SavingsCalculator">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.4}
+          variants={sectionVariants}
+        >
+          <SavingsCalculator />
+        </motion.div>
+      </SectionErrorBoundary>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.4}
-        variants={sectionVariants}
-      >
-        <FeaturesGrid features={features} />
-      </motion.div>
+      <SectionErrorBoundary name="FeaturesGrid">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.4}
+          variants={sectionVariants}
+        >
+          <FeaturesGrid features={features} />
+        </motion.div>
+      </SectionErrorBoundary>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.5}
-        variants={sectionVariants}
-      >
-        <HowItWorks steps={howItWorks} />
-      </motion.div>
+      <SectionErrorBoundary name="HowItWorks">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.5}
+          variants={sectionVariants}
+        >
+          <HowItWorks steps={howItWorks} />
+        </motion.div>
+      </SectionErrorBoundary>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.6}
-        variants={sectionVariants}
-      >
-        <AppPreviewSection mockups={siteImages.mockups} />
-      </motion.div>
+      <SectionErrorBoundary name="AppPreviewSection">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.6}
+          variants={sectionVariants}
+        >
+          <AppPreviewSection mockups={siteImages.mockups} />
+        </motion.div>
+      </SectionErrorBoundary>
 
       <motion.div
         id="download"
@@ -237,23 +277,27 @@ export function HomePageClient({
         <DownloadSection appLinks={appLinks} />
       </motion.div>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.8}
-        variants={sectionVariants}
-      >
-        <TestimonialCarousel testimonials={testimonials} />
-      </motion.div>
+      <SectionErrorBoundary name="TestimonialCarousel">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.8}
+          variants={sectionVariants}
+        >
+          <TestimonialCarousel testimonials={testimonials} />
+        </motion.div>
+      </SectionErrorBoundary>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.85}
-        variants={sectionVariants}
-      >
-        <InstagramSection />
-      </motion.div>
+      <SectionErrorBoundary name="InstagramSection">
+        <motion.div
+          initial="hidden"
+          animate={contentRevealed ? 'visible' : 'hidden'}
+          custom={0.85}
+          variants={sectionVariants}
+        >
+          <InstagramSection />
+        </motion.div>
+      </SectionErrorBoundary>
 
       <motion.div
         initial="hidden"

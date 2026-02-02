@@ -14,15 +14,17 @@ interface Blog {
   slug: string
   excerpt: string | null
   imageUrl: string | null
-  createdAt: Date
+  createdAt: Date | string
 }
 
-function formatDate(date: Date): string {
+function formatDate(date: Date | string): string {
+  const d = date instanceof Date ? date : new Date(date)
+  if (isNaN(d.getTime())) return 'N/A'
   return new Intl.DateTimeFormat('en-IN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  }).format(new Date(date))
+  }).format(d)
 }
 
 function estimateReadTime(excerpt: string | null): string {

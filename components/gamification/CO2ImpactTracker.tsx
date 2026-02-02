@@ -84,7 +84,7 @@ function FloatingLeaf({ delay = 0 }: { delay?: number }) {
   )
 }
 
-export function CO2ImpactTracker({ className }: CO2ImpactTrackerProps) {
+export default function CO2ImpactTracker({ className }: CO2ImpactTrackerProps) {
   const containerRef = useRef(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
 

@@ -52,7 +52,7 @@ const benefits = [
   },
 ]
 
-export function CabPoolingComparison() {
+export default function CabPoolingComparison() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
 

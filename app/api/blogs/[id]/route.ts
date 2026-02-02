@@ -1,31 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api-auth'
+import {
+  getServerDb,
+  getServerAppId,
+  doc,
+  getDoc,
+} from '@/lib/firebase-server'
 
-// Required for static export - returns empty array (API routes won't work on static hosting)
+// Required for static export
 export function generateStaticParams() {
   return []
 }
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params
-    const blog = await prisma.blog.findUnique({
-      where: { id },
-    })
+    const { id } = await params
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
 
-    if (!blog) {
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
       return NextResponse.json(
         { error: 'Blog not found' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(blog)
+    return NextResponse.json({ id: docSnap.id, ...docSnap.data() })
   } catch (error) {
     console.error('Error fetching blog:', error)
     return NextResponse.json(
@@ -36,29 +49,43 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
-  // Require admin authentication
   const authError = await requireAuth()
   if (authError) return authError
 
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
 
-    const blog = await prisma.blog.update({
-      where: { id },
-      data: {
-        title: body.title,
-        slug: body.slug,
-        content: body.content,
-        metaDesc: body.metaDesc || null,
-        excerpt: body.excerpt || null,
-        keywords: body.keywords || null,
-        imageUrl: body.imageUrl || null,
-        published: body.published,
-      },
-    })
+    const { setDoc, serverTimestamp } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
 
-    return NextResponse.json(blog)
+    const updateData: Record<string, unknown> = {
+      title: body.title,
+      slug: body.slug,
+      content: body.content,
+      metaDesc: body.metaDesc || '',
+      excerpt: body.excerpt || '',
+      keywords: body.keywords || '',
+      imageUrl: body.imageUrl || '',
+      published: body.published,
+      status: body.status || (body.published ? 'published' : 'draft'),
+      updatedAt: serverTimestamp(),
+    }
+
+    if (body.wordCount) updateData.wordCount = body.wordCount
+    if (body.readingTime) updateData.readingTime = body.readingTime
+
+    await setDoc(docRef, updateData, { merge: true })
+
+    return NextResponse.json({ id, ...updateData })
   } catch (error) {
     console.error('Error updating blog:', error)
     return NextResponse.json(
@@ -69,15 +96,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  // Require admin authentication
   const authError = await requireAuth()
   if (authError) return authError
 
   try {
-    const { id } = params
-    await prisma.blog.delete({
-      where: { id },
-    })
+    const { id } = await params
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
+
+    const { deleteDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
+
+    await deleteDoc(docRef)
 
     return NextResponse.json({ success: true })
   } catch (error) {

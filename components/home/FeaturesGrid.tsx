@@ -15,7 +15,7 @@ type FeatureType = FeatureData | typeof FEATURES[0]
 
 // 3D Tilt Card Component with GlowHighlight
 function FeatureCard({ feature, index }: { feature: FeatureType; index: number }) {
-  const Icon = IconMap[feature.icon]
+  const Icon = IconMap[feature.icon] || IconMap['Star']
   const cardRef = useRef<HTMLDivElement>(null)
   const [rotateX, setRotateX] = useState(0)
   const [rotateY, setRotateY] = useState(0)
@@ -116,7 +116,7 @@ interface FeaturesGridProps {
   features?: FeatureType[]
 }
 
-export function FeaturesGrid({ features }: FeaturesGridProps = {}) {
+export default function FeaturesGrid({ features }: FeaturesGridProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
 

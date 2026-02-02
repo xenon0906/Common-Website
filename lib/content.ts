@@ -222,6 +222,68 @@ const DEFAULT_SITE_CONFIG: SiteConfigData = {
   social: DEFAULT_SOCIAL,
 }
 
+// Legal page content types
+export interface LegalSection {
+  id: string
+  title: string
+  content: string
+}
+
+export interface LegalPageData {
+  lastUpdated: string
+  sections: LegalSection[]
+}
+
+// Safety page content types
+export interface SafetyFeatureData {
+  id: string
+  title: string
+  description: string
+  points: string[]
+  icon: string
+  order: number
+  isActive: boolean
+}
+
+export interface SafetyContentData {
+  hero: {
+    headline: string
+    subtext: string
+    points: string[]
+    stats: Array<{ value: string; label: string }>
+  }
+  features: SafetyFeatureData[]
+  sos: {
+    headline: string
+    subtext: string
+    steps: string[]
+    shares: Array<{ icon: string; label: string }>
+  }
+  trust: {
+    headline: string
+    subtext: string
+    certifications: Array<{ title: string; description: string }>
+  }
+  cta: {
+    quote: string
+    badge: string
+    buttonText: string
+    buttonLink: string
+  }
+}
+
+// Homepage sections configuration
+export interface HomepageSectionConfig {
+  id: string
+  label: string
+  visible: boolean
+  order: number
+}
+
+export interface HomepageConfig {
+  sections: HomepageSectionConfig[]
+}
+
 // No default blogs - all blogs come from Firestore
 const DEFAULT_BLOGS: BlogData[] = []
 
@@ -422,6 +484,141 @@ export async function getAllHomeContent() {
   return { hero, stats, features, howItWorks, testimonials, appLinks, siteConfig, images }
 }
 
+// Default safety content
+const DEFAULT_SAFETY: SafetyContentData = {
+  hero: {
+    headline: 'Your Safety is Our Priority',
+    subtext: 'Every feature is designed with your security in mind. From verified riders to instant emergency support.',
+    points: [
+      '100% KYC verification for all users',
+      'One-tap SOS with instant location sharing',
+      'Dedicated female-only ride option',
+    ],
+    stats: [
+      { value: '100%', label: 'KYC Verified' },
+      { value: '<30s', label: 'SOS Response' },
+      { value: '24/7', label: 'Support' },
+    ],
+  },
+  features: [
+    {
+      id: '1',
+      title: 'Aadhaar KYC Verification',
+      description: 'Every user must complete Aadhaar-based KYC verification powered by DigiLocker before using Snapgo.',
+      points: [
+        'Real Identities - No fake profiles or anonymous users',
+        'Gender Verification - Users cannot change or fake their gender',
+        'Government Backed - Verified through official DigiLocker system',
+        'KYC Badge - Verified users display prominent KYC-approved badge',
+      ],
+      icon: 'ShieldCheck',
+      order: 1,
+      isActive: true,
+    },
+    {
+      id: '2',
+      title: 'Female Safety Features',
+      description: 'Special features designed for women travelers.',
+      points: [
+        'Female-Only Filter - Women can enable filter to see/connect only with verified female riders',
+        'No Gender Manipulation - Thanks to Aadhaar KYC, users cannot fake/change gender',
+        'Verified Profiles - Every profile shows KYC verification status',
+      ],
+      icon: 'UserCheck',
+      order: 2,
+      isActive: true,
+    },
+    {
+      id: '3',
+      title: 'Emergency SOS Feature',
+      description: 'One tap to alert emergency contacts with your location and trip details.',
+      points: [
+        'Add up to 3 emergency contacts',
+        'One-tap SOS activation',
+        'Instant SMS & app notification',
+        'Live location tracking link',
+      ],
+      icon: 'AlertTriangle',
+      order: 3,
+      isActive: true,
+    },
+  ],
+  sos: {
+    headline: 'Emergency SOS Feature',
+    subtext: 'Your safety net in emergencies. Instantly alert trusted contacts with your location.',
+    steps: [
+      'Add up to 3 emergency contacts',
+      'One-tap SOS activation',
+      'Instant SMS & app notification',
+      'Live location tracking shared',
+    ],
+    shares: [
+      { icon: 'MapPin', label: 'Your live GPS location' },
+      { icon: 'Users', label: 'Trip details & co-riders' },
+      { icon: 'Clock', label: 'Timestamp of alert' },
+    ],
+  },
+  trust: {
+    headline: 'Trusted & Certified',
+    subtext: 'Snapgo is officially recognized and meets the highest standards of safety and security.',
+    certifications: [
+      { title: 'DPIIT Recognized', description: 'Government certified startup' },
+      { title: 'Startup India', description: 'Official initiative member' },
+      { title: 'Data Protected', description: 'Industry-standard encryption' },
+    ],
+  },
+  cta: {
+    quote: 'From day one, safety has been our top priority. Every feature, every verification is designed to ensure your journey is secure.',
+    badge: '100% KYC Verified Platform',
+    buttonText: 'Download Snapgo',
+    buttonLink: '/#download',
+  },
+}
+
+// Default homepage sections config
+const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
+  sections: [
+    { id: 'hero', label: 'Hero Section', visible: true, order: 1 },
+    { id: 'stats', label: 'Statistics Counter', visible: true, order: 2 },
+    { id: 'features', label: 'Features Grid', visible: true, order: 3 },
+    { id: 'howItWorks', label: 'How It Works', visible: true, order: 4 },
+    { id: 'comparison', label: 'Cab Pooling Comparison', visible: true, order: 5 },
+    { id: 'testimonials', label: 'Testimonials', visible: true, order: 6 },
+    { id: 'whySnapgo', label: 'Why Snapgo', visible: true, order: 7 },
+    { id: 'download', label: 'Download Section', visible: true, order: 8 },
+    { id: 'instagram', label: 'Instagram Feed', visible: true, order: 9 },
+    { id: 'trustBadges', label: 'Trust Badges', visible: true, order: 10 },
+    { id: 'cta', label: 'Call to Action', visible: true, order: 11 },
+  ],
+}
+
+// Fetch legal page content
+export async function getLegalContent(type: 'terms' | 'privacy' | 'refund'): Promise<LegalPageData> {
+  // Import defaults from legal-content.ts
+  const { TERMS_OF_SERVICE, PRIVACY_POLICY, REFUND_POLICY } = await import('./legal-content')
+  const defaults: Record<string, LegalPageData> = {
+    terms: TERMS_OF_SERVICE,
+    privacy: PRIVACY_POLICY,
+    refund: REFUND_POLICY,
+  }
+  const defaultValue = defaults[type]
+
+  if (!isFirebaseConfigured()) return defaultValue
+  return getFirestoreDocument<LegalPageData>('legal', type, defaultValue)
+}
+
+// Fetch safety page content
+export async function getSafetyContent(): Promise<SafetyContentData> {
+  if (!isFirebaseConfigured()) return DEFAULT_SAFETY
+  return getFirestoreDocument<SafetyContentData>('content', 'safety', DEFAULT_SAFETY)
+}
+
+// Fetch homepage sections config
+export async function getHomepageConfig(): Promise<HomepageConfig> {
+  if (!isFirebaseConfigured()) return DEFAULT_HOMEPAGE_CONFIG
+  return getFirestoreDocument<HomepageConfig>('content', 'homepage', DEFAULT_HOMEPAGE_CONFIG)
+}
+
 // Export defaults for direct access if needed
 export {
   DEFAULT_HERO,
@@ -437,4 +634,6 @@ export {
   DEFAULT_FAQS,
   DEFAULT_SITE_CONFIG,
   DEFAULT_TEAM,
+  DEFAULT_SAFETY,
+  DEFAULT_HOMEPAGE_CONFIG,
 }

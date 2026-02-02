@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
     // Set session cookie
-    cookies().set('admin_session', sessionToken, {
+    const cookieStore = await cookies()
+    cookieStore.set('admin_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     // Store session token hash in another cookie for verification
     const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex')
-    cookies().set('admin_token_hash', tokenHash, {
+    cookieStore.set('admin_token_hash', tokenHash, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

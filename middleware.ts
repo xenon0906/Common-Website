@@ -70,9 +70,25 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protect dashboard routes - require user_session cookie
+  if (normalizedPath.startsWith('/dashboard')) {
+    const userSession = request.cookies.get('user_session')?.value
+    if (!userSession) {
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
+  }
+
+  // If user is already logged in and trying to access auth pages, redirect to home
+  if (normalizedPath.startsWith('/auth')) {
+    const userSession = request.cookies.get('user_session')?.value
+    if (userSession) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+  }
+
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/dashboard/:path*', '/auth/:path*'],
 }

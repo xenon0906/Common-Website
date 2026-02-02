@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin, ExternalLink } from 'lucide-react'
+import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/constants'
-import { Separator } from '@/components/ui/separator'
+import { useSettings } from '@/components/providers/SettingsProvider'
 
 interface SocialLinks {
   facebook: string
@@ -22,15 +22,6 @@ interface ContactInfo {
   address: string
   supportEmail?: string
   businessEmail?: string
-}
-
-interface SiteSettings {
-  site?: {
-    name?: string
-    legalName?: string
-    tagline?: string
-    description?: string
-  }
 }
 
 const DEFAULT_WHITE_LOGO = '/images/logo/Snapgo%20Logo%20White.png'
@@ -56,25 +47,27 @@ const footerLinks = {
 }
 
 export function Footer() {
-  const [currentYear, setCurrentYear] = useState(2025)
+  const currentYear = new Date().getFullYear()
+  const { settings } = useSettings()
   const [social, setSocial] = useState<SocialLinks>(SITE_CONFIG.social)
   const [contact, setContact] = useState<ContactInfo>({
     email: SITE_CONFIG.email,
     phone: SITE_CONFIG.phone,
     address: SITE_CONFIG.address,
   })
-  const [siteInfo, setSiteInfo] = useState({
-    name: SITE_CONFIG.name,
-    legalName: SITE_CONFIG.legalName,
-    description: SITE_CONFIG.description,
-  })
+  const siteInfo = {
+    name: settings.site?.name || SITE_CONFIG.name,
+    legalName: settings.site?.legalName || SITE_CONFIG.legalName,
+    description: settings.site?.description || SITE_CONFIG.description,
+  }
   const [logoUrl, setLogoUrl] = useState(DEFAULT_WHITE_LOGO)
 
   useEffect(() => {
-    setCurrentYear(new Date().getFullYear())
+    const controller = new AbortController()
+    const { signal } = controller
 
     // Fetch social links from API
-    fetch('/api/content/social')
+    fetch('/api/content/social', { signal })
       .then(res => res.json())
       .then((data: SocialLinks) => {
         if (data) setSocial(data)
@@ -84,7 +77,7 @@ export function Footer() {
       })
 
     // Fetch contact info from API
-    fetch('/api/content/contact')
+    fetch('/api/content/contact', { signal })
       .then(res => res.json())
       .then((data: ContactInfo) => {
         if (data) setContact(data)
@@ -93,24 +86,8 @@ export function Footer() {
         // Keep defaults on error
       })
 
-    // Fetch site settings from API
-    fetch('/api/admin/settings')
-      .then(res => res.json())
-      .then((data: SiteSettings) => {
-        if (data?.site) {
-          setSiteInfo({
-            name: data.site.name || SITE_CONFIG.name,
-            legalName: data.site.legalName || SITE_CONFIG.legalName,
-            description: data.site.description || SITE_CONFIG.description,
-          })
-        }
-      })
-      .catch(() => {
-        // Keep defaults on error
-      })
-
     // Fetch dynamic logo from images API
-    fetch('/api/content/images')
+    fetch('/api/content/images', { signal })
       .then(res => res.json())
       .then(data => {
         if (data?.logos?.white) {
@@ -120,6 +97,8 @@ export function Footer() {
       .catch(() => {
         // Keep default on error
       })
+
+    return () => controller.abort()
   }, [])
 
   // Build social links array from state
@@ -194,7 +173,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold mb-3 text-white">Resources</h3>
             <ul className="space-y-2.5">
               {footerLinks.resources.map((link) => (
-                <li key={link.href}>
+                <li key={link.label}>
                   <Link
                     href={link.href}
                     className="text-white/60 hover:text-primary transition-colors text-sm"
@@ -293,7 +272,7 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4">Resources</h3>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
-                <li key={link.href}>
+                <li key={link.label}>
                   <Link
                     href={link.href}
                     className="text-white/70 hover:text-primary transition-colors"

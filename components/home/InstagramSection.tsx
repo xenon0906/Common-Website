@@ -82,7 +82,7 @@ function InstagramEmbed({ reelId, isActive }: { reelId: string; isActive: boolea
   )
 }
 
-export function InstagramSection() {
+export default function InstagramSection() {
   const [reels, setReels] = useState<InstagramReel[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [mounted, setMounted] = useState(false)

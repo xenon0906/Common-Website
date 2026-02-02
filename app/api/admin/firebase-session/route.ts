@@ -47,8 +47,10 @@ export async function POST(request: NextRequest) {
     const sessionToken = crypto.randomBytes(32).toString('hex')
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
+    const cookieStore = await cookies()
+
     // Set session cookie
-    cookies().set('admin_session', sessionToken, {
+    cookieStore.set('admin_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -58,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     // Store session token hash in another cookie for verification
     const tokenHash = hashString(sessionToken)
-    cookies().set('admin_token_hash', tokenHash, {
+    cookieStore.set('admin_token_hash', tokenHash, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     // Also store the Firebase ID token hash for API route verification
     const firebaseTokenHash = hashString(idToken)
-    cookies().set('firebase_token_hash', firebaseTokenHash, {
+    cookieStore.set('firebase_token_hash', firebaseTokenHash, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

@@ -27,9 +27,9 @@ function timingSafeCompare(a: string, b: string): boolean {
 /**
  * Verify cookie-based admin session
  */
-function verifyCookieSession(): boolean {
+async function verifyCookieSession(): Promise<boolean> {
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const sessionToken = cookieStore.get('admin_session')?.value
     const storedTokenHash = cookieStore.get('admin_token_hash')?.value
 
@@ -53,7 +53,7 @@ function verifyCookieSession(): boolean {
  */
 async function verifyFirebaseToken(): Promise<boolean> {
   try {
-    const headersList = headers()
+    const headersList = await headers()
     const authHeader = headersList.get('authorization')
 
     if (!authHeader?.startsWith('Bearer ')) {
@@ -71,7 +71,7 @@ async function verifyFirebaseToken(): Promise<boolean> {
     // If Admin SDK is not configured (returns null without env var),
     // fall back to cookie-based check
     if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       const firebaseTokenHash = cookieStore.get('firebase_token_hash')?.value
       if (firebaseTokenHash) {
         return true
@@ -91,7 +91,7 @@ async function verifyFirebaseToken(): Promise<boolean> {
  */
 export async function verifyAdminSession(): Promise<boolean> {
   // Check cookie-based session first (traditional login)
-  if (verifyCookieSession()) {
+  if (await verifyCookieSession()) {
     return true
   }
 
@@ -120,14 +120,6 @@ export function unauthorizedResponse(message = 'Authentication required'): NextR
 /**
  * Middleware helper to require authentication for API routes
  * Use this in API route handlers for POST/PUT/DELETE operations
- *
- * @example
- * export async function POST(request: NextRequest) {
- *   const authError = await requireAuth()
- *   if (authError) return authError
- *
- *   // ... rest of handler
- * }
  */
 export async function requireAuth(): Promise<NextResponse | null> {
   const isAuthenticated = await verifyAdminSession()
@@ -143,11 +135,6 @@ export async function requireAuth(): Promise<NextResponse | null> {
  * Higher-order function to wrap API handlers with authentication
  * Allows GET requests to pass through (public read access)
  * Requires auth for POST, PUT, DELETE, PATCH
- *
- * @example
- * export const POST = withAuth(async (request) => {
- *   // Handler code - already authenticated
- * })
  */
 export function withAuth(
   handler: (request: NextRequest, context?: any) => Promise<NextResponse>

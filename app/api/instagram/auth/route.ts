@@ -20,7 +20,8 @@ export async function GET() {
 
   // Generate CSRF state parameter
   const state = crypto.randomBytes(32).toString('hex')
-  cookies().set('ig_oauth_state', state, {
+  const cookieStore = await cookies()
+  cookieStore.set('ig_oauth_state', state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

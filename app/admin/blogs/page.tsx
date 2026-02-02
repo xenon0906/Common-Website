@@ -229,7 +229,7 @@ export default function BlogsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Blog Manager</h1>
-          <p className="text-muted-foreground flex items-center gap-2">
+          <span className="text-muted-foreground flex items-center gap-2">
             Create and manage blog posts
             {USE_FIREBASE && (
               <Badge variant="outline" className="text-xs gap-1">
@@ -237,7 +237,7 @@ export default function BlogsPage() {
                 Firebase
               </Badge>
             )}
-          </p>
+          </span>
         </div>
         <Button variant="gradient" asChild>
           <Link href="/admin/blogs/create">

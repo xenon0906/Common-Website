@@ -18,16 +18,18 @@ interface Blog {
   content: string
   excerpt: string | null
   imageUrl: string | null
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date | string
+  updatedAt: Date | string
 }
 
-function formatDate(date: Date): string {
+function formatDate(date: Date | string): string {
+  const d = date instanceof Date ? date : new Date(date)
+  if (isNaN(d.getTime())) return 'N/A'
   return new Intl.DateTimeFormat('en-IN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(new Date(date))
+  }).format(d)
 }
 
 function estimateReadTime(content: string): string {

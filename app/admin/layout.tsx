@@ -42,6 +42,9 @@ import {
   CheckCircle,
   Flame,
   Loader2,
+  Scale,
+  Shield,
+  LayoutGrid,
 } from 'lucide-react'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -59,6 +62,9 @@ const sidebarLinks = [
   { href: '/admin/content/contact', icon: Mail, label: 'Contact Info', parent: '/admin/content' },
   { href: '/admin/content/social', icon: Share2, label: 'Social Links', parent: '/admin/content' },
   { href: '/admin/content/images', icon: ImageIcon, label: 'Images & Assets', parent: '/admin/content' },
+  { href: '/admin/content/legal', icon: Scale, label: 'Legal Pages', parent: '/admin/content' },
+  { href: '/admin/content/safety', icon: Shield, label: 'Safety Page', parent: '/admin/content' },
+  { href: '/admin/content/homepage', icon: LayoutGrid, label: 'Homepage Sections', parent: '/admin/content' },
   { href: '/admin/blogs', icon: FileText, label: 'Blog Manager' },
   { href: '/admin/team', icon: Users, label: 'Team Manager' },
   { href: '/admin/achievements', icon: Award, label: 'Achievements' },

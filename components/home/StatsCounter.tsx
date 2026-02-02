@@ -125,7 +125,7 @@ interface StatsCounterProps {
   stats?: StatType[]
 }
 
-export function StatsCounter({ stats }: StatsCounterProps = {}) {
+export default function StatsCounter({ stats }: StatsCounterProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
 

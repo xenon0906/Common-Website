@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api-auth'
+import { getServerDb, getServerAppId, doc, getDoc } from '@/lib/firebase-server'
 
-// Default settings structure (used for initial seeding)
 const DEFAULT_SETTINGS = {
   site: {
     name: 'Snapgo',
@@ -43,75 +42,6 @@ const DEFAULT_SETTINGS = {
   },
 }
 
-// Convert flat key-value database records to nested object
-function dbToNested(records: { key: string; value: string; category: string }[]): Record<string, any> {
-  const result: Record<string, any> = {}
-
-  for (const record of records) {
-    const { category, key, value } = record
-
-    if (!result[category]) {
-      result[category] = {}
-    }
-
-    try {
-      result[category][key] = JSON.parse(value)
-    } catch {
-      result[category][key] = value
-    }
-  }
-
-  return result
-}
-
-// Convert nested object to flat key-value pairs for database
-function nestedToFlat(obj: Record<string, any>): { category: string; key: string; value: string }[] {
-  const pairs: { category: string; key: string; value: string }[] = []
-
-  for (const [category, values] of Object.entries(obj)) {
-    if (typeof values === 'object' && values !== null && !Array.isArray(values)) {
-      for (const [key, value] of Object.entries(values)) {
-        pairs.push({
-          category,
-          key,
-          value: JSON.stringify(value),
-        })
-      }
-    } else {
-      // Handle top-level arrays/primitives
-      pairs.push({
-        category: 'general',
-        key: category,
-        value: JSON.stringify(values),
-      })
-    }
-  }
-
-  return pairs
-}
-
-// Load settings from database, merge with defaults
-async function loadSettings(): Promise<Record<string, any>> {
-  try {
-    const records = await prisma.siteSettings.findMany()
-
-    if (records.length === 0) {
-      // No settings in DB, seed with defaults
-      await seedDefaultSettings()
-      return DEFAULT_SETTINGS
-    }
-
-    const dbSettings = dbToNested(records)
-
-    // Merge with defaults to ensure all keys exist
-    return deepMerge(DEFAULT_SETTINGS, dbSettings)
-  } catch {
-    // Database unavailable - silently return defaults
-    return DEFAULT_SETTINGS
-  }
-}
-
-// Deep merge objects
 function deepMerge(target: any, source: any): any {
   const result = { ...target }
 
@@ -126,73 +56,56 @@ function deepMerge(target: any, source: any): any {
   return result
 }
 
-// Seed default settings to database
-async function seedDefaultSettings() {
-  const pairs = nestedToFlat(DEFAULT_SETTINGS)
-
-  for (const pair of pairs) {
-    const settingKey = `${pair.category}.${pair.key}`
-    await prisma.siteSettings.upsert({
-      where: { key: settingKey },
-      update: { value: pair.value, category: pair.category },
-      create: { key: settingKey, value: pair.value, category: pair.category },
-    })
-  }
-}
-
-// Save settings to database
-async function saveSettings(settings: Record<string, any>): Promise<boolean> {
+async function loadSettings(): Promise<Record<string, any>> {
   try {
-    const pairs = nestedToFlat(settings)
+    const db = getServerDb()
+    if (!db) return DEFAULT_SETTINGS
 
-    for (const pair of pairs) {
-      const settingKey = `${pair.category}.${pair.key}`
-      await prisma.siteSettings.upsert({
-        where: { key: settingKey },
-        update: { value: pair.value, category: pair.category },
-        create: { key: settingKey, value: pair.value, category: pair.category },
-      })
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config')
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+      return DEFAULT_SETTINGS
     }
 
-    return true
+    return deepMerge(DEFAULT_SETTINGS, docSnap.data())
   } catch {
-    // Database unavailable
-    return false
+    return DEFAULT_SETTINGS
   }
 }
 
-// GET - Fetch all settings (public for frontend consumption)
 export async function GET() {
   try {
     const settings = await loadSettings()
     return NextResponse.json(settings)
   } catch {
-    // Return defaults if anything fails
     return NextResponse.json(DEFAULT_SETTINGS)
   }
 }
 
-// POST - Save all settings (requires auth)
 export async function POST(request: NextRequest) {
-  // Require admin authentication
   const authError = await requireAuth()
   if (authError) return authError
 
   try {
     const newSettings = await request.json()
-    const currentSettings = await loadSettings()
-
-    // Merge new settings with current settings
-    const mergedSettings = deepMerge(currentSettings, newSettings)
-
-    const success = await saveSettings(mergedSettings)
-
-    if (!success) {
+    const db = getServerDb()
+    if (!db) {
       return NextResponse.json(
-        { error: 'Failed to save settings' },
-        { status: 500 }
+        { error: 'Firebase not configured' },
+        { status: 503 }
       )
     }
+
+    const currentSettings = await loadSettings()
+    const mergedSettings = deepMerge(currentSettings, newSettings)
+
+    const { setDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config')
+
+    await setDoc(docRef, mergedSettings, { merge: true })
 
     return NextResponse.json({
       success: true,
@@ -208,9 +121,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT - Update specific setting (requires auth)
 export async function PUT(request: NextRequest) {
-  // Require admin authentication
   const authError = await requireAuth()
   if (authError) return authError
 
@@ -224,13 +135,19 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const settingKey = `${category}.${key}`
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
 
-    await prisma.siteSettings.upsert({
-      where: { key: settingKey },
-      update: { value: JSON.stringify(value), category },
-      create: { key: settingKey, value: JSON.stringify(value), category },
-    })
+    const { setDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config')
+
+    await setDoc(docRef, { [category]: { [key]: value } }, { merge: true })
 
     return NextResponse.json({
       success: true,

@@ -13,14 +13,20 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 import { slugify } from '@/lib/utils'
 import {
   ArrowLeft,
   Save,
   Eye,
   Loader2,
+  Flame,
 } from 'lucide-react'
 import Link from 'next/link'
+import { FileUpload } from '@/components/ui/FileUpload'
+import { USE_FIREBASE } from '@/lib/config'
+import { fetchDocument, updateDocument } from '@/lib/hooks/useFirestore'
+import { useToast } from '@/components/ui/use-toast'
 
 const blogSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
@@ -53,6 +59,7 @@ export default function EditBlogForm() {
   const [blog, setBlog] = useState<Blog | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
 
   const {
     register,
@@ -79,14 +86,21 @@ export default function EditBlogForm() {
 
   // Fetch blog data
   useEffect(() => {
-    const fetchBlog = async () => {
+    const loadBlog = async () => {
       try {
-        const res = await fetch(`/api/blogs/${params.id}`)
-        if (!res.ok) throw new Error('Blog not found')
-        const data = await res.json()
-        setBlog(data)
+        let data: Blog | null = null
 
-        // Reset form with blog data
+        if (USE_FIREBASE) {
+          data = await fetchDocument<Blog>('blogs', params.id as string)
+        } else {
+          const res = await fetch(`/api/blogs/${params.id}`)
+          if (!res.ok) throw new Error('Blog not found')
+          data = await res.json()
+        }
+
+        if (!data) throw new Error('Blog not found')
+
+        setBlog(data)
         reset({
           title: data.title || '',
           slug: data.slug || '',
@@ -99,15 +113,20 @@ export default function EditBlogForm() {
         })
       } catch (error) {
         console.error('Error fetching blog:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load blog post.',
+          variant: 'destructive',
+        })
       } finally {
         setIsLoading(false)
       }
     }
 
     if (params.id) {
-      fetchBlog()
+      loadBlog()
     }
-  }, [params.id, reset])
+  }, [params.id, reset, toast])
 
   // Auto-generate slug from title
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,20 +139,49 @@ export default function EditBlogForm() {
     setIsSubmitting(true)
 
     try {
-      const res = await fetch(`/api/blogs/${params.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
+      const wordCount = data.content.trim().split(/\s+/).length
+      const readingTime = Math.max(1, Math.ceil(wordCount / 200))
 
-      if (res.ok) {
-        router.push('/admin/blogs')
+      if (USE_FIREBASE) {
+        await updateDocument('blogs', params.id as string, {
+          title: data.title,
+          slug: data.slug,
+          content: data.content,
+          metaDesc: data.metaDesc || '',
+          excerpt: data.excerpt || '',
+          keywords: data.keywords || '',
+          imageUrl: data.imageUrl || '',
+          published: data.published,
+          status: data.published ? 'published' : 'draft',
+          wordCount,
+          readingTime,
+        })
       } else {
-        alert('Failed to update blog')
+        const res = await fetch(`/api/blogs/${params.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...data,
+            status: data.published ? 'published' : 'draft',
+            wordCount,
+            readingTime,
+          }),
+        })
+        if (!res.ok) throw new Error('Failed to update blog')
       }
+
+      toast({
+        title: 'Blog updated',
+        description: 'Your blog post has been saved successfully.',
+      })
+      router.push('/admin/blogs')
     } catch (error) {
       console.error('Error updating blog:', error)
-      alert('Error updating blog')
+      toast({
+        title: 'Error',
+        description: 'Failed to update blog. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -169,7 +217,15 @@ export default function EditBlogForm() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">Edit Blog Post</h1>
-          <p className="text-muted-foreground">Update the blog article</p>
+          <span className="text-muted-foreground flex items-center gap-2">
+            Update the blog article
+            {USE_FIREBASE && (
+              <Badge variant="outline" className="text-xs gap-1">
+                <Flame className="w-3 h-3 text-orange-500" />
+                Saves to Firebase
+              </Badge>
+            )}
+          </span>
         </div>
       </div>
 
@@ -323,12 +379,18 @@ export default function EditBlogForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="imageUrl">Featured Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    {...register('imageUrl')}
-                    placeholder="https://..."
+                  <FileUpload
+                    category="blog"
+                    label="Featured Image"
+                    description="Upload a featured image for your blog post"
+                    onUploadComplete={(url) => setValue('imageUrl', url)}
                   />
+                  <input type="hidden" {...register('imageUrl')} />
+                  {watch('imageUrl') && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      Current: {watch('imageUrl')}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

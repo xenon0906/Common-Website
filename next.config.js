@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Image optimization
@@ -16,7 +18,10 @@ const nextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
   },
 
-  // Performance optimizations
+  // Server external packages (firebase-admin uses native modules)
+  serverExternalPackages: ['firebase-admin', '@opentelemetry/instrumentation', '@prisma/instrumentation'],
+
+  // Experimental features
   experimental: {
     optimizePackageImports: [
       'lucide-react',
@@ -47,13 +52,6 @@ const nextConfig = {
   // Remove console logs in production (except errors)
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
-  },
-
-  // Tree-shake lucide icons
-  modularizeImports: {
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
-    },
   },
 
   // Security and caching headers
@@ -101,4 +99,17 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Wrap with Sentry (only when DSN is configured)
+const sentryConfig = {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+}
+
+module.exports = process.env.SENTRY_DSN
+  ? withSentryConfig(nextConfig, sentryConfig)
+  : nextConfig

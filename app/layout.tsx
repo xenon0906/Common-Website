@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { GlassNavbar as Navbar } from '@/components/layout/GlassNavbar'
-import { Footer } from '@/components/layout/Footer'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { SettingsProvider } from '@/components/providers/SettingsProvider'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
+import { AuthProvider } from '@/components/providers/AuthProvider'
 import { SITE_CONFIG } from '@/lib/constants'
 
 const inter = Inter({
@@ -230,7 +229,9 @@ export default function RootLayout({
         <GoogleAnalytics />
         <ThemeProvider>
           <SettingsProvider>
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </SettingsProvider>
         </ThemeProvider>
       </body>

@@ -1,35 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api-auth'
+import { getServerDb, getServerAppId, doc, getDoc } from '@/lib/firebase-server'
 
-// Required for static export - returns empty array (API routes won't work on static hosting)
 export function generateStaticParams() {
   return []
 }
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
-// GET - Fetch single achievement by ID
 export async function GET(
   request: NextRequest,
   { params }: RouteParams
 ) {
   try {
-    const { id } = params
-    const achievement = await prisma.achievement.findUnique({
-      where: { id },
-    })
+    const { id } = await params
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
 
-    if (!achievement) {
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'achievements', id)
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
       return NextResponse.json(
         { error: 'Achievement not found' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(achievement)
+    return NextResponse.json({ id: docSnap.id, ...docSnap.data() })
   } catch (error) {
     console.error('Error fetching achievement:', error)
     return NextResponse.json(
@@ -39,32 +45,41 @@ export async function GET(
   }
 }
 
-// PUT - Update achievement
 export async function PUT(
   request: NextRequest,
   { params }: RouteParams
 ) {
-  // Require admin authentication
   const authError = await requireAuth()
   if (authError) return authError
 
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
 
-    const achievement = await prisma.achievement.update({
-      where: { id },
-      data: {
-        type: body.type,
-        title: body.title,
-        content: body.content || null,
-        mediaUrl: body.mediaUrl || null,
-        embedCode: body.embedCode || null,
-        metrics: body.metrics || null,
-      },
-    })
+    const { setDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'achievements', id)
 
-    return NextResponse.json(achievement)
+    const updateData = {
+      type: body.type,
+      title: body.title,
+      content: body.content || null,
+      mediaUrl: body.mediaUrl || null,
+      embedCode: body.embedCode || null,
+      metrics: body.metrics || null,
+      updatedAt: new Date().toISOString(),
+    }
+
+    await setDoc(docRef, updateData, { merge: true })
+
+    return NextResponse.json({ id, ...updateData })
   } catch (error) {
     console.error('Error updating achievement:', error)
     return NextResponse.json(
@@ -74,20 +89,28 @@ export async function PUT(
   }
 }
 
-// DELETE - Delete achievement
 export async function DELETE(
   request: NextRequest,
   { params }: RouteParams
 ) {
-  // Require admin authentication
   const authError = await requireAuth()
   if (authError) return authError
 
   try {
-    const { id } = params
-    await prisma.achievement.delete({
-      where: { id },
-    })
+    const { id } = await params
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
+
+    const { deleteDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'achievements', id)
+
+    await deleteDoc(docRef)
 
     return NextResponse.json({ success: true })
   } catch (error) {

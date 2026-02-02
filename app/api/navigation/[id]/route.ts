@@ -1,38 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api-auth'
+import { getServerDb, getServerAppId, doc, getDoc } from '@/lib/firebase-server'
 
-// Required for static export - returns empty array (API routes won't work on static hosting)
 export function generateStaticParams() {
   return []
 }
 
-// GET single navigation item
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: RouteParams
 ) {
   try {
     const { id } = await params
-    const item = await prisma.navigationItem.findUnique({
-      where: { id },
-    })
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 503 })
+    }
 
-    if (!item) {
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'navigation', id)
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
       return NextResponse.json({ error: 'Navigation item not found' }, { status: 404 })
     }
 
-    return NextResponse.json(item)
+    return NextResponse.json({ id: docSnap.id, ...docSnap.data() })
   } catch (error) {
     console.error('Error fetching navigation item:', error)
     return NextResponse.json({ error: 'Failed to fetch navigation item' }, { status: 500 })
   }
 }
 
-// PUT update navigation item
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: RouteParams
 ) {
   try {
     const authError = await requireAuth()
@@ -42,40 +48,55 @@ export async function PUT(
     const body = await request.json()
     const { label, href, icon, visible, external, order, location, section } = body
 
-    const item = await prisma.navigationItem.update({
-      where: { id },
-      data: {
-        label,
-        href,
-        icon,
-        visible,
-        external,
-        order,
-        location,
-        section,
-      },
-    })
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 503 })
+    }
 
-    return NextResponse.json(item)
+    const { setDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'navigation', id)
+
+    const updateData = {
+      label,
+      href,
+      icon,
+      visible,
+      external,
+      order,
+      location,
+      section,
+      updatedAt: new Date().toISOString(),
+    }
+
+    await setDoc(docRef, updateData, { merge: true })
+
+    return NextResponse.json({ id, ...updateData })
   } catch (error) {
     console.error('Error updating navigation item:', error)
     return NextResponse.json({ error: 'Failed to update navigation item' }, { status: 500 })
   }
 }
 
-// DELETE navigation item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: RouteParams
 ) {
   try {
     const authError = await requireAuth()
     if (authError) return authError
 
     const { id } = await params
-    await prisma.navigationItem.delete({
-      where: { id },
-    })
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 503 })
+    }
+
+    const { deleteDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'navigation', id)
+
+    await deleteDoc(docRef)
 
     return NextResponse.json({ success: true })
   } catch (error) {

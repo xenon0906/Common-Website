@@ -2,7 +2,17 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { BlogPost } from './BlogPost'
 import { SITE_CONFIG } from '@/lib/constants'
-import { getBlogBySlug, getBlogs, DEFAULT_BLOGS } from '@/lib/content'
+import { getBlogBySlug, getBlogs } from '@/lib/content'
+
+function toISOStringSafe(date: unknown): string {
+  if (!date) return new Date().toISOString()
+  if (date instanceof Date) return date.toISOString()
+  if (typeof date === 'string') return new Date(date).toISOString()
+  if (typeof date === 'object' && date !== null && 'toDate' in date) {
+    return (date as { toDate(): Date }).toDate().toISOString()
+  }
+  return new Date().toISOString()
+}
 
 // Generate static params for all blog posts (required for static export)
 export async function generateStaticParams() {
@@ -14,10 +24,10 @@ export async function generateStaticParams() {
 
 // Static revalidation
 export const revalidate = 3600
-export const dynamicParams = false // Don't allow params not in generateStaticParams
+export const dynamicParams = true
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 async function getBlog(slug: string) {
@@ -31,7 +41,7 @@ async function getBlog(slug: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = params
+  const { slug } = await params
   const blog = await getBlog(slug)
 
   if (!blog) {
@@ -47,8 +57,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: blog.title,
       description: blog.excerpt || undefined,
       type: 'article',
-      publishedTime: blog.createdAt.toISOString(),
-      modifiedTime: blog.updatedAt.toISOString(),
+      publishedTime: toISOStringSafe(blog.createdAt),
+      modifiedTime: toISOStringSafe(blog.updatedAt),
       images: blog.imageUrl ? [{ url: blog.imageUrl }] : undefined,
     },
     twitter: {
@@ -61,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = params
+  const { slug } = await params
   const blog = await getBlog(slug)
 
   if (!blog) {
@@ -82,8 +92,8 @@ export default async function BlogPostPage({ params }: Props) {
     headline: blog.title,
     description: blog.excerpt,
     image: blog.imageUrl,
-    datePublished: blog.createdAt.toISOString(),
-    dateModified: blog.updatedAt.toISOString(),
+    datePublished: toISOStringSafe(blog.createdAt),
+    dateModified: toISOStringSafe(blog.updatedAt),
     author: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,

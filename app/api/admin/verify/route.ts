@@ -2,16 +2,15 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
-// Removed 'force-dynamic' for static export compatibility
-
 function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex')
 }
 
 export async function GET() {
   try {
-    const sessionToken = cookies().get('admin_session')?.value
-    const storedTokenHash = cookies().get('admin_token_hash')?.value
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('admin_session')?.value
+    const storedTokenHash = cookieStore.get('admin_token_hash')?.value
 
     if (!sessionToken || !storedTokenHash) {
       return NextResponse.json({ authenticated: false }, { status: 401 })

@@ -21,60 +21,131 @@ import {
   Sparkles,
 } from 'lucide-react'
 
-// Clean hero section - no orbiting badges or rotating rings
-function SafetyHero({ mockupUrl }: { mockupUrl: string }) {
-  const safetyPoints = [
-    '100% KYC verification for all users',
-    'One-tap SOS with instant location sharing',
-    'Dedicated female-only ride option',
-  ]
+interface SafetyContentData {
+  hero: {
+    headline: string
+    subtext: string
+    points: string[]
+    stats: Array<{ value: string; label: string }>
+  }
+  features: Array<{
+    id: string
+    title: string
+    description: string
+    points: string[]
+    icon: string
+    order: number
+    isActive: boolean
+  }>
+  sos: {
+    headline: string
+    subtext: string
+    steps: string[]
+    shares: Array<{ icon: string; label: string }>
+  }
+  trust: {
+    headline: string
+    subtext: string
+    certifications: Array<{ title: string; description: string }>
+  }
+  cta: {
+    quote: string
+    badge: string
+    buttonText: string
+    buttonLink: string
+  }
+}
 
+const DEFAULT_SAFETY: SafetyContentData = {
+  hero: {
+    headline: 'Your Safety is Our Priority',
+    subtext: 'Every feature is designed with your security in mind. From verified riders to instant emergency support.',
+    points: [
+      '100% KYC verification for all users',
+      'One-tap SOS with instant location sharing',
+      'Dedicated female-only ride option',
+    ],
+    stats: [
+      { value: '100%', label: 'KYC Verified' },
+      { value: '<30s', label: 'SOS Response' },
+      { value: '24/7', label: 'Support' },
+    ],
+  },
+  features: [],
+  sos: {
+    headline: 'Emergency SOS Feature',
+    subtext: 'Your safety net in emergencies. Instantly alert trusted contacts with your location.',
+    steps: [
+      'Add up to 3 emergency contacts',
+      'One-tap SOS activation',
+      'Instant SMS & app notification',
+      'Live location tracking shared',
+    ],
+    shares: [
+      { icon: 'MapPin', label: 'Your live GPS location' },
+      { icon: 'Users', label: 'Trip details & co-riders' },
+      { icon: 'Clock', label: 'Timestamp of alert' },
+    ],
+  },
+  trust: {
+    headline: 'Trusted & Certified',
+    subtext: 'Snapgo is officially recognized and meets the highest standards of safety and security.',
+    certifications: [
+      { title: 'DPIIT Recognized', description: 'Government certified startup' },
+      { title: 'Startup India', description: 'Official initiative member' },
+      { title: 'Data Protected', description: 'Industry-standard encryption' },
+    ],
+  },
+  cta: {
+    quote: 'From day one, safety has been our top priority. Every feature, every verification is designed to ensure your journey is secure.',
+    badge: '100% KYC Verified Platform',
+    buttonText: 'Download Snapgo',
+    buttonLink: '/#download',
+  },
+}
+
+const ICON_MAP: Record<string, any> = {
+  MapPin,
+  Users,
+  Clock,
+  AlertTriangle,
+  ShieldCheck,
+  Award,
+}
+
+function SafetyHero({ mockupUrl, data }: { mockupUrl: string; data: SafetyContentData['hero'] }) {
   return (
     <section className="hero-viewport bg-gradient-to-br from-primary via-primary/90 to-primary-800">
       <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          {/* Left - Content */}
           <div className="text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-              Your Safety is{' '}
-              <span className="text-white/90">Our Priority</span>
+              {data.headline}
             </h1>
 
             <p className="text-lg text-white/70 mb-8 max-w-lg mx-auto lg:mx-0">
-              Every feature is designed with your security in mind. From verified riders to instant emergency support.
+              {data.subtext}
             </p>
 
-            {/* Simple bullet points - no cards */}
             <ul className="space-y-4 mb-10 max-w-md mx-auto lg:mx-0">
-              {safetyPoints.map((point, index) => (
-                <li
-                  key={index}
-                  className="flex items-center gap-3 text-white/80"
-                >
+              {data.points.map((point, index) => (
+                <li key={index} className="flex items-center gap-3 text-white/80">
                   <ShieldCheck className="w-5 h-5 text-white flex-shrink-0" />
                   <span>{point}</span>
                 </li>
               ))}
             </ul>
 
-            {/* Simple stats row */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-8">
-              <div>
-                <p className="text-3xl font-bold text-teal-400">100%</p>
-                <p className="text-sm text-white/50">KYC Verified</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-teal-400">&lt;30s</p>
-                <p className="text-sm text-white/50">SOS Response</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-teal-400">24/7</p>
-                <p className="text-sm text-white/50">Support</p>
-              </div>
+              {data.stats.map((stat, i) => (
+                <div key={i}>
+                  <p className="text-3xl font-bold text-teal-400">{stat.value}</p>
+                  <p className="text-sm text-white/50">{stat.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right - Phone mockup (iPhone 15 frame already in image) */}
           <div className="flex justify-center lg:justify-end">
             <div className="relative w-[220px] sm:w-[260px] md:w-[280px] lg:w-[300px]">
               <Image
@@ -93,14 +164,12 @@ function SafetyHero({ mockupUrl }: { mockupUrl: string }) {
   )
 }
 
-// Interactive checklist section
 function ChecklistSection() {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
     <section ref={ref} className="section-padding bg-gray-50 relative overflow-hidden">
-      {/* Background pattern */}
       <div
         className="absolute inset-0 opacity-50"
         style={{
@@ -110,7 +179,6 @@ function ChecklistSection() {
       />
 
       <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 relative z-10">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -132,7 +200,6 @@ function ChecklistSection() {
           </p>
         </motion.div>
 
-        {/* Checklist */}
         <div className="max-w-2xl mx-auto">
           <SafetyChecklist />
         </div>
@@ -141,44 +208,31 @@ function ChecklistSection() {
   )
 }
 
-// SOS Feature section - clean, no pulsing effects
-function SOSSection() {
+function SOSSection({ data }: { data: SafetyContentData['sos'] }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
-
-  const sosSteps = [
-    'Add up to 3 emergency contacts',
-    'One-tap SOS activation',
-    'Instant SMS & app notification',
-    'Live location tracking shared',
-  ]
-
-  const sosShares = [
-    { icon: MapPin, label: 'Your live GPS location' },
-    { icon: Users, label: 'Trip details & co-riders' },
-    { icon: Clock, label: 'Timestamp of alert' },
-  ]
 
   return (
     <section ref={ref} className="section-padding bg-gray-900 text-white">
       <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
-        {/* Header */}
         <div className="text-center mb-16">
           <div className="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto mb-6">
             <AlertTriangle className="w-8 h-8 text-red-400" />
           </div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-            Emergency <span className="text-red-400">SOS</span> Feature
+            {data.headline.includes('SOS') ? (
+              <>Emergency <span className="text-red-400">SOS</span> Feature</>
+            ) : (
+              data.headline
+            )}
           </h2>
           <p className="text-white/70 max-w-2xl mx-auto text-lg">
-            Your safety net in emergencies. Instantly alert trusted contacts with your location.
+            {data.subtext}
           </p>
         </div>
 
-        {/* Two columns */}
         <div className="grid sm:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* What gets shared */}
           <div className="bg-white/5 rounded-2xl p-8 border border-white/10">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
@@ -187,8 +241,8 @@ function SOSSection() {
               What Gets Shared
             </h3>
             <div className="space-y-4">
-              {sosShares.map((item) => {
-                const Icon = item.icon
+              {data.shares.map((item) => {
+                const Icon = ICON_MAP[item.icon] || MapPin
                 return (
                   <div
                     key={item.label}
@@ -204,7 +258,6 @@ function SOSSection() {
             </div>
           </div>
 
-          {/* How it works */}
           <div className="bg-white/5 rounded-2xl p-8 border border-white/10">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
@@ -213,8 +266,8 @@ function SOSSection() {
               How It Works
             </h3>
             <div className="space-y-4">
-              {sosSteps.map((step, index) => (
-                <div key={step} className="flex items-center gap-4">
+              {data.steps.map((step, index) => (
+                <div key={index} className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center font-bold text-teal-400">
                     {index + 1}
                   </div>
@@ -229,16 +282,9 @@ function SOSSection() {
   )
 }
 
-// Trust & certifications section
-function TrustSection() {
+function TrustSection({ data }: { data: SafetyContentData['trust'] }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
-
-  const certifications = [
-    { title: 'DPIIT Recognized', description: 'Government certified startup' },
-    { title: 'Startup India', description: 'Official initiative member' },
-    { title: 'Data Protected', description: 'Industry-standard encryption' },
-  ]
 
   return (
     <section ref={ref} className="section-padding bg-white">
@@ -251,14 +297,14 @@ function TrustSection() {
         >
           <Award className="w-16 h-16 text-primary mx-auto mb-6" />
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Trusted & Certified
+            {data.headline}
           </h2>
           <p className="text-gray-600 mb-10 max-w-2xl mx-auto">
-            Snapgo is officially recognized and meets the highest standards of safety and security.
+            {data.subtext}
           </p>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {certifications.map((cert, index) => (
+            {data.certifications.map((cert, index) => (
               <motion.div
                 key={cert.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -280,8 +326,7 @@ function TrustSection() {
   )
 }
 
-// CTA section - clean, no animated backgrounds
-function CTASection() {
+function CTASection({ data }: { data: SafetyContentData['cta'] }) {
   return (
     <section className="section-padding-lg bg-gradient-to-br from-primary to-teal-600">
       <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
@@ -291,19 +336,19 @@ function CTASection() {
           </div>
 
           <p className="text-xl md:text-2xl font-medium text-white mb-8 leading-relaxed">
-            From day one, safety has been our top priority. Every feature, every verification is designed to ensure your journey is secure.
+            {data.quote}
           </p>
 
-          <p className="text-white/70 mb-10">100% KYC Verified Platform</p>
+          <p className="text-white/70 mb-10">{data.badge}</p>
 
           <Button
             size="xl"
             className="bg-white text-primary hover:bg-white/90"
             asChild
           >
-            <Link href="/#download">
+            <Link href={data.buttonLink}>
               <Download className="w-5 h-5 mr-2" />
-              Download Snapgo
+              {data.buttonText}
             </Link>
           </Button>
         </div>
@@ -314,25 +359,29 @@ function CTASection() {
 
 export default function SafetyPage() {
   const [images, setImages] = useState<SiteImagesConfig>(DEFAULT_IMAGES)
+  const [safety, setSafety] = useState<SafetyContentData>(DEFAULT_SAFETY)
 
   useEffect(() => {
+    // Fetch images
     fetch('/api/content/images')
       .then(res => res.json())
-      .then(data => {
-        if (data) setImages(data)
-      })
-      .catch(() => {
-        // Keep defaults on error
-      })
+      .then(data => { if (data) setImages(data) })
+      .catch(() => {})
+
+    // Fetch safety content
+    fetch('/api/content/safety')
+      .then(res => res.json())
+      .then(data => { if (data?.hero) setSafety(data) })
+      .catch(() => {})
   }, [])
 
   return (
     <SiteLayout>
-      <SafetyHero mockupUrl={images.mockups.emergencySos} />
+      <SafetyHero mockupUrl={images.mockups.emergencySos} data={safety.hero} />
       <ChecklistSection />
-      <SOSSection />
-      <TrustSection />
-      <CTASection />
+      <SOSSection data={safety.sos} />
+      <TrustSection data={safety.trust} />
+      <CTASection data={safety.cta} />
     </SiteLayout>
   )
 }

@@ -27,6 +27,7 @@ import Link from 'next/link'
 import { FileUpload } from '@/components/ui/FileUpload'
 import { USE_FIREBASE } from '@/lib/config'
 import { createDoc } from '@/lib/hooks/useFirestore'
+import { useToast } from '@/components/ui/use-toast'
 
 const blogSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
@@ -44,6 +45,7 @@ type BlogFormData = z.infer<typeof blogSchema>
 export default function CreateBlogPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
 
   const {
     register,
@@ -79,36 +81,46 @@ export default function CreateBlogPage() {
     setIsSubmitting(true)
 
     try {
+      const wordCount = data.content.trim().split(/\s+/).length
+      const readingTime = Math.max(1, Math.ceil(wordCount / 200))
+
+      const blogData = {
+        title: data.title,
+        slug: data.slug,
+        content: data.content,
+        metaDesc: data.metaDesc || '',
+        excerpt: data.excerpt || '',
+        keywords: data.keywords || '',
+        imageUrl: data.imageUrl || '',
+        published: data.published,
+        status: data.published ? 'published' : 'draft',
+        wordCount,
+        readingTime,
+      }
+
       if (USE_FIREBASE) {
-        // Save to Firestore
-        await createDoc('blogs', {
-          title: data.title,
-          slug: data.slug,
-          content: data.content,
-          metaDesc: data.metaDesc || '',
-          excerpt: data.excerpt || '',
-          keywords: data.keywords || '',
-          imageUrl: data.imageUrl || '',
-          published: data.published,
-        })
-        router.push('/admin/blogs')
+        await createDoc('blogs', blogData)
       } else {
-        // Save via API
         const res = await fetch('/api/blogs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify(blogData),
         })
-
-        if (res.ok) {
-          router.push('/admin/blogs')
-        } else {
-          alert('Failed to create blog')
-        }
+        if (!res.ok) throw new Error('Failed to create blog')
       }
+
+      toast({
+        title: 'Blog created',
+        description: 'Your blog post has been created successfully.',
+      })
+      router.push('/admin/blogs')
     } catch (error) {
       console.error('Error creating blog:', error)
-      alert('Error creating blog')
+      toast({
+        title: 'Error',
+        description: 'Failed to create blog. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -125,7 +137,7 @@ export default function CreateBlogPage() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">Create Blog Post</h1>
-          <p className="text-muted-foreground flex items-center gap-2">
+          <span className="text-muted-foreground flex items-center gap-2">
             Write a new article for the snapgo blog
             {USE_FIREBASE && (
               <Badge variant="outline" className="text-xs gap-1">
@@ -133,7 +145,7 @@ export default function CreateBlogPage() {
                 Saves to Firebase
               </Badge>
             )}
-          </p>
+          </span>
         </div>
       </div>
 
@@ -221,7 +233,8 @@ export default function CreateBlogPage() {
                   <Label htmlFor="published">Publish immediately</Label>
                   <Switch
                     id="published"
-                    {...register('published')}
+                    checked={watch('published')}
+                    onCheckedChange={(checked) => setValue('published', checked)}
                   />
                 </div>
                 <div className="flex gap-2">

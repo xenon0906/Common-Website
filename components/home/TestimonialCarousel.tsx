@@ -15,14 +15,14 @@ interface TestimonialCarouselProps {
   testimonials?: TestimonialType[]
 }
 
-export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps = {}) {
+export default function TestimonialCarousel({ testimonials }: TestimonialCarouselProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: '-100px' })
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(0)
 
   // Use provided testimonials or fall back to constants
-  const displayTestimonials = testimonials || TESTIMONIALS
+  const displayTestimonials = testimonials && testimonials.length > 0 ? testimonials : TESTIMONIALS
 
   const slideVariants = {
     enter: (direction: number) => ({

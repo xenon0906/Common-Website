@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { getBlogs } from '@/lib/content'
+import { getSiteUrl } from '@/lib/utils/url'
 import { BlogList } from './BlogList'
 
 export const metadata: Metadata = {
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 
 export default async function BlogPage() {
   const blogs = await getBlogs()
+  const SITE_URL = getSiteUrl()
 
   // Transform to match BlogList expected format
   const formattedBlogs = blogs.map(blog => ({
@@ -20,5 +22,35 @@ export default async function BlogPage() {
     createdAt: blog.createdAt,
   }))
 
-  return <BlogList blogs={formattedBlogs} />
+  const blogCollectionJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Snapgo Blog',
+    description: 'Read the latest articles about ride-sharing, saving money on commute, and sustainable travel tips from Snapgo.',
+    url: `${SITE_URL}/blog`,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Snapgo',
+      url: SITE_URL,
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: formattedBlogs.map((blog, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${SITE_URL}/blog/${blog.slug}`,
+        name: blog.title,
+      })),
+    },
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogCollectionJsonLd) }}
+      />
+      <BlogList blogs={formattedBlogs} />
+    </>
+  )
 }

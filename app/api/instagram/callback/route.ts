@@ -18,8 +18,9 @@ export async function GET(request: NextRequest) {
 
   // Verify OAuth state parameter to prevent CSRF
   const stateParam = searchParams.get('state')
-  const storedState = cookies().get('ig_oauth_state')?.value
-  cookies().delete('ig_oauth_state')
+  const cookieStore = await cookies()
+  const storedState = cookieStore.get('ig_oauth_state')?.value
+  cookieStore.delete('ig_oauth_state')
 
   if (!stateParam || !storedState || stateParam !== storedState) {
     return NextResponse.redirect(new URL('/admin/instagram?error=invalid_state', request.url))

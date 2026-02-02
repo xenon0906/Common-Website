@@ -1,19 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api-auth'
+import { getServerDb, getServerAppId } from '@/lib/firebase-server'
 
-// GET all navigation items
 export async function GET(request: NextRequest) {
   try {
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json([])
+    }
+
     const { searchParams } = new URL(request.url)
-    const location = searchParams.get('location') // header or footer
+    const location = searchParams.get('location')
 
-    const where = location ? { location } : {}
+    const { collection, getDocs, query, orderBy, where } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'navigation')
 
-    const items = await prisma.navigationItem.findMany({
-      where,
-      orderBy: { order: 'asc' },
-    })
+    let q
+    if (location) {
+      q = query(collRef, where('location', '==', location), orderBy('order', 'asc'))
+    } else {
+      q = query(collRef, orderBy('order', 'asc'))
+    }
+
+    const snapshot = await getDocs(q)
+    const items = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
 
     return NextResponse.json(items)
   } catch (error) {
@@ -22,7 +36,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST create new navigation item
 export async function POST(request: NextRequest) {
   try {
     const authError = await requireAuth()
@@ -31,27 +44,36 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { label, href, icon, location, section, visible, external, order } = body
 
-    const item = await prisma.navigationItem.create({
-      data: {
-        label,
-        href,
-        icon,
-        location: location || 'header',
-        section,
-        visible: visible ?? true,
-        external: external ?? false,
-        order: order || 0,
-      },
-    })
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 503 })
+    }
 
-    return NextResponse.json(item, { status: 201 })
+    const { addDoc, collection, serverTimestamp } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'navigation')
+
+    const itemData = {
+      label,
+      href,
+      icon,
+      location: location || 'header',
+      section,
+      visible: visible ?? true,
+      external: external ?? false,
+      order: order || 0,
+      createdAt: serverTimestamp(),
+    }
+
+    const docRef = await addDoc(collRef, itemData)
+
+    return NextResponse.json({ id: docRef.id, ...itemData }, { status: 201 })
   } catch (error) {
     console.error('Error creating navigation item:', error)
     return NextResponse.json({ error: 'Failed to create navigation item' }, { status: 500 })
   }
 }
 
-// PUT update navigation items
 export async function PUT(request: NextRequest) {
   try {
     const authError = await requireAuth()
@@ -60,26 +82,43 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { items } = body
 
-    // Delete existing and recreate (simpler for reordering)
-    const location = items[0]?.location || 'header'
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 503 })
+    }
 
-    await prisma.$transaction([
-      prisma.navigationItem.deleteMany({ where: { location } }),
-      ...items.map((item: any, index: number) =>
-        prisma.navigationItem.create({
-          data: {
-            label: item.label,
-            href: item.href,
-            icon: item.icon,
-            location: item.location || 'header',
-            section: item.section,
-            visible: item.visible ?? true,
-            external: item.external ?? false,
-            order: index,
-          },
-        })
-      ),
-    ])
+    const { collection, getDocs, query, where, writeBatch, doc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'navigation')
+
+    const locationValue = items[0]?.location || 'header'
+
+    // Use writeBatch for atomic delete + recreate
+    const batch = writeBatch(db)
+
+    // Delete existing items for this location
+    const existingQuery = query(collRef, where('location', '==', locationValue))
+    const existingSnapshot = await getDocs(existingQuery)
+    existingSnapshot.docs.forEach(docSnap => {
+      batch.delete(docSnap.ref)
+    })
+
+    // Create new items
+    items.forEach((item: any, index: number) => {
+      const newDocRef = doc(collRef)
+      batch.set(newDocRef, {
+        label: item.label,
+        href: item.href,
+        icon: item.icon,
+        location: item.location || 'header',
+        section: item.section,
+        visible: item.visible ?? true,
+        external: item.external ?? false,
+        order: index,
+      })
+    })
+
+    await batch.commit()
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -88,7 +127,6 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE navigation item
 export async function DELETE(request: NextRequest) {
   try {
     const authError = await requireAuth()
@@ -101,7 +139,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Item ID required' }, { status: 400 })
     }
 
-    await prisma.navigationItem.delete({ where: { id } })
+    const db = getServerDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 503 })
+    }
+
+    const { doc, deleteDoc } = await import('firebase/firestore')
+    const appId = getServerAppId()
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'navigation', id)
+
+    await deleteDoc(docRef)
 
     return NextResponse.json({ success: true })
   } catch (error) {
