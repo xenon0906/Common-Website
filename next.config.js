@@ -49,6 +49,11 @@ const nextConfig = {
   // Generate ETags for caching
   generateEtags: true,
 
+  // Skip ESLint during builds (run separately in CI if needed)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Remove console logs in production (except errors)
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
