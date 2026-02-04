@@ -35,6 +35,7 @@ functions/lib/
 # windows
 desktop.ini
 Thumbs.db
+nul
 
 # local env files
 .env*.local
