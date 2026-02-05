@@ -24,31 +24,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthChange(async (firebaseUser) => {
-      try {
-        setUser(firebaseUser)
-        if (firebaseUser) {
-          let userProfile = await getUserProfile(firebaseUser.uid)
-          if (!userProfile) {
-            await createUserProfile(firebaseUser.uid, {
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
-              photoURL: firebaseUser.photoURL,
-            })
-            userProfile = await getUserProfile(firebaseUser.uid)
+    let unsubscribe: (() => void) | undefined
+    try {
+      unsubscribe = onAuthChange(async (firebaseUser) => {
+        try {
+          setUser(firebaseUser)
+          if (firebaseUser) {
+            let userProfile = await getUserProfile(firebaseUser.uid)
+            if (!userProfile) {
+              await createUserProfile(firebaseUser.uid, {
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL,
+              })
+              userProfile = await getUserProfile(firebaseUser.uid)
+            }
+            setProfile(userProfile)
+          } else {
+            setProfile(null)
           }
-          setProfile(userProfile)
-        } else {
+        } catch (err) {
+          console.error('AuthProvider: auth state change error', err)
           setProfile(null)
+        } finally {
+          setLoading(false)
         }
-      } catch (err) {
-        console.error('AuthProvider: auth state change error', err)
-        setProfile(null)
-      } finally {
-        setLoading(false)
-      }
-    })
-    return () => unsubscribe()
+      })
+    } catch (err) {
+      console.error('AuthProvider: Firebase auth init failed', err)
+      setLoading(false)
+    }
+    return () => unsubscribe?.()
   }, [])
 
   const handleSignIn = async (email: string, password: string) => {
