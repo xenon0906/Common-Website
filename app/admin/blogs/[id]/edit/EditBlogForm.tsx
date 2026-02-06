@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { slugify } from '@/lib/utils'
+import { slugify, sanitizeSlug } from '@/lib/utils'
 import {
   ArrowLeft,
   Save,
@@ -145,7 +145,7 @@ export default function EditBlogForm() {
       if (USE_FIREBASE) {
         await updateDocument('blogs', params.id as string, {
           title: data.title,
-          slug: data.slug,
+          slug: sanitizeSlug(data.slug),
           content: data.content,
           metaDesc: data.metaDesc || '',
           excerpt: data.excerpt || '',
@@ -162,6 +162,7 @@ export default function EditBlogForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...data,
+            slug: sanitizeSlug(data.slug),
             status: data.published ? 'published' : 'draft',
             wordCount,
             readingTime,

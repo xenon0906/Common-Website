@@ -26,6 +26,21 @@ export function slugify(text: string): string {
     .trim()
 }
 
+/**
+ * Sanitize a slug by removing URL prefixes like /blog/ and cleaning up
+ * This prevents double-path issues like /blog//blog/slug
+ */
+export function sanitizeSlug(slug: string): string {
+  if (!slug) return ''
+  return slug
+    .replace(/^\/+/, '')           // Remove leading slashes
+    .replace(/^blog\/+/i, '')      // Remove blog/ prefix
+    .replace(/\/+$/, '')           // Remove trailing slashes
+    .replace(/\/+/g, '-')          // Replace any remaining slashes with hyphens
+    .toLowerCase()
+    .trim()
+}
+
 export function truncate(text: string, length: number): string {
   if (text.length <= length) return text
   return text.slice(0, length).trim() + '...'

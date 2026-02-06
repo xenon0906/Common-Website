@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
 } from '@/lib/firebase-server'
+import { sanitizeSlug } from '@/lib/utils'
 
 // Required for static export
 export function generateStaticParams() {
@@ -69,7 +70,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const updateData: Record<string, unknown> = {
       title: body.title,
-      slug: body.slug,
+      slug: sanitizeSlug(body.slug),
       content: body.content,
       metaDesc: body.metaDesc || '',
       excerpt: body.excerpt || '',

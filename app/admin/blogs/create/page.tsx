@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { slugify } from '@/lib/utils'
+import { slugify, sanitizeSlug } from '@/lib/utils'
 import {
   ArrowLeft,
   Save,
@@ -86,7 +86,7 @@ export default function CreateBlogPage() {
 
       const blogData = {
         title: data.title,
-        slug: data.slug,
+        slug: sanitizeSlug(data.slug),
         content: data.content,
         metaDesc: data.metaDesc || '',
         excerpt: data.excerpt || '',

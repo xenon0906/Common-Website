@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getBlogs, DEFAULT_BLOGS } from '@/lib/content'
 import { requireAuth } from '@/lib/api-auth'
 import { getServerDb, getServerAppId } from '@/lib/firebase-server'
+import { sanitizeSlug } from '@/lib/utils'
 
 export async function GET() {
   try {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     const blogData = {
       title: body.title,
-      slug: body.slug,
+      slug: sanitizeSlug(body.slug),
       content: body.content,
       metaDesc: body.metaDesc || '',
       excerpt: body.excerpt || '',
