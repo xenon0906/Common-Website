@@ -7,12 +7,15 @@ import { checkRateLimit } from '@/lib/rate-limit'
 // Default admin credentials (change in production via env vars)
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin'
 
-// In production, ADMIN_PASSWORD_HASH must be set via env var.
-// In development, fall back to a default hash for convenience.
+// Support both hashed password (ADMIN_PASSWORD_HASH) and plain password (ADMIN_PASSWORD)
+// In production, at least one must be set
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || null
+const ADMIN_PASSWORD_PLAIN = process.env.ADMIN_PASSWORD || null
+
+// In development, fall back to default password
 const DEFAULT_PASSWORD_HASH = process.env.NODE_ENV === 'production'
   ? null
   : bcrypt.hashSync('snapgo2024', 12)
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || DEFAULT_PASSWORD_HASH
 
 // Input length limits
 const MAX_USERNAME_LENGTH = 100
@@ -51,18 +54,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // In production, refuse login if password hash is not configured
-    if (!ADMIN_PASSWORD_HASH) {
-      console.error('ADMIN_PASSWORD_HASH env var is not set. Login is disabled in production.')
+    // In production, refuse login if no password is configured
+    if (!ADMIN_PASSWORD_HASH && !ADMIN_PASSWORD_PLAIN && !DEFAULT_PASSWORD_HASH) {
+      console.error('No admin password configured. Set ADMIN_PASSWORD or ADMIN_PASSWORD_HASH.')
       return NextResponse.json(
-        { error: 'Login is not configured. Set ADMIN_PASSWORD_HASH environment variable.' },
+        { error: 'Login is not configured. Set ADMIN_PASSWORD environment variable.' },
         { status: 500 }
       )
     }
 
-    // Verify credentials using bcrypt
+    // Verify credentials
     const usernameMatch = username === ADMIN_USERNAME
-    const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH)
+
+    // Check password - try plain password first, then hashed, then default
+    let passwordMatch = false
+    if (ADMIN_PASSWORD_PLAIN) {
+      // Plain password comparison (simpler for Vercel env vars)
+      passwordMatch = password === ADMIN_PASSWORD_PLAIN
+    } else if (ADMIN_PASSWORD_HASH) {
+      // Bcrypt hash comparison
+      passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH)
+    } else if (DEFAULT_PASSWORD_HASH) {
+      // Development fallback
+      passwordMatch = await bcrypt.compare(password, DEFAULT_PASSWORD_HASH)
+    }
 
     if (!usernameMatch || !passwordMatch) {
       return NextResponse.json(
