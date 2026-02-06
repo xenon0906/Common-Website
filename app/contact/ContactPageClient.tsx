@@ -7,6 +7,7 @@ import { SiteLayout } from '@/components/layout/SiteLayout'
 import { AnimatedInput, ConfettiBurst, SuccessCheckmark } from '@/components/ui/AnimatedInput'
 import { Button } from '@/components/ui/button'
 import { SITE_CONFIG } from '@/lib/constants'
+import { trackContactFormSubmit } from '@/lib/google-analytics'
 import {
   Mail,
   Phone,
@@ -104,6 +105,9 @@ function ContactHero() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send message')
       }
+
+      // Track successful contact form submission
+      trackContactFormSubmit()
 
       setIsSubmitted(true)
       setShowConfetti(true)

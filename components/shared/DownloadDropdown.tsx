@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
+import { trackDownloadClick } from '@/lib/google-analytics'
 
 // Custom Apple icon since lucide doesn't have a proper Apple logo
 function AppleIcon({ className }: { className?: string }) {
@@ -49,6 +50,7 @@ export function DownloadDropdown({ variant = 'gradient', size = 'lg', className 
             href="https://play.google.com/store/apps/details?id=in.snapgo.app&hl=en_IN"
             target="_blank"
             className="flex items-center gap-3 cursor-pointer"
+            onClick={() => trackDownloadClick('android')}
           >
             <AndroidIcon className="w-5 h-5 text-[#3DDC84]" />
             <div>
@@ -62,6 +64,7 @@ export function DownloadDropdown({ variant = 'gradient', size = 'lg', className 
             href="https://apps.apple.com/in/app/snapgo-connect-split-fare/id6748761741"
             target="_blank"
             className="flex items-center gap-3 cursor-pointer"
+            onClick={() => trackDownloadClick('ios')}
           >
             <AppleIcon className="w-5 h-5" />
             <div>

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Calendar, Clock, ArrowLeft, Share2, Facebook, Linkedin } from 'lucide-react'
+import { trackBlogView } from '@/lib/google-analytics'
 
 interface Blog {
   id: string
@@ -43,7 +44,9 @@ export function BlogPost({ blog }: { blog: Blog }) {
 
   useEffect(() => {
     setShareUrl(window.location.href)
-  }, [])
+    // Track blog view in Google Analytics
+    trackBlogView(blog.slug)
+  }, [blog.slug])
 
   return (
     <>
