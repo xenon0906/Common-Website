@@ -49,7 +49,8 @@ const nextConfig = {
   // Generate ETags for caching
   generateEtags: true,
 
-  // Skip ESLint during builds (run separately in CI if needed)
+  // Skip ESLint during builds (many pre-existing issues need fixing)
+  // TODO: Fix all ESLint errors and re-enable
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -76,7 +77,8 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.instagram.com https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://img.youtube.com https://www.instagram.com; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google-analytics.com wss://*.firebaseio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.ingest.sentry.io; frame-src https://www.instagram.com; object-src 'none'; base-uri 'self';"
+            // Note: 'unsafe-inline' required for Next.js inline scripts, styled-components
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.instagram.com https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://img.youtube.com https://www.instagram.com; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google-analytics.com wss://*.firebaseio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.ingest.sentry.io; frame-src https://www.instagram.com; object-src 'none'; base-uri 'self';"
           },
         ],
       },

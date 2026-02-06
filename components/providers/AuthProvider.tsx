@@ -58,37 +58,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const handleSignIn = async (email: string, password: string) => {
-    await signInWithEmail(email, password)
+    try {
+      await signInWithEmail(email, password)
+    } catch (err) {
+      console.error('Sign in failed:', err)
+      throw err
+    }
   }
 
   const handleSignUp = async (email: string, password: string, displayName?: string) => {
-    const cred = await signUpWithEmail(email, password)
-    await createUserProfile(cred.user.uid, {
-      email: cred.user.email,
-      displayName: displayName || cred.user.displayName,
-      photoURL: cred.user.photoURL,
-    })
+    try {
+      const cred = await signUpWithEmail(email, password)
+      await createUserProfile(cred.user.uid, {
+        email: cred.user.email,
+        displayName: displayName || cred.user.displayName,
+        photoURL: cred.user.photoURL,
+      })
+    } catch (err) {
+      console.error('Sign up failed:', err)
+      throw err
+    }
   }
 
   const handleGoogleSignIn = async () => {
-    const cred = await signInWithGoogle()
-    const existing = await getUserProfile(cred.user.uid)
-    if (!existing) {
-      await createUserProfile(cred.user.uid, {
-        email: cred.user.email,
-        displayName: cred.user.displayName,
-        photoURL: cred.user.photoURL,
-      })
+    try {
+      const cred = await signInWithGoogle()
+      const existing = await getUserProfile(cred.user.uid)
+      if (!existing) {
+        await createUserProfile(cred.user.uid, {
+          email: cred.user.email,
+          displayName: cred.user.displayName,
+          photoURL: cred.user.photoURL,
+        })
+      }
+    } catch (err) {
+      console.error('Google sign in failed:', err)
+      throw err
     }
   }
 
   const handleLogout = async () => {
-    await signOut()
-    setProfile(null)
+    try {
+      await signOut()
+      setProfile(null)
+    } catch (err) {
+      console.error('Logout failed:', err)
+      throw err
+    }
   }
 
   const handleForgotPassword = async (email: string) => {
-    await resetPassword(email)
+    try {
+      await resetPassword(email)
+    } catch (err) {
+      console.error('Password reset failed:', err)
+      throw err
+    }
   }
 
   return (

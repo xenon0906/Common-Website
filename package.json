@@ -61,7 +61,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^15.1.0",
+    "@next/bundle-analyzer": "^15.5.11",
     "@tailwindcss/typography": "^0.5.15",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
@@ -76,7 +76,7 @@
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^15.1.0",
+    "eslint-config-next": "^15.5.11",
     "jsdom": "^25.0.0",
     "msw": "^2.6.0",
     "postcss": "^8.4.49",
@@ -84,5 +84,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.0"
+  },
+  "overrides": {
+    "use-sync-external-store": "^1.2.2"
   }
 }

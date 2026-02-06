@@ -35,11 +35,19 @@ export async function POST(request: NextRequest) {
           { status: 401 }
         )
       }
-      // Admin SDK not configured — fall back to trusting client token with warning
+      // Admin SDK not configured — reject in production for security
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[firebase-session] FIREBASE_SERVICE_ACCOUNT_KEY not configured. Rejecting unverified token.')
+        return NextResponse.json(
+          { error: 'Server-side token verification is not configured. Set FIREBASE_SERVICE_ACCOUNT_KEY.' },
+          { status: 503 }
+        )
+      }
+      // Only allow in development with warning
       console.warn(
         '[firebase-session] Admin SDK not configured. ' +
-        'Accepting unverified Firebase token. ' +
-        'Set FIREBASE_SERVICE_ACCOUNT_KEY for server-side verification.'
+        'Accepting unverified Firebase token in development. ' +
+        'Set FIREBASE_SERVICE_ACCOUNT_KEY for production.'
       )
     }
 
