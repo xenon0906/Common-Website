@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: 'Read the latest articles about ride-sharing, saving money on commute, and sustainable travel tips from snapgo.',
 }
 
+// Revalidate every 60 seconds for faster updates
+export const revalidate = 60
+
 export default async function BlogPage() {
   const blogs = await getBlogs()
   const SITE_URL = getSiteUrl()

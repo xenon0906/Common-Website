@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { requireAuth } from '@/lib/api-auth'
 import {
   getServerDb,
@@ -86,6 +87,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     await setDoc(docRef, updateData, { merge: true })
 
+    // Revalidate blog pages to reflect the update immediately
+    revalidatePath('/blog')
+    revalidatePath(`/blog/${updateData.slug}`)
+
     return NextResponse.json({ id, ...updateData })
   } catch (error) {
     console.error('Error updating blog:', error)
@@ -115,6 +120,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
 
     await deleteDoc(docRef)
+
+    // Revalidate blog pages to remove the deleted blog immediately
+    revalidatePath('/blog')
+    revalidatePath('/blog/[slug]', 'page')
 
     return NextResponse.json({ success: true })
   } catch (error) {

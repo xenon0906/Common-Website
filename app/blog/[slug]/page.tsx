@@ -22,8 +22,8 @@ export async function generateStaticParams() {
   }))
 }
 
-// Static revalidation
-export const revalidate = 3600
+// Static revalidation - 60 seconds for faster updates after admin changes
+export const revalidate = 60
 export const dynamicParams = true
 
 interface Props {

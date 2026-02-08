@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getBlogs, DEFAULT_BLOGS } from '@/lib/content'
 import { requireAuth } from '@/lib/api-auth'
 import { getServerDb, getServerAppId } from '@/lib/firebase-server'
@@ -52,6 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     const docRef = await addDoc(collRef, blogData)
+
+    // Revalidate blog pages to reflect the new blog immediately
+    revalidatePath('/blog')
+    revalidatePath('/blog/[slug]', 'page')
 
     return NextResponse.json({ id: docRef.id, ...blogData }, { status: 201 })
   } catch (error) {

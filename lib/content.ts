@@ -442,7 +442,12 @@ export async function getBlogs(): Promise<BlogData[]> {
 
 export async function getBlogBySlug(slug: string): Promise<BlogData | null> {
   const blogs = await getBlogs()
-  return blogs.find(blog => blog.slug === slug) || null
+  // Normalize the search slug (strip leading slashes and /blog/ prefix if present)
+  const normalizedSlug = slug.replace(/^\/+/, '').replace(/^blog\/+/i, '')
+  return blogs.find(blog => {
+    const blogSlug = blog.slug.replace(/^\/+/, '').replace(/^blog\/+/i, '')
+    return blogSlug === normalizedSlug
+  }) || null
 }
 
 export async function getFAQs(): Promise<FAQData[]> {
