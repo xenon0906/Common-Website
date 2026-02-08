@@ -36,7 +36,7 @@ const blogSchema = z.object({
   metaDesc: z.string().max(160, 'Meta description must be under 160 characters').optional(),
   excerpt: z.string().max(300, 'Excerpt must be under 300 characters').optional(),
   keywords: z.string().optional(),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().optional().or(z.literal('')),
   published: z.boolean(),
 })
 
