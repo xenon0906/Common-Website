@@ -6,7 +6,6 @@ import { z } from 'zod'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import { AnimatedInput, ConfettiBurst, SuccessCheckmark } from '@/components/ui/AnimatedInput'
 import { Button } from '@/components/ui/button'
-import { SITE_CONFIG } from '@/lib/constants'
 import { trackContactFormSubmit } from '@/lib/google-analytics'
 import {
   Mail,
@@ -25,8 +24,14 @@ const contactSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactSchema>
 
+interface ContactPageClientProps {
+  contactEmail: string
+  contactPhone: string
+  legalName: string
+}
+
 // Clean hero with embedded form - no rotating rings
-function ContactHero() {
+function ContactHero({ contactEmail, contactPhone }: { contactEmail: string; contactPhone: string }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
@@ -131,8 +136,8 @@ function ContactHero() {
   }
 
   const contactInfo = [
-    { icon: Mail, label: 'Email', value: SITE_CONFIG.email },
-    { icon: Phone, label: 'Phone', value: SITE_CONFIG.phone },
+    { icon: Mail, label: 'Email', value: contactEmail },
+    { icon: Phone, label: 'Phone', value: contactPhone },
     { icon: MapPin, label: 'Location', value: 'Greater Noida, UP' },
   ]
 
@@ -258,7 +263,7 @@ function ContactHero() {
 
 
 // Company info section
-function CompanyInfo() {
+function CompanyInfo({ legalName }: { legalName: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
@@ -281,7 +286,7 @@ function CompanyInfo() {
           </motion.div>
 
           <h3 className="text-2xl font-bold text-white mb-2">
-            {SITE_CONFIG.legalName}
+            {legalName}
           </h3>
           <p className="text-white/70 mb-6">
             Officially registered and recognized by the Government of India under the Startup India initiative
@@ -306,11 +311,11 @@ function CompanyInfo() {
   )
 }
 
-export default function ContactPageClient() {
+export default function ContactPageClient({ contactEmail, contactPhone, legalName }: ContactPageClientProps) {
   return (
     <SiteLayout>
-      <ContactHero />
-      <CompanyInfo />
+      <ContactHero contactEmail={contactEmail} contactPhone={contactPhone} />
+      <CompanyInfo legalName={legalName} />
     </SiteLayout>
   )
 }

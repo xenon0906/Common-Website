@@ -43,6 +43,13 @@ const contentSections = [
     color: 'bg-yellow-100 text-yellow-600',
   },
   {
+    href: '/admin/content/features-page',
+    icon: Layers,
+    title: 'Features Page',
+    description: 'Manage feature cards on the /features page with highlights',
+    color: 'bg-cyan-100 text-cyan-600',
+  },
+  {
     href: '/admin/content/testimonials',
     icon: MessageSquare,
     title: 'Testimonials',

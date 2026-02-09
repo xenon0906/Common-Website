@@ -12,13 +12,35 @@ import { NAV_LINKS, SITE_CONFIG } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { DownloadDropdown } from '@/components/shared/DownloadDropdown'
 
+interface NavLink {
+  label: string
+  href: string
+}
+
 export function GlassNavbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [isFloating, setIsFloating] = useState(false)
+  const [navLinks, setNavLinks] = useState<NavLink[]>(NAV_LINKS)
   const pathname = usePathname()
   const { scrollY } = useScroll()
   const lastScrollY = useRef(0)
+
+  // Fetch navigation from Firebase (with NAV_LINKS fallback)
+  useEffect(() => {
+    fetch('/api/navigation')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const headerLinks = data
+            .filter((l: any) => l.isActive !== false && (!l.location || l.location === 'header'))
+            .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+            .map((l: any) => ({ label: l.label, href: l.href }))
+          if (headerLinks.length > 0) setNavLinks(headerLinks)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Hide on scroll down, show on scroll up
   useMotionValueEvent(scrollY, 'change', (latest) => {
@@ -92,7 +114,7 @@ export function GlassNavbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
-              {NAV_LINKS.map((link) => {
+              {navLinks.map((link) => {
                 const isActive = pathname === link.href ||
                   (link.href !== '/' && pathname.startsWith(link.href))
 
@@ -168,7 +190,7 @@ export function GlassNavbar() {
 
                     {/* Mobile Navigation Links */}
                     <nav className="flex flex-col gap-1 py-6 flex-1">
-                      {NAV_LINKS.map((link, index) => {
+                      {navLinks.map((link, index) => {
                         const isActive = pathname === link.href ||
                           (link.href !== '/' && pathname.startsWith(link.href))
 

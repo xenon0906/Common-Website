@@ -4,22 +4,15 @@
  * Seeds Firestore with default data from lib/constants.ts
  * Run with: npm run seed:firestore
  *
+ * Supports two modes:
+ * 1. Admin SDK (preferred): Set FIREBASE_SERVICE_ACCOUNT_KEY env var
+ * 2. Client SDK (fallback): Uses NEXT_PUBLIC_FIREBASE_* env vars
+ *
  * This script will:
  * 1. Clear all existing Firestore collections
  * 2. Seed fresh data from constants.ts (primary source of truth)
  * 3. Ensure all images, favicons, and content match the website
  */
-
-import { initializeApp } from 'firebase/app'
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  getDocs,
-  deleteDoc,
-  writeBatch
-} from 'firebase/firestore'
 
 // Import constants as source of truth
 import {
@@ -38,132 +31,197 @@ import {
 
 import { DEFAULT_IMAGES } from '../lib/types/images'
 
-// Firebase config from environment
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-}
-
 // App ID for path prefix
 const APP_ID = process.env.NEXT_PUBLIC_APP_ID || 'default'
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+// ========================================
+// Firebase abstraction layer
+// ========================================
 
-// Helper to get collection path with app ID
-function getPath(...segments: string[]): string {
-  return ['artifacts', APP_ID, 'public', 'data', ...segments].join('/')
+interface FirestoreAdapter {
+  setDocument(path: string, data: Record<string, unknown>): Promise<void>
+  batchWrite(operations: Array<{ path: string; data: Record<string, unknown> }>): Promise<void>
+  clearCollection(collectionPath: string): Promise<void>
 }
 
-// Helper to clear a collection
-async function clearCollection(collectionPath: string): Promise<void> {
-  const colRef = collection(db, collectionPath)
-  const snapshot = await getDocs(colRef)
+// Admin SDK adapter
+async function createAdminAdapter(): Promise<FirestoreAdapter | null> {
+  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+  if (!serviceAccountKey) return null
 
-  const batch = writeBatch(db)
-  snapshot.docs.forEach((docSnapshot) => {
-    batch.delete(docSnapshot.ref)
-  })
+  try {
+    const admin = await import('firebase-admin')
+    const serviceAccount = JSON.parse(serviceAccountKey)
+    admin.default.initializeApp({
+      credential: admin.default.credential.cert(serviceAccount),
+    })
+    const db = admin.default.firestore()
 
-  if (snapshot.docs.length > 0) {
-    await batch.commit()
-    console.log(`  Cleared ${snapshot.docs.length} docs from ${collectionPath}`)
+    return {
+      async setDocument(path: string, data: Record<string, unknown>) {
+        await db.doc(path).set(data)
+      },
+      async batchWrite(operations) {
+        // Firestore batches limited to 500 operations
+        for (let i = 0; i < operations.length; i += 450) {
+          const chunk = operations.slice(i, i + 450)
+          const batch = db.batch()
+          chunk.forEach(op => batch.set(db.doc(op.path), op.data))
+          await batch.commit()
+        }
+      },
+      async clearCollection(collectionPath: string) {
+        const snapshot = await db.collection(collectionPath).get()
+        if (snapshot.docs.length === 0) return
+        const batch = db.batch()
+        snapshot.docs.forEach(doc => batch.delete(doc.ref))
+        await batch.commit()
+        console.log(`  Cleared ${snapshot.docs.length} docs from ${collectionPath}`)
+      },
+    }
+  } catch (error) {
+    console.warn('Admin SDK init failed:', error)
+    return null
   }
 }
 
-// Seed data definitions
-async function seedHeroContent(): Promise<void> {
+// Client SDK adapter (fallback)
+async function createClientAdapter(): Promise<FirestoreAdapter | null> {
+  const config = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  }
+
+  if (!config.apiKey || !config.projectId) return null
+
+  try {
+    const { initializeApp } = await import('firebase/app')
+    const {
+      getFirestore,
+      doc,
+      setDoc,
+      getDocs,
+      collection,
+      writeBatch,
+    } = await import('firebase/firestore')
+
+    const app = initializeApp(config)
+    const db = getFirestore(app)
+
+    return {
+      async setDocument(path: string, data: Record<string, unknown>) {
+        const segments = path.split('/')
+        const docId = segments.pop()!
+        const collPath = segments.join('/')
+        const docRef = doc(db, collPath, docId)
+        await setDoc(docRef, data)
+      },
+      async batchWrite(operations) {
+        for (let i = 0; i < operations.length; i += 450) {
+          const chunk = operations.slice(i, i + 450)
+          const batch = writeBatch(db)
+          chunk.forEach(op => {
+            const segments = op.path.split('/')
+            const docId = segments.pop()!
+            const collPath = segments.join('/')
+            const docRef = doc(db, collPath, docId)
+            batch.set(docRef, op.data)
+          })
+          await batch.commit()
+        }
+      },
+      async clearCollection(collectionPath: string) {
+        const colRef = collection(db, collectionPath)
+        const snapshot = await getDocs(colRef)
+        if (snapshot.docs.length === 0) return
+        const batch = writeBatch(db)
+        snapshot.docs.forEach(d => batch.delete(d.ref))
+        await batch.commit()
+        console.log(`  Cleared ${snapshot.docs.length} docs from ${collectionPath}`)
+      },
+    }
+  } catch (error) {
+    console.warn('Client SDK init failed:', error)
+    return null
+  }
+}
+
+// ========================================
+// Path helpers
+// ========================================
+
+function getCollectionPath(...segments: string[]): string {
+  return ['artifacts', APP_ID, 'public', 'data', ...segments].join('/')
+}
+
+function getDocPath(collectionPath: string, docId: string): string {
+  return `${collectionPath}/${docId}`
+}
+
+// ========================================
+// Seed functions
+// ========================================
+
+async function seedHeroContent(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding hero content...')
-  const heroRef = doc(db, getPath('content'), 'hero')
-  await setDoc(heroRef, {
+  await adapter.setDocument(getDocPath(getCollectionPath('content'), 'hero'), {
     headline: HERO_CONTENT.headline,
     subtext: HERO_CONTENT.subtext,
     updatedAt: new Date().toISOString(),
   })
 }
 
-async function seedStats(): Promise<void> {
+async function seedStats(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding stats...')
-  const batch = writeBatch(db)
-
-  STATS.forEach((stat, index) => {
-    const statRef = doc(db, getPath('stats'), `stat_${index}`)
-    batch.set(statRef, {
-      ...stat,
-      order: index,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = STATS.map((stat, index) => ({
+    path: getDocPath(getCollectionPath('stats'), `stat_${index}`),
+    data: { ...stat, order: index, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedFeatures(): Promise<void> {
+async function seedFeatures(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding features...')
-  const batch = writeBatch(db)
-
-  FEATURES.forEach((feature, index) => {
-    const featureRef = doc(db, getPath('features'), `feature_${index}`)
-    batch.set(featureRef, {
-      ...feature,
-      order: index,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = FEATURES.map((feature, index) => ({
+    path: getDocPath(getCollectionPath('features'), `feature_${index}`),
+    data: { ...feature, order: index, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedHowItWorks(): Promise<void> {
+async function seedHowItWorks(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding how it works...')
-  const batch = writeBatch(db)
-
-  HOW_IT_WORKS.forEach((step, index) => {
-    const stepRef = doc(db, getPath('howItWorks'), `step_${index}`)
-    batch.set(stepRef, {
-      ...step,
-      order: index,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = HOW_IT_WORKS.map((step, index) => ({
+    path: getDocPath(getCollectionPath('howItWorks'), `step_${index}`),
+    data: { ...step, order: index, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedTestimonials(): Promise<void> {
+async function seedTestimonials(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding testimonials...')
-  const batch = writeBatch(db)
-
-  TESTIMONIALS.forEach((testimonial, index) => {
-    const testimonialRef = doc(db, getPath('testimonials'), `testimonial_${index}`)
-    batch.set(testimonialRef, {
-      ...testimonial,
-      order: index,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = TESTIMONIALS.map((testimonial, index) => ({
+    path: getDocPath(getCollectionPath('testimonials'), `testimonial_${index}`),
+    data: { ...testimonial, order: index, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedAbout(): Promise<void> {
+async function seedAbout(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding about content...')
-  const aboutRef = doc(db, getPath('content'), 'about')
-  await setDoc(aboutRef, {
+  await adapter.setDocument(getDocPath(getCollectionPath('content'), 'about'), {
     ...ABOUT_STORY,
     updatedAt: new Date().toISOString(),
   })
 }
 
-async function seedApps(): Promise<void> {
+async function seedApps(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding app links...')
-  const appsRef = doc(db, getPath('content'), 'apps')
-  await setDoc(appsRef, {
+  await adapter.setDocument(getDocPath(getCollectionPath('content'), 'apps'), {
     android: {
       url: 'https://play.google.com/store/apps/details?id=in.snapgo.app&hl=en_IN',
       isLive: true,
@@ -178,10 +236,9 @@ async function seedApps(): Promise<void> {
   })
 }
 
-async function seedContact(): Promise<void> {
+async function seedContact(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding contact info...')
-  const contactRef = doc(db, getPath('content'), 'contact')
-  await setDoc(contactRef, {
+  await adapter.setDocument(getDocPath(getCollectionPath('content'), 'contact'), {
     email: SITE_CONFIG.email,
     phone: SITE_CONFIG.phone,
     address: SITE_CONFIG.address,
@@ -189,31 +246,27 @@ async function seedContact(): Promise<void> {
   })
 }
 
-async function seedSocial(): Promise<void> {
+async function seedSocial(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding social links...')
-  const socialRef = doc(db, getPath('content'), 'social')
-  await setDoc(socialRef, {
+  await adapter.setDocument(getDocPath(getCollectionPath('content'), 'social'), {
     ...SITE_CONFIG.social,
     updatedAt: new Date().toISOString(),
   })
 }
 
-async function seedImages(): Promise<void> {
+async function seedImages(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding images config...')
-  const imagesRef = doc(db, getPath('content'), 'images')
-  await setDoc(imagesRef, {
+  await adapter.setDocument(getDocPath(getCollectionPath('content'), 'images'), {
     ...DEFAULT_IMAGES,
     updatedAt: new Date().toISOString(),
   })
 }
 
-async function seedTeam(): Promise<void> {
+async function seedTeam(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding team members...')
-  const batch = writeBatch(db)
-
-  TEAM_MEMBERS.forEach((member, index) => {
-    const memberRef = doc(db, getPath('team'), `member_${index}`)
-    batch.set(memberRef, {
+  const ops = TEAM_MEMBERS.map((member, index) => ({
+    path: getDocPath(getCollectionPath('team'), `member_${index}`),
+    data: {
       name: member.name,
       role: member.role || '',
       bio: member.details,
@@ -224,16 +277,13 @@ async function seedTeam(): Promise<void> {
       order: member.order,
       isActive: true,
       updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+    },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedFAQ(): Promise<void> {
+async function seedFAQ(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding FAQ...')
-  const batch = writeBatch(db)
-
   const faqs = [
     { question: 'How does Snapgo work?', answer: 'Snapgo offers two ways to pool: No car? Match with verified co-riders, book a cab together via any app (Ola, Uber, etc.), and split the fare. Have a car? Create a ride for others to join. Either way, save up to 75% while reducing your carbon footprint.', category: 'general', order: 1 },
     { question: 'Is Snapgo safe to use?', answer: 'Yes! Safety is our top priority. All users are verified through Aadhaar KYC powered by DigiLocker. We also offer a female-only option for women riders, real-time ride tracking, emergency SOS features, and a rating system for accountability.', category: 'safety', order: 2 },
@@ -242,22 +292,15 @@ async function seedFAQ(): Promise<void> {
     { question: 'Is cab pooling legal?', answer: "Yes! Unlike carpooling with private vehicles (which is not legal for commercial use in India), cab pooling uses commercial taxis and cabs that are already licensed for passenger transport. Snapgo simply helps riders find others heading the same way to share the fare.", category: 'general', order: 5 },
   ]
 
-  faqs.forEach((faq, index) => {
-    const faqRef = doc(db, getPath('faq'), `faq_${index}`)
-    batch.set(faqRef, {
-      ...faq,
-      isActive: true,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = faqs.map((faq, index) => ({
+    path: getDocPath(getCollectionPath('faq'), `faq_${index}`),
+    data: { ...faq, isActive: true, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedFeaturesPage(): Promise<void> {
+async function seedFeaturesPage(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding features page data...')
-  const batch = writeBatch(db)
-
   const featuresPageData = [
     { icon: 'ShieldCheck', title: 'Aadhaar KYC Verification', description: 'All users are verified through Aadhaar and DigiLocker integration. Every profile displays a KYC-approved badge, eliminating fake profiles and ensuring complete identity verification. Your safety starts with knowing who you\'re riding with.', highlight: true },
     { icon: 'Users', title: 'Female-Only Option', description: 'Women can filter to connect exclusively with verified female riders for enhanced safety and comfort. This feature empowers women to travel confidently, knowing they\'re matched with fellow verified female commuters.', highlight: true },
@@ -270,23 +313,16 @@ async function seedFeaturesPage(): Promise<void> {
     { icon: 'Leaf', title: 'Eco-Friendly Impact', description: 'Every shared ride contributes to a greener planet. Track your personal carbon footprint savings and see the collective impact. Together, we\'re reducing traffic congestion and urban pollution.', highlight: false },
   ]
 
-  featuresPageData.forEach((feature, index) => {
-    const featureRef = doc(db, getPath('featuresPage'), `fp_${index}`)
-    batch.set(featureRef, {
-      ...feature,
-      order: index,
-      isActive: true,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = featuresPageData.map((feature, index) => ({
+    path: getDocPath(getCollectionPath('featuresPage'), `fp_${index}`),
+    data: { ...feature, order: index, isActive: true, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedSettings(): Promise<void> {
+async function seedSettings(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding site settings...')
-  const settingsRef = doc(db, getPath('settings'), 'config')
-  await setDoc(settingsRef, {
+  await adapter.setDocument(getDocPath(getCollectionPath('settings'), 'config'), {
     siteName: SITE_CONFIG.name,
     legalName: SITE_CONFIG.legalName,
     tagline: SITE_CONFIG.tagline,
@@ -297,7 +333,6 @@ async function seedSettings(): Promise<void> {
     address: SITE_CONFIG.address,
     social: SITE_CONFIG.social,
     founders: SITE_CONFIG.founders,
-    // Image paths
     favicon: '/favicon.png',
     logoWhite: '/images/logo/Snapgo Logo White.png',
     logoBlue: '/images/logo/Snapgo Logo Blue.png',
@@ -306,110 +341,127 @@ async function seedSettings(): Promise<void> {
   })
 }
 
-async function seedSafetyFeatures(): Promise<void> {
+async function seedSafetyFeatures(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding safety features...')
-  const batch = writeBatch(db)
-
-  SAFETY_FEATURES.forEach((feature, index) => {
-    const featureRef = doc(db, getPath('safety'), `feature_${index}`)
-    batch.set(featureRef, {
-      ...feature,
-      order: index,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = SAFETY_FEATURES.map((feature, index) => ({
+    path: getDocPath(getCollectionPath('safety'), `feature_${index}`),
+    data: { ...feature, order: index, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedJourneyTimeline(): Promise<void> {
+async function seedJourneyTimeline(adapter: FirestoreAdapter): Promise<void> {
   console.log('Seeding journey timeline...')
-  const batch = writeBatch(db)
-
-  JOURNEY_TIMELINE.forEach((item, index) => {
-    const itemRef = doc(db, getPath('journey'), `item_${index}`)
-    batch.set(itemRef, {
-      ...item,
-      order: index,
-      updatedAt: new Date().toISOString(),
-    })
-  })
-
-  await batch.commit()
+  const ops = JOURNEY_TIMELINE.map((item, index) => ({
+    path: getDocPath(getCollectionPath('journey'), `item_${index}`),
+    data: { ...item, order: index, updatedAt: new Date().toISOString() },
+  }))
+  await adapter.batchWrite(ops)
 }
 
-async function seedNavigation(): Promise<void> {
-  console.log('Seeding navigation...')
-  const batch = writeBatch(db)
+async function seedNavigation(adapter: FirestoreAdapter): Promise<void> {
+  console.log('Seeding navigation (header + footer)...')
 
-  NAV_LINKS.forEach((link, index) => {
-    const linkRef = doc(db, getPath('navigation'), `link_${index}`)
-    batch.set(linkRef, {
-      ...link,
-      order: index,
-      isActive: true,
-      updatedAt: new Date().toISOString(),
-    })
-  })
+  const headerOps = NAV_LINKS.map((link, index) => ({
+    path: getDocPath(getCollectionPath('navigation'), `link_${index}`),
+    data: { ...link, order: index, isActive: true, location: 'header', updatedAt: new Date().toISOString() },
+  }))
 
-  await batch.commit()
+  const footerLinks = [
+    { label: 'About Us', href: '/about', section: 'company', order: 0 },
+    { label: 'Our Team', href: '/team', section: 'company', order: 1 },
+    { label: 'Blog', href: '/blog', section: 'company', order: 2 },
+    { label: 'Contact', href: '/contact', section: 'company', order: 3 },
+    { label: 'How It Works', href: '/how-it-works', section: 'resources', order: 0 },
+    { label: 'Features', href: '/features', section: 'resources', order: 1 },
+    { label: 'Safety', href: '/safety', section: 'resources', order: 2 },
+    { label: 'FAQ', href: '/faq', section: 'resources', order: 3 },
+    { label: 'Terms of Service', href: '/terms', section: 'legal', order: 0 },
+    { label: 'Privacy Policy', href: '/privacy', section: 'legal', order: 1 },
+    { label: 'Refund Policy', href: '/refund', section: 'legal', order: 2 },
+  ]
+
+  const footerOps = footerLinks.map((link, index) => ({
+    path: getDocPath(getCollectionPath('navigation'), `footer_${index}`),
+    data: { ...link, isActive: true, location: 'footer', updatedAt: new Date().toISOString() },
+  }))
+
+  await adapter.batchWrite([...headerOps, ...footerOps])
 }
 
+// ========================================
 // Main seed function
+// ========================================
+
 async function seedFirestore(): Promise<void> {
   console.log('='.repeat(60))
   console.log('Snapgo Firestore Seed Script')
   console.log('='.repeat(60))
   console.log(`App ID: ${APP_ID}`)
-  console.log(`Project ID: ${firebaseConfig.projectId}`)
   console.log('')
 
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.error('Error: Firebase configuration not found!')
-    console.error('Make sure you have set the following environment variables:')
-    console.error('  - NEXT_PUBLIC_FIREBASE_API_KEY')
-    console.error('  - NEXT_PUBLIC_FIREBASE_PROJECT_ID')
-    console.error('  - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN')
-    console.error('  - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET')
-    console.error('  - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID')
-    console.error('  - NEXT_PUBLIC_FIREBASE_APP_ID')
+  // Try Admin SDK first, then fall back to Client SDK
+  console.log('Initializing Firebase...')
+  let adapter = await createAdminAdapter()
+  if (adapter) {
+    console.log('  Using: Firebase Admin SDK (service account)')
+  } else {
+    console.log('  Admin SDK not available, trying Client SDK...')
+    adapter = await createClientAdapter()
+    if (adapter) {
+      console.log('  Using: Firebase Client SDK')
+      console.log('  Note: Client SDK may fail if Firestore rules block writes.')
+      console.log('  For guaranteed writes, set FIREBASE_SERVICE_ACCOUNT_KEY env var.')
+    }
+  }
+
+  if (!adapter) {
+    console.error('')
+    console.error('ERROR: No Firebase credentials found!')
+    console.error('')
+    console.error('Option 1 (Recommended): Set FIREBASE_SERVICE_ACCOUNT_KEY')
+    console.error('  1. Go to Firebase Console > Project Settings > Service Accounts')
+    console.error('  2. Click "Generate new private key"')
+    console.error('  3. Add to .env.local:')
+    console.error("     FIREBASE_SERVICE_ACCOUNT_KEY='{...json contents...}'")
+    console.error('')
+    console.error('Option 2: Set NEXT_PUBLIC_FIREBASE_* env vars for Client SDK')
     process.exit(1)
   }
+
+  console.log('')
 
   try {
     // Clear existing collections
     console.log('Clearing existing data...')
-    await clearCollection(getPath('stats'))
-    await clearCollection(getPath('features'))
-    await clearCollection(getPath('howItWorks'))
-    await clearCollection(getPath('testimonials'))
-    await clearCollection(getPath('team'))
-    await clearCollection(getPath('faq'))
-    await clearCollection(getPath('safety'))
-    await clearCollection(getPath('journey'))
-    await clearCollection(getPath('navigation'))
-    await clearCollection(getPath('featuresPage'))
+    const collectionsToClean = [
+      'stats', 'features', 'howItWorks', 'testimonials',
+      'team', 'faq', 'safety', 'journey', 'navigation', 'featuresPage',
+    ]
+    for (const col of collectionsToClean) {
+      await adapter.clearCollection(getCollectionPath(col))
+    }
     console.log('')
 
     // Seed all data
     console.log('Seeding new data...')
-    await seedHeroContent()
-    await seedStats()
-    await seedFeatures()
-    await seedHowItWorks()
-    await seedTestimonials()
-    await seedAbout()
-    await seedApps()
-    await seedContact()
-    await seedSocial()
-    await seedImages()
-    await seedTeam()
-    await seedFAQ()
-    await seedFeaturesPage()
-    await seedSettings()
-    await seedSafetyFeatures()
-    await seedJourneyTimeline()
-    await seedNavigation()
+    await seedHeroContent(adapter)
+    await seedStats(adapter)
+    await seedFeatures(adapter)
+    await seedHowItWorks(adapter)
+    await seedTestimonials(adapter)
+    await seedAbout(adapter)
+    await seedApps(adapter)
+    await seedContact(adapter)
+    await seedSocial(adapter)
+    await seedImages(adapter)
+    await seedTeam(adapter)
+    await seedFAQ(adapter)
+    await seedFeaturesPage(adapter)
+    await seedSettings(adapter)
+    await seedSafetyFeatures(adapter)
+    await seedJourneyTimeline(adapter)
+    await seedNavigation(adapter)
 
     console.log('')
     console.log('='.repeat(60))
@@ -417,26 +469,30 @@ async function seedFirestore(): Promise<void> {
     console.log('='.repeat(60))
     console.log('')
     console.log('Collections seeded:')
-    console.log('  - content/hero')
-    console.log('  - stats/')
-    console.log('  - features/')
-    console.log('  - howItWorks/')
-    console.log('  - testimonials/')
-    console.log('  - content/about')
-    console.log('  - content/apps')
-    console.log('  - content/contact')
-    console.log('  - content/social')
-    console.log('  - content/images')
-    console.log('  - team/')
-    console.log('  - faq/')
+    console.log('  - content/hero, about, apps, contact, social, images')
+    console.log('  - stats/ (4 items)')
+    console.log('  - features/ (6 items)')
+    console.log('  - howItWorks/ (3 items)')
+    console.log('  - testimonials/ (3 items)')
+    console.log('  - team/ (7 members)')
+    console.log('  - faq/ (5 items)')
+    console.log('  - featuresPage/ (9 items)')
     console.log('  - settings/config')
-    console.log('  - safety/')
-    console.log('  - journey/')
-    console.log('  - navigation/')
-    console.log('  - featuresPage/')
-
+    console.log('  - safety/ features')
+    console.log('  - journey/ timeline')
+    console.log('  - navigation/ (header + footer links)')
   } catch (error) {
+    console.error('')
     console.error('Error seeding Firestore:', error)
+    if (String(error).includes('PERMISSION_DENIED')) {
+      console.error('')
+      console.error('PERMISSION_DENIED: Firestore rules are blocking writes.')
+      console.error('To fix this, set FIREBASE_SERVICE_ACCOUNT_KEY in .env.local:')
+      console.error('  1. Go to Firebase Console > Project Settings > Service Accounts')
+      console.error('  2. Click "Generate new private key"')
+      console.error('  3. Copy the JSON and add to .env.local:')
+      console.error("     FIREBASE_SERVICE_ACCOUNT_KEY='{...json contents...}'")
+    }
     process.exit(1)
   }
 }

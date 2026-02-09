@@ -501,6 +501,77 @@ export async function getFeaturesPageData(): Promise<FeaturesPageFeatureData[]> 
   return features.filter(f => f.isActive !== false)
 }
 
+// How It Works detailed step data (for /how-it-works page)
+export interface HowItWorksDetailedStep {
+  id: string
+  icon: string
+  title: string
+  description: string
+  details: string
+  mode: 'realtime' | 'scheduled'
+  order: number
+  isActive: boolean
+}
+
+export interface HowItWorksComparison {
+  id: string
+  feature: string
+  realTime: string
+  scheduled: string
+  icon: string
+  order: number
+}
+
+const DEFAULT_HOW_IT_WORKS_DETAILED: HowItWorksDetailedStep[] = [
+  { id: 'rt_0', icon: 'MapPin', title: 'Enter Your Locations', description: 'Set your pickup point and destination', details: 'Use auto-detect for instant location or manually enter addresses. Specify how many people are traveling with you for accurate matching.', mode: 'realtime', order: 0, isActive: true },
+  { id: 'rt_1', icon: 'Search', title: 'Set Your Preferences', description: 'Customize your ride matching options', details: 'Choose the number of co-riders, enable female-only matching for added safety, and set your preferred search radius (750m default, expandable to 1km).', mode: 'realtime', order: 1, isActive: true },
+  { id: 'rt_2', icon: 'Users', title: 'Find Verified Matches', description: 'Connect with nearby verified riders', details: 'Our algorithm instantly finds KYC-verified users heading your way. View profiles, ratings, and verification status before connecting.', mode: 'realtime', order: 2, isActive: true },
+  { id: 'rt_3', icon: 'MessageCircle', title: 'Connect & Coordinate', description: 'Chat securely with your co-riders', details: 'Send ride requests to potential matches. Once accepted, a secure group chat opens for easy coordination of pickup time and location.', mode: 'realtime', order: 3, isActive: true },
+  { id: 'rt_4', icon: 'Navigation', title: 'Meet at the Optimal Point', description: 'Navigate to your suggested meetup', details: 'The app calculates the most convenient meeting point for all riders. Use the built-in navigation to reach the pickup spot effortlessly.', mode: 'realtime', order: 4, isActive: true },
+  { id: 'rt_5', icon: 'Wallet', title: 'Pool & Save', description: 'Two ways to share, one goal', details: "No car? Book via Ola, Uber, or any cab service together with your matches. Have a car? Create a ride and share costs with co-riders. Either way, you save up to 75% while reducing emissions.", mode: 'realtime', order: 5, isActive: true },
+  { id: 'sc_0', icon: 'Calendar', title: 'Plan Your Trip', description: 'Set date, time, and route details', details: 'Enter your pickup location, destination, preferred date and time. Perfect for regular commutes or planned journeys.', mode: 'scheduled', order: 0, isActive: true },
+  { id: 'sc_1', icon: 'Search', title: 'Browse Available Rides', description: 'Find existing rides matching your route', details: 'Search within a 2km radius to find rides posted by other users. See ride details, host profiles, and available seats.', mode: 'scheduled', order: 1, isActive: true },
+  { id: 'sc_2', icon: 'Users', title: 'Request to Join or Create', description: 'Join existing rides or host your own', details: 'Send join requests to suitable rides, or create your own ride and let others find you. Set preferences like gender filter and additional notes.', mode: 'scheduled', order: 2, isActive: true },
+  { id: 'sc_3', icon: 'Check', title: 'Confirm & Connect', description: 'Get confirmed and start chatting', details: 'Once your request is accepted (or you accept joiners), connect via group chat to finalize details before the trip.', mode: 'scheduled', order: 3, isActive: true },
+]
+
+const DEFAULT_HOW_IT_WORKS_COMPARISONS: HowItWorksComparison[] = [
+  { id: 'cmp_0', feature: 'Match Speed', realTime: 'Instant (30 sec)', scheduled: 'Planned ahead', icon: 'Clock', order: 0 },
+  { id: 'cmp_1', feature: 'Search Radius', realTime: '750m - 1km', scheduled: 'Up to 2km', icon: 'Target', order: 1 },
+  { id: 'cmp_2', feature: 'Best For', realTime: 'Spontaneous trips', scheduled: 'Daily commutes', icon: 'Zap', order: 2 },
+  { id: 'cmp_3', feature: 'Flexibility', realTime: 'High - ride now', scheduled: 'Plan & confirm', icon: 'Navigation', order: 3 },
+]
+
+// Navigation data type
+export interface NavLinkData {
+  id: string
+  label: string
+  href: string
+  order: number
+  isActive: boolean
+  location: 'header' | 'footer'
+  section?: string
+}
+
+export async function getHowItWorksDetailed(): Promise<HowItWorksDetailedStep[]> {
+  if (!isFirebaseConfigured()) return DEFAULT_HOW_IT_WORKS_DETAILED.filter(s => s.isActive)
+  const steps = await getFirestoreCollection<HowItWorksDetailedStep>('howItWorksDetailed', DEFAULT_HOW_IT_WORKS_DETAILED, 'order')
+  return steps.filter(s => s.isActive !== false)
+}
+
+export async function getHowItWorksComparisons(): Promise<HowItWorksComparison[]> {
+  if (!isFirebaseConfigured()) return DEFAULT_HOW_IT_WORKS_COMPARISONS
+  return getFirestoreCollection<HowItWorksComparison>('howItWorksComparisons', DEFAULT_HOW_IT_WORKS_COMPARISONS, 'order')
+}
+
+export async function getNavigation(location?: 'header' | 'footer'): Promise<NavLinkData[]> {
+  if (!isFirebaseConfigured()) return []
+  const links = await getFirestoreCollection<NavLinkData>('navigation', [], 'order')
+  const active = links.filter(l => l.isActive !== false)
+  if (location) return active.filter(l => l.location === location)
+  return active
+}
+
 // Get images configuration
 export async function getImagesConfig(): Promise<SiteImagesConfig> {
   if (!isFirebaseConfigured()) return DEFAULT_IMAGES
@@ -675,4 +746,6 @@ export {
   DEFAULT_TEAM,
   DEFAULT_SAFETY,
   DEFAULT_HOMEPAGE_CONFIG,
+  DEFAULT_HOW_IT_WORKS_DETAILED,
+  DEFAULT_HOW_IT_WORKS_COMPARISONS,
 }

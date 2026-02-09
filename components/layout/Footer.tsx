@@ -26,7 +26,7 @@ interface ContactInfo {
 
 const DEFAULT_WHITE_LOGO = '/images/logo/Snapgo%20Logo%20White.png'
 
-const footerLinks = {
+const DEFAULT_FOOTER_LINKS = {
   company: [
     { label: 'About Us', href: '/about' },
     { label: 'How It Works', href: '/how-it-works' },
@@ -46,6 +46,17 @@ const footerLinks = {
   ],
 }
 
+interface FooterLinkItem {
+  label: string
+  href: string
+}
+
+interface FooterLinksMap {
+  company: FooterLinkItem[]
+  resources: FooterLinkItem[]
+  legal: FooterLinkItem[]
+}
+
 export function Footer() {
   const currentYear = new Date().getFullYear()
   const { settings } = useSettings()
@@ -61,6 +72,7 @@ export function Footer() {
     description: settings.site?.description || SITE_CONFIG.description,
   }
   const [logoUrl, setLogoUrl] = useState(DEFAULT_WHITE_LOGO)
+  const [footerLinks, setFooterLinks] = useState<FooterLinksMap>(DEFAULT_FOOTER_LINKS)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -96,6 +108,38 @@ export function Footer() {
       })
       .catch(() => {
         // Keep default on error
+      })
+
+    // Fetch footer navigation links from Firebase
+    fetch('/api/navigation', { signal })
+      .then(res => res.json())
+      .then((data: Array<{ label: string; href: string; location?: string; section?: string; isActive?: boolean; order?: number }>) => {
+        if (Array.isArray(data)) {
+          const footerItems = data
+            .filter(item => item.location === 'footer' && item.isActive !== false)
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+          const grouped: FooterLinksMap = {
+            company: [],
+            resources: [],
+            legal: [],
+          }
+
+          for (const item of footerItems) {
+            const section = item.section as keyof FooterLinksMap
+            if (section && grouped[section]) {
+              grouped[section].push({ label: item.label, href: item.href })
+            }
+          }
+
+          // Only update if we got data in at least one section
+          if (grouped.company.length || grouped.resources.length || grouped.legal.length) {
+            setFooterLinks(grouped)
+          }
+        }
+      })
+      .catch(() => {
+        // Keep defaults on error
       })
 
     return () => controller.abort()
