@@ -45,6 +45,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_ABOUT)
   } catch (error) {
     console.error('Error fetching about content:', error)
-    return NextResponse.json(DEFAULT_ABOUT, { status: 200 })
+    return NextResponse.json(DEFAULT_ABOUT, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

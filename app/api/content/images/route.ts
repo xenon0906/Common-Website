@@ -20,6 +20,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_IMAGES)
   } catch (error) {
     console.error('Error fetching images config:', error)
-    return NextResponse.json(DEFAULT_IMAGES, { status: 200 })
+    return NextResponse.json(DEFAULT_IMAGES, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

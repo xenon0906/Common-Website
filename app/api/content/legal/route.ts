@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching legal content:', error)
     return NextResponse.json(
       { error: 'Failed to fetch legal content' },
-      { status: 500 }
+      { status: 500, headers: { 'X-Data-Source': 'fallback' } }
     )
   }
 }

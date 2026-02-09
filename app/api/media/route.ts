@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
 import { getServerDb, getServerAppId } from '@/lib/firebase-server'
+import { registerMediaSchema, validateBody } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,7 +43,11 @@ export async function POST(request: NextRequest) {
     if (authError) return authError
 
     const body = await request.json()
-    const { filename, url, category, mimeType, size, alt } = body
+    const validation = validateBody(registerMediaSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+    const { filename, url, category, mimeType, size, alt } = validation.data
 
     const db = getServerDb()
     if (!db) {
@@ -96,6 +101,19 @@ export async function DELETE(request: NextRequest) {
     const docSnap = await getDoc(docRef)
     if (!docSnap.exists()) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
+    }
+
+    // Clean up actual file from disk for local uploads
+    const fileData = docSnap.data()
+    if (fileData?.url && typeof fileData.url === 'string' && fileData.url.startsWith('/uploads/')) {
+      try {
+        const { unlink } = await import('fs/promises')
+        const path = await import('path')
+        const filePath = path.join(process.cwd(), 'public', fileData.url)
+        await unlink(filePath)
+      } catch (fsError) {
+        console.warn('Failed to delete file from disk:', fsError)
+      }
     }
 
     await deleteDoc(docRef)

@@ -32,6 +32,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_APP_LINKS)
   } catch (error) {
     console.error('Error fetching app store links:', error)
-    return NextResponse.json(DEFAULT_APP_LINKS, { status: 200 })
+    return NextResponse.json(DEFAULT_APP_LINKS, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

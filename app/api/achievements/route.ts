@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { getServerDb, getServerAppId } from '@/lib/firebase-server'
+import { createAchievementSchema, validateBody } from '@/lib/validations'
 
 export async function GET() {
   try {
@@ -31,11 +33,20 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request, 'achievements', { maxRequests: 10, windowMs: 10 * 60 * 1000 })
+  if (rateLimited) return rateLimited
+
   const authError = await requireAuth()
   if (authError) return authError
 
   try {
     const body = await request.json()
+    const validation = validateBody(createAchievementSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+    const validated = validation.data
+
     const db = getServerDb()
     if (!db) {
       return NextResponse.json(
@@ -49,12 +60,12 @@ export async function POST(request: NextRequest) {
     const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'achievements')
 
     const achievementData = {
-      type: body.type,
-      title: body.title,
-      content: body.content || null,
-      mediaUrl: body.mediaUrl || null,
-      embedCode: body.embedCode || null,
-      metrics: body.metrics || null,
+      type: validated.type,
+      title: validated.title,
+      content: validated.content || null,
+      mediaUrl: validated.mediaUrl || null,
+      embedCode: validated.embedCode || null,
+      metrics: validated.metrics || null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }

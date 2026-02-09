@@ -6,6 +6,7 @@ import {
   getCollectionPath,
 } from '@/lib/firebase-server'
 import { DEFAULT_TEAM, TeamMemberData } from '@/lib/content'
+import { createTeamMemberSchema, validateBody } from '@/lib/validations'
 
 // Required for static export - returns empty array (API routes won't work on static hosting)
 export function generateStaticParams() {
@@ -79,7 +80,12 @@ export async function PUT(
     }
 
     const body = await req.json()
-    const { name, bio, details, imageUrl, portraitUrl, email, linkedin, twitter, order, isActive, role, category } = body
+    const validation = validateBody(createTeamMemberSchema.partial(), body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+    const { name, bio, details, imageUrl, portraitUrl, email, linkedin, twitter, order, role, category } = validation.data
+    const isActive = body.isActive
 
     const db = getAdminFirestore()
     const collectionPath = getCollectionPath('team')

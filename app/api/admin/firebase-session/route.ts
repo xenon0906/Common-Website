@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 import { verifyIdToken, isAdminConfigured } from '@/lib/firebase-admin'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // Hash function for session token
 function hashString(str: string): string {
@@ -14,6 +15,9 @@ function hashString(str: string): string {
  * This bridges Firebase Auth with cookie-based API authentication
  */
 export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request, 'firebase-session', { maxRequests: 5, windowMs: 15 * 60 * 1000 })
+  if (rateLimited) return rateLimited
+
   try {
     const { idToken } = await request.json()
 

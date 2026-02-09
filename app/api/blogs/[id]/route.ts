@@ -8,6 +8,7 @@ import {
   getDoc,
 } from '@/lib/firebase-server'
 import { sanitizeSlug } from '@/lib/utils'
+import { updateBlogSchema, validateBody } from '@/lib/validations'
 
 // Required for static export
 export function generateStaticParams() {
@@ -57,6 +58,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const body = await request.json()
+    const validation = validateBody(updateBlogSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+    const validated = validation.data
+
     const db = getServerDb()
     if (!db) {
       return NextResponse.json(
@@ -70,20 +77,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
 
     const updateData: Record<string, unknown> = {
-      title: body.title,
-      slug: sanitizeSlug(body.slug),
-      content: body.content,
-      metaDesc: body.metaDesc || '',
-      excerpt: body.excerpt || '',
-      keywords: body.keywords || '',
-      imageUrl: body.imageUrl || '',
-      published: body.published,
-      status: body.status || (body.published ? 'published' : 'draft'),
+      title: validated.title,
+      slug: sanitizeSlug(validated.slug),
+      content: validated.content,
+      metaDesc: validated.metaDesc,
+      excerpt: validated.excerpt,
+      keywords: validated.keywords,
+      imageUrl: validated.imageUrl,
+      published: validated.published,
+      status: validated.status || (validated.published ? 'published' : 'draft'),
       updatedAt: serverTimestamp(),
     }
 
-    if (body.wordCount) updateData.wordCount = body.wordCount
-    if (body.readingTime) updateData.readingTime = body.readingTime
+    if (validated.wordCount) updateData.wordCount = validated.wordCount
+    if (validated.readingTime) updateData.readingTime = validated.readingTime
 
     await setDoc(docRef, updateData, { merge: true })
 

@@ -22,6 +22,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_FEATURES)
   } catch (error) {
     console.error('Error fetching features:', error)
-    return NextResponse.json(DEFAULT_FEATURES, { status: 200 })
+    return NextResponse.json(DEFAULT_FEATURES, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

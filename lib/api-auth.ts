@@ -69,11 +69,17 @@ async function verifyFirebaseToken(): Promise<boolean> {
     }
 
     // If Admin SDK is not configured (returns null without env var),
-    // fall back to cookie-based check
+    // fall back to cookie-based check in development only
     if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[api-auth] FIREBASE_SERVICE_ACCOUNT_KEY not set. Rejecting unverified token in production.')
+        return false
+      }
+      // Development only: accept cookie-based fallback with warning
       const cookieStore = await cookies()
       const firebaseTokenHash = cookieStore.get('firebase_token_hash')?.value
       if (firebaseTokenHash) {
+        console.warn('[api-auth] Accepting unverified Firebase token in development mode.')
         return true
       }
     }

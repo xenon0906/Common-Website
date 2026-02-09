@@ -13,6 +13,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_SAFETY)
   } catch (error) {
     console.error('Error fetching safety content:', error)
-    return NextResponse.json(DEFAULT_SAFETY, { status: 200 })
+    return NextResponse.json(DEFAULT_SAFETY, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

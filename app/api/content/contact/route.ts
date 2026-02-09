@@ -35,6 +35,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_CONTACT)
   } catch (error) {
     console.error('Error fetching contact info:', error)
-    return NextResponse.json(DEFAULT_CONTACT, { status: 200 })
+    return NextResponse.json(DEFAULT_CONTACT, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

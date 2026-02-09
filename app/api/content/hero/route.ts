@@ -19,6 +19,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_HERO)
   } catch (error) {
     console.error('Error fetching hero content:', error)
-    return NextResponse.json(DEFAULT_HERO, { status: 200 })
+    return NextResponse.json(DEFAULT_HERO, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

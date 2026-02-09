@@ -22,6 +22,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_STEPS)
   } catch (error) {
     console.error('Error fetching how it works steps:', error)
-    return NextResponse.json(DEFAULT_STEPS, { status: 200 })
+    return NextResponse.json(DEFAULT_STEPS, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

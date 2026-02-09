@@ -22,6 +22,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_STATS)
   } catch (error) {
     console.error('Error fetching statistics:', error)
-    return NextResponse.json(DEFAULT_STATS, { status: 200 })
+    return NextResponse.json(DEFAULT_STATS, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

@@ -22,6 +22,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_TESTIMONIALS)
   } catch (error) {
     console.error('Error fetching testimonials:', error)
-    return NextResponse.json(DEFAULT_TESTIMONIALS, { status: 200 })
+    return NextResponse.json(DEFAULT_TESTIMONIALS, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

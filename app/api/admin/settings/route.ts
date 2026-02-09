@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { getServerDb, getServerAppId, doc, getDoc } from '@/lib/firebase-server'
+import { settingsSchema, updateSettingSchema, validateBody } from '@/lib/validations'
 
 const DEFAULT_SETTINGS = {
   site: {
@@ -85,11 +87,18 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request, 'settings', { maxRequests: 10, windowMs: 10 * 60 * 1000 })
+  if (rateLimited) return rateLimited
+
   const authError = await requireAuth()
   if (authError) return authError
 
   try {
     const newSettings = await request.json()
+    const validation = validateBody(settingsSchema, newSettings)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
     const db = getServerDb()
     if (!db) {
       return NextResponse.json(
@@ -126,14 +135,12 @@ export async function PUT(request: NextRequest) {
   if (authError) return authError
 
   try {
-    const { category, key, value } = await request.json()
-
-    if (!category || !key) {
-      return NextResponse.json(
-        { error: 'Category and key are required' },
-        { status: 400 }
-      )
+    const body = await request.json()
+    const validation = validateBody(updateSettingSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
+    const { category, key, value } = validation.data
 
     const db = getServerDb()
     if (!db) {

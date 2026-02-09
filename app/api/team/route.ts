@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
+import { checkRateLimit } from '@/lib/rate-limit'
 import {
   getFirestoreCollection,
   isFirebaseConfigured,
@@ -38,6 +39,9 @@ export async function GET(request: NextRequest) {
 
 // POST - Create a new team member in Firestore
 export async function POST(req: NextRequest) {
+  const rateLimited = checkRateLimit(req, 'team', { maxRequests: 10, windowMs: 10 * 60 * 1000 })
+  if (rateLimited) return rateLimited
+
   // Require admin authentication
   const authError = await requireAuth()
   if (authError) return authError

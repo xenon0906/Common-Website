@@ -27,6 +27,9 @@ export async function GET() {
     return NextResponse.json(DEFAULT_SOCIAL)
   } catch (error) {
     console.error('Error fetching social links:', error)
-    return NextResponse.json(DEFAULT_SOCIAL, { status: 200 })
+    return NextResponse.json(DEFAULT_SOCIAL, {
+      status: 200,
+      headers: { 'X-Data-Source': 'fallback' },
+    })
   }
 }

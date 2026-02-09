@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { getServerDb, getServerAppId } from '@/lib/firebase-server'
+import { createNavigationSchema, bulkUpdateNavigationSchema, validateBody } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,11 +40,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimited = checkRateLimit(request, 'navigation', { maxRequests: 10, windowMs: 10 * 60 * 1000 })
+    if (rateLimited) return rateLimited
+
     const authError = await requireAuth()
     if (authError) return authError
 
     const body = await request.json()
-    const { label, href, icon, location, section, visible, external, order } = body
+    const validation = validateBody(createNavigationSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+    const { label, href, icon, location, section, visible, external, order } = validation.data
 
     const db = getServerDb()
     if (!db) {

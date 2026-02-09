@@ -11,17 +11,17 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 // Constant-time string comparison (Edge runtime compatible)
-// Prevents timing attacks by always comparing all bytes
+// Prevents timing attacks by always comparing all bytes, even on length mismatch
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false
-  }
+  const maxLen = Math.max(a.length, b.length)
+  const paddedA = a.padEnd(maxLen, '\0')
+  const paddedB = b.padEnd(maxLen, '\0')
 
   const encoder = new TextEncoder()
-  const aBytes = encoder.encode(a)
-  const bBytes = encoder.encode(b)
+  const aBytes = encoder.encode(paddedA)
+  const bBytes = encoder.encode(paddedB)
 
-  let result = 0
+  let result = a.length ^ b.length // non-zero if lengths differ
   for (let i = 0; i < aBytes.length; i++) {
     result |= aBytes[i] ^ bBytes[i]
   }

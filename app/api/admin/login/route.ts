@@ -63,14 +63,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify credentials
-    const usernameMatch = username === ADMIN_USERNAME
+    // Verify credentials (timing-safe to prevent timing attacks)
+    const usernameMatch = crypto.timingSafeEqual(
+      Buffer.from(username.padEnd(256, '\0')),
+      Buffer.from(ADMIN_USERNAME.padEnd(256, '\0'))
+    )
 
     // Check password - try plain password first, then hashed, then default
     let passwordMatch = false
     if (ADMIN_PASSWORD_PLAIN) {
-      // Plain password comparison (simpler for Vercel env vars)
-      passwordMatch = password === ADMIN_PASSWORD_PLAIN
+      // Plain password comparison (timing-safe)
+      passwordMatch = crypto.timingSafeEqual(
+        Buffer.from(password.padEnd(256, '\0')),
+        Buffer.from(ADMIN_PASSWORD_PLAIN.padEnd(256, '\0'))
+      )
     } else if (ADMIN_PASSWORD_HASH) {
       // Bcrypt hash comparison
       passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH)

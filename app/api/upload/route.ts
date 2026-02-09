@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadFile, FileCategory, validateUpload, formatFileSize, UPLOAD_CONFIG } from '@/lib/upload'
 import { requireAuth } from '@/lib/api-auth'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request, 'upload', { maxRequests: 20, windowMs: 10 * 60 * 1000 })
+  if (rateLimited) return rateLimited
+
   const authError = await requireAuth()
   if (authError) return authError
 

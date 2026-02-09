@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
 import { getServerDb, getServerAppId, doc, getDoc } from '@/lib/firebase-server'
+import { createAchievementSchema, validateBody } from '@/lib/validations'
 
 export function generateStaticParams() {
   return []
@@ -55,6 +56,12 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
+    const validation = validateBody(createAchievementSchema.partial(), body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+    const validated = validation.data
+
     const db = getServerDb()
     if (!db) {
       return NextResponse.json(
@@ -68,12 +75,12 @@ export async function PUT(
     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'achievements', id)
 
     const updateData = {
-      type: body.type,
-      title: body.title,
-      content: body.content || null,
-      mediaUrl: body.mediaUrl || null,
-      embedCode: body.embedCode || null,
-      metrics: body.metrics || null,
+      type: validated.type,
+      title: validated.title,
+      content: validated.content || null,
+      mediaUrl: validated.mediaUrl || null,
+      embedCode: validated.embedCode || null,
+      metrics: validated.metrics || null,
       updatedAt: new Date().toISOString(),
     }
 
