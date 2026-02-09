@@ -296,8 +296,13 @@ const DEFAULT_FAQS: FAQData[] = [
 ]
 
 const DEFAULT_TEAM: TeamMemberData[] = [
-  { id: '1', name: 'Mohit Purohit', role: 'Co-Founder & CEO', bio: 'Driving the vision and strategy of Snapgo.', imageUrl: null, linkedin: null, twitter: null, order: 1, isActive: true },
-  { id: '2', name: 'Surya Purohit', role: 'Co-Founder & COO', bio: 'Managing operations and business growth.', imageUrl: null, linkedin: null, twitter: null, order: 2, isActive: true },
+  { id: '1', name: 'Mohit Purohit', role: 'Founder & CTO', bio: 'Serial entrepreneur with experience building, scaling, and selling mobile applications. Drives product development and technology strategy for Snapgo.', imageUrl: '/images/team/mohit.png', linkedin: 'https://www.linkedin.com/in/mohitpurohitbr/', twitter: null, order: 1, isActive: true },
+  { id: '2', name: 'Surya Purohit', role: 'Co-Founder & CEO', bio: 'Digital marketing specialist expert in Meta Ads, Google Ads, and performance marketing. Drives growth and strategic partnerships.', imageUrl: '/images/team/surya.png', linkedin: 'https://www.linkedin.com/in/snapgosurya/', twitter: null, order: 2, isActive: true },
+  { id: '3', name: 'Anurag Tiwari', role: 'Chief Marketing Officer', bio: 'Multi-business founder with deep knowledge of traditional and digital marketing channels. Leads strategic communications and market intelligence.', imageUrl: '/images/team/anurag.png', linkedin: 'https://www.linkedin.com/in/snapgoanurag/', twitter: null, order: 3, isActive: true },
+  { id: '4', name: 'Siddhanth Kunwar', role: 'Full Stack Developer', bio: 'Building and maintaining the full stack infrastructure and web platform for Snapgo.', imageUrl: null, linkedin: null, twitter: null, order: 4, isActive: true },
+  { id: '5', name: 'Charu Lata', role: 'Marketing Lead', bio: 'Driving marketing initiatives, brand awareness, and user engagement campaigns.', imageUrl: null, linkedin: null, twitter: null, order: 5, isActive: true },
+  { id: '6', name: 'Arshita Pal', role: 'UI/UX Designer', bio: 'Designing intuitive and beautiful user experiences for the Snapgo platform.', imageUrl: null, linkedin: null, twitter: null, order: 6, isActive: true },
+  { id: '7', name: 'Sachin Kumar', role: 'Operations Manager', bio: 'Managing day-to-day operations, logistics, and operational efficiency.', imageUrl: null, linkedin: null, twitter: null, order: 7, isActive: true },
 ]
 
 // Data fetching functions - fetch from Firebase with static fallbacks
@@ -465,6 +470,35 @@ export async function getTeamMembers(): Promise<TeamMemberData[]> {
   if (!isFirebaseConfigured()) return DEFAULT_TEAM
   const team = await getFirestoreCollection<TeamMemberData>('team', DEFAULT_TEAM, 'order')
   return team.filter(m => m.isActive !== false)
+}
+
+// Features page data (separate from homepage features)
+export interface FeaturesPageFeatureData {
+  id: string
+  icon: string
+  title: string
+  description: string
+  highlight: boolean
+  order: number
+  isActive: boolean
+}
+
+const DEFAULT_FEATURES_PAGE: FeaturesPageFeatureData[] = [
+  { id: 'fp_0', icon: 'ShieldCheck', title: 'Aadhaar KYC Verification', description: 'All users are verified through Aadhaar and DigiLocker integration. Every profile displays a KYC-approved badge, eliminating fake profiles and ensuring complete identity verification. Your safety starts with knowing who you\'re riding with.', highlight: true, order: 0, isActive: true },
+  { id: 'fp_1', icon: 'Users', title: 'Female-Only Option', description: 'Women can filter to connect exclusively with verified female riders for enhanced safety and comfort. This feature empowers women to travel confidently, knowing they\'re matched with fellow verified female commuters.', highlight: true, order: 1, isActive: true },
+  { id: 'fp_2', icon: 'MapPin', title: 'Smart Radius Matching', description: 'Our intelligent algorithm matches riders within a 750m radius for both source and destination, ensuring perfect route alignment. The radius auto-expands to 1km if no immediate matches are found, maximizing your ride opportunities.', highlight: false, order: 2, isActive: true },
+  { id: 'fp_3', icon: 'AlertTriangle', title: 'SOS Safety Feature', description: 'One-tap emergency alert instantly shares your live location and complete trip details with your saved emergency contacts. In any situation, help is just one tap away. Your safety is our absolute priority.', highlight: true, order: 3, isActive: true },
+  { id: 'fp_4', icon: 'MessageCircle', title: 'In-App Group Chat', description: 'A secure group chat is automatically created when riders match. Coordinate pickup points, share ETAs, and communicate seamlessly with your co-riders without exchanging personal phone numbers.', highlight: false, order: 4, isActive: true },
+  { id: 'fp_5', icon: 'Clock', title: 'Real-Time & Scheduled Rides', description: 'Need a ride now? Find matches instantly. Planning ahead? Schedule rides in advance. Snapgo adapts to your lifestyle, whether you\'re spontaneous or prefer to plan your commute meticulously.', highlight: false, order: 5, isActive: true },
+  { id: 'fp_6', icon: 'Navigation', title: 'Optimal Path Suggestion', description: 'Our smart algorithm calculates and suggests the most convenient meeting point for all matched riders. No more complicated coordination—just show up at the optimized pickup location.', highlight: false, order: 6, isActive: true },
+  { id: 'fp_7', icon: 'Wallet', title: 'Transparent Fare Splitting', description: 'Crystal-clear cost breakdown shows exactly what you pay. Save up to 75% compared to solo cab rides. If no match is found, you get an instant refund—no questions asked, no delays.', highlight: false, order: 7, isActive: true },
+  { id: 'fp_8', icon: 'Leaf', title: 'Eco-Friendly Impact', description: 'Every shared ride contributes to a greener planet. Track your personal carbon footprint savings and see the collective impact. Together, we\'re reducing traffic congestion and urban pollution.', highlight: false, order: 8, isActive: true },
+]
+
+export async function getFeaturesPageData(): Promise<FeaturesPageFeatureData[]> {
+  if (!isFirebaseConfigured()) return DEFAULT_FEATURES_PAGE.filter(f => f.isActive)
+  const features = await getFirestoreCollection<FeaturesPageFeatureData>('featuresPage', DEFAULT_FEATURES_PAGE, 'order')
+  return features.filter(f => f.isActive !== false)
 }
 
 // Get images configuration

@@ -92,7 +92,7 @@ async function seedStats(): Promise<void> {
   const batch = writeBatch(db)
 
   STATS.forEach((stat, index) => {
-    const statRef = doc(db, getPath('content', 'stats'), `stat_${index}`)
+    const statRef = doc(db, getPath('stats'), `stat_${index}`)
     batch.set(statRef, {
       ...stat,
       order: index,
@@ -108,7 +108,7 @@ async function seedFeatures(): Promise<void> {
   const batch = writeBatch(db)
 
   FEATURES.forEach((feature, index) => {
-    const featureRef = doc(db, getPath('content', 'features'), `feature_${index}`)
+    const featureRef = doc(db, getPath('features'), `feature_${index}`)
     batch.set(featureRef, {
       ...feature,
       order: index,
@@ -124,7 +124,7 @@ async function seedHowItWorks(): Promise<void> {
   const batch = writeBatch(db)
 
   HOW_IT_WORKS.forEach((step, index) => {
-    const stepRef = doc(db, getPath('content', 'howItWorks'), `step_${index}`)
+    const stepRef = doc(db, getPath('howItWorks'), `step_${index}`)
     batch.set(stepRef, {
       ...step,
       order: index,
@@ -140,7 +140,7 @@ async function seedTestimonials(): Promise<void> {
   const batch = writeBatch(db)
 
   TESTIMONIALS.forEach((testimonial, index) => {
-    const testimonialRef = doc(db, getPath('content', 'testimonials'), `testimonial_${index}`)
+    const testimonialRef = doc(db, getPath('testimonials'), `testimonial_${index}`)
     batch.set(testimonialRef, {
       ...testimonial,
       order: index,
@@ -214,8 +214,68 @@ async function seedTeam(): Promise<void> {
   TEAM_MEMBERS.forEach((member, index) => {
     const memberRef = doc(db, getPath('team'), `member_${index}`)
     batch.set(memberRef, {
-      ...member,
-      image: `/images/team/${member.name.toLowerCase().replace(/\s+/g, '-')}.jpg`,
+      name: member.name,
+      role: member.role || '',
+      bio: member.details,
+      details: member.details,
+      imageUrl: member.imageUrl || null,
+      linkedin: member.linkedin || null,
+      twitter: null,
+      order: member.order,
+      isActive: true,
+      updatedAt: new Date().toISOString(),
+    })
+  })
+
+  await batch.commit()
+}
+
+async function seedFAQ(): Promise<void> {
+  console.log('Seeding FAQ...')
+  const batch = writeBatch(db)
+
+  const faqs = [
+    { question: 'How does Snapgo work?', answer: 'Snapgo offers two ways to pool: No car? Match with verified co-riders, book a cab together via any app (Ola, Uber, etc.), and split the fare. Have a car? Create a ride for others to join. Either way, save up to 75% while reducing your carbon footprint.', category: 'general', order: 1 },
+    { question: 'Is Snapgo safe to use?', answer: 'Yes! Safety is our top priority. All users are verified through Aadhaar KYC powered by DigiLocker. We also offer a female-only option for women riders, real-time ride tracking, emergency SOS features, and a rating system for accountability.', category: 'safety', order: 2 },
+    { question: 'How much can I save with Snapgo?', answer: 'You can save up to 75% on your cab fares! For example, a ₹400 solo ride becomes just ₹100 when shared with 3 other riders. Regular users save ₹3,000-5,000 per month on average.', category: 'pricing', order: 3 },
+    { question: 'What is the female-only option?', answer: 'The female-only option allows women riders to match exclusively with other verified female riders. This feature provides an extra layer of comfort and security for women commuters.', category: 'safety', order: 4 },
+    { question: 'Is cab pooling legal?', answer: "Yes! Unlike carpooling with private vehicles (which is not legal for commercial use in India), cab pooling uses commercial taxis and cabs that are already licensed for passenger transport. Snapgo simply helps riders find others heading the same way to share the fare.", category: 'general', order: 5 },
+  ]
+
+  faqs.forEach((faq, index) => {
+    const faqRef = doc(db, getPath('faq'), `faq_${index}`)
+    batch.set(faqRef, {
+      ...faq,
+      isActive: true,
+      updatedAt: new Date().toISOString(),
+    })
+  })
+
+  await batch.commit()
+}
+
+async function seedFeaturesPage(): Promise<void> {
+  console.log('Seeding features page data...')
+  const batch = writeBatch(db)
+
+  const featuresPageData = [
+    { icon: 'ShieldCheck', title: 'Aadhaar KYC Verification', description: 'All users are verified through Aadhaar and DigiLocker integration. Every profile displays a KYC-approved badge, eliminating fake profiles and ensuring complete identity verification. Your safety starts with knowing who you\'re riding with.', highlight: true },
+    { icon: 'Users', title: 'Female-Only Option', description: 'Women can filter to connect exclusively with verified female riders for enhanced safety and comfort. This feature empowers women to travel confidently, knowing they\'re matched with fellow verified female commuters.', highlight: true },
+    { icon: 'MapPin', title: 'Smart Radius Matching', description: 'Our intelligent algorithm matches riders within a 750m radius for both source and destination, ensuring perfect route alignment. The radius auto-expands to 1km if no immediate matches are found, maximizing your ride opportunities.', highlight: false },
+    { icon: 'AlertTriangle', title: 'SOS Safety Feature', description: 'One-tap emergency alert instantly shares your live location and complete trip details with your saved emergency contacts. In any situation, help is just one tap away. Your safety is our absolute priority.', highlight: true },
+    { icon: 'MessageCircle', title: 'In-App Group Chat', description: 'A secure group chat is automatically created when riders match. Coordinate pickup points, share ETAs, and communicate seamlessly with your co-riders without exchanging personal phone numbers.', highlight: false },
+    { icon: 'Clock', title: 'Real-Time & Scheduled Rides', description: 'Need a ride now? Find matches instantly. Planning ahead? Schedule rides in advance. Snapgo adapts to your lifestyle, whether you\'re spontaneous or prefer to plan your commute meticulously.', highlight: false },
+    { icon: 'Navigation', title: 'Optimal Path Suggestion', description: 'Our smart algorithm calculates and suggests the most convenient meeting point for all matched riders. No more complicated coordination—just show up at the optimized pickup location.', highlight: false },
+    { icon: 'Wallet', title: 'Transparent Fare Splitting', description: 'Crystal-clear cost breakdown shows exactly what you pay. Save up to 75% compared to solo cab rides. If no match is found, you get an instant refund—no questions asked, no delays.', highlight: false },
+    { icon: 'Leaf', title: 'Eco-Friendly Impact', description: 'Every shared ride contributes to a greener planet. Track your personal carbon footprint savings and see the collective impact. Together, we\'re reducing traffic congestion and urban pollution.', highlight: false },
+  ]
+
+  featuresPageData.forEach((feature, index) => {
+    const featureRef = doc(db, getPath('featuresPage'), `fp_${index}`)
+    batch.set(featureRef, {
+      ...feature,
+      order: index,
+      isActive: true,
       updatedAt: new Date().toISOString(),
     })
   })
@@ -319,14 +379,16 @@ async function seedFirestore(): Promise<void> {
   try {
     // Clear existing collections
     console.log('Clearing existing data...')
-    await clearCollection(getPath('content', 'stats'))
-    await clearCollection(getPath('content', 'features'))
-    await clearCollection(getPath('content', 'howItWorks'))
-    await clearCollection(getPath('content', 'testimonials'))
+    await clearCollection(getPath('stats'))
+    await clearCollection(getPath('features'))
+    await clearCollection(getPath('howItWorks'))
+    await clearCollection(getPath('testimonials'))
     await clearCollection(getPath('team'))
+    await clearCollection(getPath('faq'))
     await clearCollection(getPath('safety'))
     await clearCollection(getPath('journey'))
     await clearCollection(getPath('navigation'))
+    await clearCollection(getPath('featuresPage'))
     console.log('')
 
     // Seed all data
@@ -342,6 +404,8 @@ async function seedFirestore(): Promise<void> {
     await seedSocial()
     await seedImages()
     await seedTeam()
+    await seedFAQ()
+    await seedFeaturesPage()
     await seedSettings()
     await seedSafetyFeatures()
     await seedJourneyTimeline()
@@ -354,20 +418,22 @@ async function seedFirestore(): Promise<void> {
     console.log('')
     console.log('Collections seeded:')
     console.log('  - content/hero')
-    console.log('  - content/stats')
-    console.log('  - content/features')
-    console.log('  - content/howItWorks')
-    console.log('  - content/testimonials')
+    console.log('  - stats/')
+    console.log('  - features/')
+    console.log('  - howItWorks/')
+    console.log('  - testimonials/')
     console.log('  - content/about')
     console.log('  - content/apps')
     console.log('  - content/contact')
     console.log('  - content/social')
     console.log('  - content/images')
     console.log('  - team/')
+    console.log('  - faq/')
     console.log('  - settings/config')
     console.log('  - safety/')
     console.log('  - journey/')
     console.log('  - navigation/')
+    console.log('  - featuresPage/')
 
   } catch (error) {
     console.error('Error seeding Firestore:', error)

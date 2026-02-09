@@ -187,13 +187,13 @@ export const NAV_LINKS = [
 ]
 
 export const TEAM_MEMBERS = [
-  { name: 'Mohit Purohit', details: 'Co-Founder driving the vision and strategy of Snapgo.', order: 1 },
-  { name: 'Surya Purohit', details: 'Co-Founder managing operations and business growth.', order: 2 },
-  { name: 'Anurag Tiwari', details: 'Leading technical development and architecture.', order: 3 },
-  { name: 'Siddhanth Kunwar', details: 'Building and maintaining the full stack infrastructure.', order: 4 },
-  { name: 'Charu Lata', details: 'Driving marketing initiatives and brand awareness.', order: 5 },
-  { name: 'Arshita Pal', details: 'Designing intuitive and beautiful user experiences.', order: 6 },
-  { name: 'Sachin Kumar', details: 'Managing day-to-day operations and logistics.', order: 7 },
+  { name: 'Mohit Purohit', role: 'Founder & CTO', details: 'Serial entrepreneur with experience building, scaling, and selling mobile applications. Drives product development and technology strategy for Snapgo.', linkedin: 'https://www.linkedin.com/in/mohitpurohitbr/', imageUrl: '/images/team/mohit.png', order: 1 },
+  { name: 'Surya Purohit', role: 'Co-Founder & CEO', details: 'Digital marketing specialist expert in Meta Ads, Google Ads, and performance marketing. Drives growth and strategic partnerships.', linkedin: 'https://www.linkedin.com/in/snapgosurya/', imageUrl: '/images/team/surya.png', order: 2 },
+  { name: 'Anurag Tiwari', role: 'Chief Marketing Officer', details: 'Multi-business founder with deep knowledge of traditional and digital marketing channels. Leads strategic communications and market intelligence.', linkedin: 'https://www.linkedin.com/in/snapgoanurag/', imageUrl: '/images/team/anurag.png', order: 3 },
+  { name: 'Siddhanth Kunwar', role: 'Full Stack Developer', details: 'Building and maintaining the full stack infrastructure and web platform for Snapgo.', linkedin: null, imageUrl: null, order: 4 },
+  { name: 'Charu Lata', role: 'Marketing Lead', details: 'Driving marketing initiatives, brand awareness, and user engagement campaigns.', linkedin: null, imageUrl: null, order: 5 },
+  { name: 'Arshita Pal', role: 'UI/UX Designer', details: 'Designing intuitive and beautiful user experiences for the Snapgo platform.', linkedin: null, imageUrl: null, order: 6 },
+  { name: 'Sachin Kumar', role: 'Operations Manager', details: 'Managing day-to-day operations, logistics, and operational efficiency.', linkedin: null, imageUrl: null, order: 7 },
 ]
 
 export const COLORS = {

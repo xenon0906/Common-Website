@@ -511,17 +511,58 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
 
-      {/* Analytics error banner */}
-      {analytics?.overview.isError && (
-        <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <div>
-            <p className="font-medium">Analytics unavailable</p>
-            <p className="text-sm text-amber-600">
-              {analytics.overview.errorMessage || 'Could not load analytics data. Showing placeholder values.'}
-            </p>
-          </div>
-        </div>
+      {/* Analytics Setup Guide - shows when GA4 isn't configured */}
+      {!loading && (analytics?.overview.isError || (analytics && analytics.overview.totalVisitors === 0 && analytics.overview.totalPageViews === 0)) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-amber-600" />
+                Connect Google Analytics
+              </CardTitle>
+              <CardDescription>
+                Set up Google Analytics 4 to see real-time traffic data, visitor insights, and page performance in this dashboard.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { step: '1', title: 'Create a Service Account', desc: 'Go to Google Cloud Console > IAM & Admin > Service Accounts. Create a new service account for your project.' },
+                  { step: '2', title: 'Grant GA4 Access', desc: 'In Google Analytics, go to Admin > Property Access Management. Add the service account email with Viewer role.' },
+                  { step: '3', title: 'Set Environment Variables', desc: 'Add these 3 variables to your .env file:' },
+                ].map((item) => (
+                  <div key={item.step} className="flex gap-3">
+                    <div className="w-7 h-7 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                      {item.step}
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-muted rounded-lg p-4 font-mono text-xs space-y-1">
+                <p>GOOGLE_SERVICE_ACCOUNT_EMAIL=your-sa@project.iam.gserviceaccount.com</p>
+                <p>GOOGLE_PRIVATE_KEY=&quot;-----BEGIN PRIVATE KEY-----\n...&quot;</p>
+                <p>GOOGLE_ANALYTICS_PROPERTY_ID=123456789</p>
+              </div>
+              <a
+                href="https://console.cloud.google.com/iam-admin/serviceaccounts"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-primary hover:underline font-medium"
+              >
+                Open Google Cloud Console
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {/* Stats Grid */}
