@@ -16,12 +16,14 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { slugify, sanitizeSlug } from '@/lib/utils'
+import Image from 'next/image'
 import {
   ArrowLeft,
   Save,
   Eye,
   Loader2,
   Flame,
+  ImageIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { FileUpload } from '@/components/ui/FileUpload'
@@ -69,6 +71,7 @@ export default function CreateBlogPage() {
 
   const content = watch('content')
   const title = watch('title')
+  const imageUrl = watch('imageUrl')
 
   // Auto-generate slug from title
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +156,55 @@ export default function CreateBlogPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Featured Image Hero */}
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <Label className="text-base font-semibold">Featured Image</Label>
+                {imageUrl ? (
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 border">
+                    <Image
+                      src={imageUrl}
+                      alt="Featured image preview"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setValue('imageUrl', '')}
+                      >
+                        Remove Image
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <FileUpload
+                    category="blog"
+                    label=""
+                    description="Upload a featured image (recommended: 1200x630px)"
+                    onUploadComplete={(url) => setValue('imageUrl', url)}
+                  />
+                )}
+                {imageUrl && (
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground truncate max-w-[80%]">{imageUrl}</p>
+                    <FileUpload
+                      category="blog"
+                      label=""
+                      description="Replace"
+                      className="w-auto"
+                      onUploadComplete={(url) => setValue('imageUrl', url)}
+                    />
+                  </div>
+                )}
+                <input type="hidden" {...register('imageUrl')} />
+              </CardContent>
+            </Card>
+
+            {/* Title, Slug, Content */}
             <Card>
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-2">
@@ -298,15 +350,6 @@ export default function CreateBlogPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <FileUpload
-                    category="blog"
-                    label="Featured Image"
-                    description="Upload a featured image for your blog post"
-                    onUploadComplete={(url) => setValue('imageUrl', url)}
-                  />
-                  <input type="hidden" {...register('imageUrl')} />
-                </div>
               </CardContent>
             </Card>
           </div>

@@ -104,6 +104,7 @@ export function BlogPost({ blog }: { blog: Blog }) {
                   fill
                   className="object-cover"
                   priority
+                  unoptimized={blog.imageUrl.startsWith('/uploads/')}
                 />
               </div>
             </motion.div>

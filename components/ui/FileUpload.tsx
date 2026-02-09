@@ -242,6 +242,7 @@ export function FileUpload({
                 alt="Preview"
                 fill
                 className="object-cover"
+                unoptimized
               />
 
               {/* Overlay with status */}
@@ -386,7 +387,7 @@ export function FileUploadCompact({
     <div className={cn('flex items-center gap-3', className)}>
       {imageUrl ? (
         <div className="relative w-16 h-16 rounded-lg overflow-hidden border">
-          <Image src={imageUrl} alt="Preview" fill className="object-cover" />
+          <Image src={imageUrl} alt="Preview" fill className="object-cover" unoptimized />
           <button
             type="button"
             onClick={() => setImageUrl(undefined)}
