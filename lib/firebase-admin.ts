@@ -43,6 +43,23 @@ export function isAdminConfigured(): boolean {
   return !!process.env.FIREBASE_SERVICE_ACCOUNT_KEY
 }
 
+/**
+ * Returns a Firestore instance from the Admin SDK.
+ * Bypasses all Firestore security rules - use only in server-side API routes.
+ */
+export function getAdminDb(): admin.firestore.Firestore | null {
+  const app = getApp()
+  return app ? app.firestore() : null
+}
+
+/**
+ * Get the full Firestore collection path with app ID prefix.
+ */
+export function getAdminCollectionPath(collectionName: string): string {
+  const appId = process.env.NEXT_PUBLIC_APP_ID || 'default'
+  return `artifacts/${appId}/public/data/${collectionName}`
+}
+
 export async function verifyIdToken(token: string): Promise<admin.auth.DecodedIdToken | null> {
   const auth = getAdminAuth()
   if (!auth) {

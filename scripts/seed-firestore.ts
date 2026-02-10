@@ -100,6 +100,7 @@ async function createClientAdapter(): Promise<FirestoreAdapter | null> {
 
   try {
     const { initializeApp } = await import('firebase/app')
+    const { getAuth, signInAnonymously } = await import('firebase/auth')
     const {
       getFirestore,
       doc,
@@ -111,6 +112,12 @@ async function createClientAdapter(): Promise<FirestoreAdapter | null> {
 
     const app = initializeApp(config)
     const db = getFirestore(app)
+
+    // Sign in anonymously so Firestore rules (request.auth != null) allow writes
+    const auth = getAuth(app)
+    console.log('  Signing in anonymously for Firestore write access...')
+    await signInAnonymously(auth)
+    console.log('  Anonymous auth successful')
 
     return {
       async setDocument(path: string, data: Record<string, unknown>) {
@@ -474,7 +481,7 @@ async function seedFirestore(): Promise<void> {
     console.log('  - features/ (6 items)')
     console.log('  - howItWorks/ (3 items)')
     console.log('  - testimonials/ (3 items)')
-    console.log('  - team/ (7 members)')
+    console.log('  - team/ (3 members)')
     console.log('  - faq/ (5 items)')
     console.log('  - featuresPage/ (9 items)')
     console.log('  - settings/config')

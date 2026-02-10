@@ -118,7 +118,7 @@ export default function AdminLoginPage() {
     return () => unsubscribe()
   }, [router])
 
-  // Traditional API login (fallback)
+  // Traditional API login + Firebase Auth sign-in
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -135,6 +135,21 @@ export default function AdminLoginPage() {
 
       if (!res.ok) {
         throw new Error(data.error || 'Login failed')
+      }
+
+      // After successful traditional login, also sign into Firebase Auth
+      // This gives the browser a Firebase Auth context so client SDK writes work
+      // (Firestore rules require request.auth != null for writes)
+      if (USE_FIREBASE) {
+        try {
+          const auth = getFirebaseAuth()
+          if (!auth.currentUser) {
+            await signInAnonymously(auth)
+          }
+        } catch (fbErr) {
+          // Non-blocking: admin panel still works via API routes with server-side auth
+          console.warn('Firebase Auth sign-in failed (non-blocking):', fbErr)
+        }
       }
 
       // Redirect to admin dashboard

@@ -1,16 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Calendar, Clock, ArrowLeft, Share2, Facebook, Linkedin } from 'lucide-react'
+import { Calendar, Clock, ArrowLeft, Tag } from 'lucide-react'
 import { trackBlogView } from '@/lib/google-analytics'
+import { ShareButton } from '@/components/blog/ShareButton'
+import { AuthorSection } from '@/components/blog/AuthorSection'
+import { RelatedPosts } from '@/components/blog/RelatedPosts'
+import { DEFAULT_CATEGORIES, type BlogAuthor, type ContentBlock, type ContentVersion } from '@/lib/types/blog'
+import { ContentRenderer } from '@/components/blog/ContentRenderer'
+
+interface RelatedPost {
+  id: string
+  title: string
+  slug: string
+  excerpt?: string | null
+  imageUrl?: string | null
+  category?: string
+  categoryName?: string
+  readingTime?: number
+  createdAt: Date | string
+}
 
 interface Blog {
   id: string
@@ -21,6 +36,18 @@ interface Blog {
   imageUrl: string | null
   createdAt: Date | string
   updatedAt: Date | string
+  category?: string
+  categoryName?: string
+  tags?: string[]
+  readingTime?: number
+  author?: BlogAuthor
+  contentBlocks?: ContentBlock[]
+  contentVersion?: ContentVersion
+}
+
+interface BlogPostProps {
+  blog: Blog
+  relatedPosts?: RelatedPost[]
 }
 
 function formatDate(date: Date | string): string {
@@ -33,17 +60,22 @@ function formatDate(date: Date | string): string {
   }).format(d)
 }
 
-function estimateReadTime(content: string): string {
+function estimateReadTime(content: string, readingTime?: number): string {
+  if (readingTime) return `${readingTime} min read`
   const words = content.split(' ').length
   const minutes = Math.ceil(words / 200)
   return `${minutes} min read`
 }
 
-export function BlogPost({ blog }: { blog: Blog }) {
-  const [shareUrl, setShareUrl] = useState('')
+function getCategoryInfo(categoryId?: string) {
+  if (!categoryId) return null
+  return DEFAULT_CATEGORIES.find((c) => c.id === categoryId)
+}
+
+export function BlogPost({ blog, relatedPosts = [] }: BlogPostProps) {
+  const category = getCategoryInfo(blog.category)
 
   useEffect(() => {
-    setShareUrl(window.location.href)
     // Track blog view in Google Analytics
     trackBlogView(blog.slug)
   }, [blog.slug])
@@ -67,7 +99,14 @@ export function BlogPost({ blog }: { blog: Blog }) {
               Back to Blog
             </Link>
 
-            <Badge variant="teal" className="mb-4">Blog</Badge>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Badge variant="teal">Blog</Badge>
+              {category && (
+                <Badge className={`${category.color} text-white border-0`}>
+                  {category.name}
+                </Badge>
+              )}
+            </div>
 
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
               {blog.title}
@@ -80,9 +119,24 @@ export function BlogPost({ blog }: { blog: Blog }) {
               </span>
               <span className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                {estimateReadTime(blog.content)}
+                {estimateReadTime(blog.content, blog.readingTime)}
               </span>
             </div>
+
+            {/* Tags */}
+            {blog.tags && blog.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mt-4">
+                <Tag className="w-4 h-4 text-white/60" />
+                {blog.tags.slice(0, 5).map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-0.5 bg-white/10 text-white/80 text-xs rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -121,83 +175,27 @@ export function BlogPost({ blog }: { blog: Blog }) {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="max-w-3xl mx-auto"
           >
-            <article className="prose prose-lg max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  h1: ({ children }) => (
-                    <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>
-                  ),
-                  h2: ({ children }) => (
-                    <h2 className="text-2xl font-bold mt-8 mb-4 text-primary">{children}</h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="text-xl font-semibold mt-6 mb-3">{children}</h3>
-                  ),
-                  p: ({ children }) => (
-                    <p className="mb-4 leading-relaxed text-muted-foreground">{children}</p>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="list-disc pl-6 mb-4 space-y-2">{children}</ul>
-                  ),
-                  ol: ({ children }) => (
-                    <ol className="list-decimal pl-6 mb-4 space-y-2">{children}</ol>
-                  ),
-                  li: ({ children }) => (
-                    <li className="text-muted-foreground">{children}</li>
-                  ),
-                  blockquote: ({ children }) => (
-                    <blockquote className="border-l-4 border-teal pl-4 py-2 my-4 bg-teal/5 rounded-r-lg italic">
-                      {children}
-                    </blockquote>
-                  ),
-                  a: ({ href, children }) => (
-                    <a
-                      href={href}
-                      className="text-teal hover:underline"
-                      target={href?.startsWith('http') ? '_blank' : undefined}
-                      rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
-                    >
-                      {children}
-                    </a>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="font-semibold text-foreground">{children}</strong>
-                  ),
-                  code: ({ children }) => (
-                    <code className="bg-muted px-1.5 py-0.5 rounded text-sm">{children}</code>
-                  ),
-                }}
-              >
-                {blog.content}
-              </ReactMarkdown>
-            </article>
+            {/* Author Section */}
+            <AuthorSection
+              author={blog.author}
+              publishedAt={blog.createdAt}
+              className="mb-8"
+            />
+
+            <ContentRenderer
+              content={blog.content}
+              contentBlocks={blog.contentBlocks}
+              contentVersion={blog.contentVersion}
+            />
 
             <Separator className="my-8" />
 
             {/* Share */}
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Share:</span>
-                <Button variant="ghost" size="icon" asChild>
-                  <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Facebook className="w-4 h-4" />
-                  </a>
-                </Button>
-                <Button variant="ghost" size="icon" asChild>
-                  <a
-                    href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(blog.title)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Linkedin className="w-4 h-4" />
-                  </a>
-                </Button>
-              </div>
+              <ShareButton
+                title={blog.title}
+                excerpt={blog.excerpt || undefined}
+              />
 
               <Button variant="outline" asChild>
                 <Link href="/blog">
@@ -209,6 +207,20 @@ export function BlogPost({ blog }: { blog: Blog }) {
           </motion.div>
         </div>
       </section>
+
+      {/* Related Posts */}
+      {relatedPosts.length > 0 && (
+        <RelatedPosts posts={relatedPosts} className="bg-gray-50 dark:bg-gray-950" />
+      )}
+
+      {/* Floating Share Button for mobile */}
+      <div className="lg:hidden">
+        <ShareButton
+          title={blog.title}
+          excerpt={blog.excerpt || undefined}
+          variant="floating"
+        />
+      </div>
     </>
   )
 }

@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { BlogPost } from './BlogPost'
 import { SITE_CONFIG } from '@/lib/constants'
-import { getBlogBySlug, getBlogs } from '@/lib/content'
+import { getBlogBySlug, getBlogs, getRelatedPosts } from '@/lib/content'
 
 function toISOStringSafe(date: unknown): string {
   if (!date) return new Date().toISOString()
@@ -78,6 +78,9 @@ export default async function BlogPostPage({ params }: Props) {
     notFound()
   }
 
+  // Fetch related posts
+  const relatedPosts = await getRelatedPosts(blog.slug, blog.category, 3)
+
   // Convert to format expected by BlogPost component
   const blogForComponent = {
     ...blog,
@@ -120,7 +123,7 @@ export default async function BlogPostPage({ params }: Props) {
         // Escape angle brackets to prevent XSS via </script> injection in JSON-LD
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      <BlogPost blog={blogForComponent} />
+      <BlogPost blog={blogForComponent} relatedPosts={relatedPosts} />
     </>
   )
 }

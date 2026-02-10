@@ -4,18 +4,22 @@ import { z } from 'zod'
 export const createBlogSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
   slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long'),
-  content: z.string().min(1, 'Content is required').max(100_000, 'Content too long'),
+  content: z.string().max(100_000).optional().default(''),
   metaDesc: z.string().max(160).optional().default(''),
   excerpt: z.string().max(300).optional().default(''),
   keywords: z.string().max(500).optional().default(''),
   imageUrl: z.string().max(2000).optional().default(''),
   published: z.boolean().optional().default(false),
+  category: z.string().max(100).optional().default(''),
+  tags: z.array(z.string()).optional().default([]),
+  contentBlocks: z.array(z.any()).optional(),
+  contentVersion: z.number().int().min(1).max(2).optional(),
 })
 
 export const updateBlogSchema = z.object({
   title: z.string().min(1).max(200),
   slug: z.string().min(1).max(200),
-  content: z.string().min(1).max(100_000),
+  content: z.string().max(100_000).optional().default(''),
   metaDesc: z.string().max(160).optional().default(''),
   excerpt: z.string().max(300).optional().default(''),
   keywords: z.string().max(500).optional().default(''),
@@ -24,6 +28,9 @@ export const updateBlogSchema = z.object({
   status: z.enum(['draft', 'published', 'scheduled']).optional(),
   wordCount: z.number().int().positive().optional(),
   readingTime: z.number().int().positive().optional(),
+  category: z.string().max(100).optional().default(''),
+  contentBlocks: z.array(z.any()).optional(),
+  contentVersion: z.number().int().min(1).max(2).optional(),
 })
 
 // ===== NAVIGATION SCHEMAS =====

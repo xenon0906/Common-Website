@@ -10,7 +10,9 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "seed:firestore": "dotenv -e .env.local -- tsx scripts/seed-firestore.ts"
+    "seed:firestore": "dotenv -e .env.local -- tsx scripts/seed-firestore.ts",
+    "fix:blog-slugs": "dotenv -e .env.local -- tsx scripts/fix-blog-slugs.ts",
+    "delete:blogs": "dotenv -e .env.local -- tsx scripts/delete-all-blogs.ts"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.9.0",

@@ -7,6 +7,7 @@ import {
   isFirebaseConfigured,
 } from './firebase-server'
 
+import { sanitizeSlug, MAX_SLUG_LENGTH } from './utils'
 import { SiteImagesConfig, DEFAULT_IMAGES } from './types/images'
 
 // Re-export image types for convenience
@@ -84,6 +85,18 @@ export interface BlogData {
   published: boolean
   createdAt: Date
   updatedAt: Date
+  category?: string
+  categoryName?: string
+  tags?: string[]
+  readingTime?: number
+  author?: {
+    id: string
+    name: string
+    avatar?: string
+    bio?: string
+  }
+  contentBlocks?: any[]
+  contentVersion?: 1 | 2
 }
 
 export interface FAQData {
@@ -442,7 +455,16 @@ export async function getSiteConfig(): Promise<SiteConfigData> {
 export async function getBlogs(): Promise<BlogData[]> {
   if (!isFirebaseConfigured()) return []
   const blogs = await getFirestoreCollection<BlogData>('blogs', [], 'createdAt')
-  return blogs.filter(blog => blog.published)
+  return blogs
+    .filter(blog => blog.published)
+    .filter(blog => {
+      const slug = sanitizeSlug(blog.slug)
+      return slug.length >= 3 && slug.length <= MAX_SLUG_LENGTH
+    })
+    .map(blog => ({
+      ...blog,
+      slug: sanitizeSlug(blog.slug),
+    }))
 }
 
 export async function getBlogBySlug(slug: string): Promise<BlogData | null> {
@@ -453,6 +475,27 @@ export async function getBlogBySlug(slug: string): Promise<BlogData | null> {
     const blogSlug = blog.slug.replace(/^\/+/, '').replace(/^blog\/+/i, '')
     return blogSlug === normalizedSlug
   }) || null
+}
+
+export async function getRelatedPosts(currentSlug: string, category?: string, limit: number = 3): Promise<BlogData[]> {
+  const blogs = await getBlogs()
+  // Filter out the current blog
+  const otherBlogs = blogs.filter(blog => blog.slug !== currentSlug)
+
+  if (category) {
+    // First try to find blogs in the same category
+    const sameCategoryBlogs = otherBlogs.filter(blog => blog.category === category)
+    if (sameCategoryBlogs.length >= limit) {
+      return sameCategoryBlogs.slice(0, limit)
+    }
+    // If not enough in same category, fill with other blogs
+    const remaining = limit - sameCategoryBlogs.length
+    const otherCategoryBlogs = otherBlogs.filter(blog => blog.category !== category).slice(0, remaining)
+    return [...sameCategoryBlogs, ...otherCategoryBlogs]
+  }
+
+  // No category specified, return most recent blogs
+  return otherBlogs.slice(0, limit)
 }
 
 export async function getFAQs(): Promise<FAQData[]> {

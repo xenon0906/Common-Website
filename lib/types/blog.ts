@@ -1,5 +1,56 @@
 import { Timestamp } from 'firebase/firestore'
 
+// Content Block Types for Rich Content Editor
+export type ContentBlockType = 'paragraph' | 'heading' | 'image' | 'quote' | 'list'
+
+export interface ContentBlockBase {
+  id: string
+  type: ContentBlockType
+  order: number
+}
+
+export interface ParagraphBlock extends ContentBlockBase {
+  type: 'paragraph'
+  content: string // Markdown for inline formatting (bold, italic, links)
+}
+
+export interface HeadingBlock extends ContentBlockBase {
+  type: 'heading'
+  content: string
+  level: 1 | 2 | 3 // h1, h2, h3
+}
+
+export interface ImageBlock extends ContentBlockBase {
+  type: 'image'
+  url: string
+  alt: string
+  caption?: string
+  width?: number
+  height?: number
+}
+
+export interface QuoteBlock extends ContentBlockBase {
+  type: 'quote'
+  content: string
+  attribution?: string
+}
+
+export interface ListBlock extends ContentBlockBase {
+  type: 'list'
+  items: string[]
+  ordered: boolean
+}
+
+export type ContentBlock =
+  | ParagraphBlock
+  | HeadingBlock
+  | ImageBlock
+  | QuoteBlock
+  | ListBlock
+
+// Content version type
+export type ContentVersion = 1 | 2 // 1 = markdown, 2 = blocks
+
 export interface BlogAuthor {
   id: string
   name: string
@@ -19,8 +70,12 @@ export interface BlogPost {
   id?: string
   title: string
   slug: string
-  content: string
+  content: string // Legacy markdown content
   excerpt?: string
+
+  // Rich Content (v2)
+  contentBlocks?: ContentBlock[] // Structured content blocks
+  contentVersion?: ContentVersion // 1 = markdown, 2 = blocks
 
   // Author
   author?: BlogAuthor

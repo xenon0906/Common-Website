@@ -24,7 +24,6 @@ import {
   Eye,
   FileText,
   Calendar,
-  Flame,
   Clock,
   Filter,
   MoreHorizontal,
@@ -39,10 +38,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { USE_FIREBASE } from '@/lib/config'
 import {
   useCollection,
-  deleteDocument,
   orderBy,
   FirestoreDoc,
 } from '@/lib/hooks/useFirestore'
@@ -81,32 +78,15 @@ export default function BlogsPage() {
     loading: firestoreLoading,
   } = useCollection<Blog>(
     'blogs',
-    USE_FIREBASE ? [orderBy('createdAt', 'desc')] : []
+    [orderBy('createdAt', 'desc')]
   )
 
   useEffect(() => {
-    if (USE_FIREBASE) {
-      if (!firestoreLoading) {
-        setBlogs(firestoreBlogs)
-        setLoading(false)
-      }
-    } else {
-      fetchBlogs()
-    }
-  }, [firestoreBlogs, firestoreLoading])
-
-  const fetchBlogs = async () => {
-    try {
-      const res = await fetch('/api/blogs')
-      const data = await res.json()
-      setBlogs(Array.isArray(data) ? data : [])
-    } catch (error) {
-      console.error('Error fetching blogs:', error)
-      setBlogs([])
-    } finally {
+    if (!firestoreLoading) {
+      setBlogs(firestoreBlogs)
       setLoading(false)
     }
-  }
+  }, [firestoreBlogs, firestoreLoading])
 
   const filteredBlogs = (blogs || []).filter((blog) => {
     const matchesSearch = blog.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -128,12 +108,9 @@ export default function BlogsPage() {
     if (!confirmed) return
 
     try {
-      if (USE_FIREBASE) {
-        await deleteDocument('blogs', id)
-      } else {
-        await fetch(`/api/blogs/${id}`, { method: 'DELETE' })
-        setBlogs(blogs.filter((b) => b.id !== id))
-      }
+      const res = await fetch(`/api/blogs/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete blog')
+      setBlogs(blogs.filter((b) => b.id !== id))
       toast({
         title: 'Blog deleted',
         description: 'The blog post has been permanently deleted.',
@@ -161,12 +138,9 @@ export default function BlogsPage() {
     let deletedCount = 0
     for (const id of selectedBlogs) {
       try {
-        if (USE_FIREBASE) {
-          await deleteDocument('blogs', id)
-        } else {
-          await fetch(`/api/blogs/${id}`, { method: 'DELETE' })
-          setBlogs(prev => prev.filter((b) => b.id !== id))
-        }
+        const res = await fetch(`/api/blogs/${id}`, { method: 'DELETE' })
+        if (!res.ok) throw new Error('Failed to delete blog')
+        setBlogs(prev => prev.filter((b) => b.id !== id))
         deletedCount++
       } catch (error) {
         console.error('Error deleting blog:', error)
@@ -232,14 +206,8 @@ export default function BlogsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Blog Manager</h1>
-          <span className="text-muted-foreground flex items-center gap-2">
+          <span className="text-muted-foreground">
             Create and manage blog posts
-            {USE_FIREBASE && (
-              <Badge variant="outline" className="text-xs gap-1">
-                <Flame className="w-3 h-3 text-orange-500" />
-                Firebase
-              </Badge>
-            )}
           </span>
         </div>
         <Button variant="gradient" asChild>

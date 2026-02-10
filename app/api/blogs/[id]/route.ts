@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { requireAuth } from '@/lib/api-auth'
+import { getAdminDb, getAdminCollectionPath } from '@/lib/firebase-admin'
 import {
   getServerDb,
   getServerAppId,
+  getAuthenticatedServerDb,
+  getCollectionPath,
   doc,
   getDoc,
 } from '@/lib/firebase-server'
@@ -64,41 +67,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
     const validated = validation.data
 
-    const db = getServerDb()
-    if (!db) {
-      return NextResponse.json(
-        { error: 'Firebase not configured' },
-        { status: 503 }
-      )
+    // Try Admin SDK first, fall back to authenticated client SDK
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      return await updateBlogWithAdminSDK(adminDb, id, validated)
     }
-
-    const { setDoc, serverTimestamp } = await import('firebase/firestore')
-    const appId = getServerAppId()
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
-
-    const updateData: Record<string, unknown> = {
-      title: validated.title,
-      slug: sanitizeSlug(validated.slug),
-      content: validated.content,
-      metaDesc: validated.metaDesc,
-      excerpt: validated.excerpt,
-      keywords: validated.keywords,
-      imageUrl: validated.imageUrl,
-      published: validated.published,
-      status: validated.status || (validated.published ? 'published' : 'draft'),
-      updatedAt: serverTimestamp(),
-    }
-
-    if (validated.wordCount) updateData.wordCount = validated.wordCount
-    if (validated.readingTime) updateData.readingTime = validated.readingTime
-
-    await setDoc(docRef, updateData, { merge: true })
-
-    // Revalidate blog pages to reflect the update immediately
-    revalidatePath('/blog')
-    revalidatePath(`/blog/${updateData.slug}`)
-
-    return NextResponse.json({ id, ...updateData })
+    return await updateBlogWithClientSDK(id, validated)
   } catch (error) {
     console.error('Error updating blog:', error)
     return NextResponse.json(
@@ -114,25 +88,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = await params
-    const db = getServerDb()
-    if (!db) {
-      return NextResponse.json(
-        { error: 'Firebase not configured' },
-        { status: 503 }
-      )
+
+    // Try Admin SDK first, fall back to authenticated client SDK
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      return await deleteBlogWithAdminSDK(adminDb, id)
     }
-
-    const { deleteDoc } = await import('firebase/firestore')
-    const appId = getServerAppId()
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
-
-    await deleteDoc(docRef)
-
-    // Revalidate blog pages to remove the deleted blog immediately
-    revalidatePath('/blog')
-    revalidatePath('/blog/[slug]', 'page')
-
-    return NextResponse.json({ success: true })
+    return await deleteBlogWithClientSDK(id)
   } catch (error) {
     console.error('Error deleting blog:', error)
     return NextResponse.json(
@@ -140,4 +102,104 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     )
   }
+}
+
+// --- Admin SDK implementations ---
+
+async function updateBlogWithAdminSDK(adminDb: FirebaseFirestore.Firestore, id: string, validated: Record<string, any>) {
+  const admin = await import('firebase-admin')
+  const blogsPath = getAdminCollectionPath('blogs')
+  const docRef = adminDb.doc(`${blogsPath}/${id}`)
+
+  const updateData: Record<string, unknown> = {
+    title: validated.title,
+    slug: sanitizeSlug(validated.slug),
+    content: validated.content || '',
+    metaDesc: validated.metaDesc || '',
+    excerpt: validated.excerpt || '',
+    keywords: validated.keywords || '',
+    imageUrl: validated.imageUrl || '',
+    published: validated.published,
+    status: validated.status || (validated.published ? 'published' : 'draft'),
+    category: validated.category || '',
+    updatedAt: admin.default.firestore.FieldValue.serverTimestamp(),
+  }
+
+  if (validated.wordCount) updateData.wordCount = validated.wordCount
+  if (validated.readingTime) updateData.readingTime = validated.readingTime
+  if (validated.contentBlocks) updateData.contentBlocks = validated.contentBlocks
+  if (validated.contentVersion) updateData.contentVersion = validated.contentVersion
+
+  await docRef.set(updateData, { merge: true })
+  revalidatePath('/blog')
+  revalidatePath(`/blog/${updateData.slug}`)
+  return NextResponse.json({ id, ...updateData })
+}
+
+async function deleteBlogWithAdminSDK(adminDb: FirebaseFirestore.Firestore, id: string) {
+  const blogsPath = getAdminCollectionPath('blogs')
+  const docRef = adminDb.doc(`${blogsPath}/${id}`)
+  await docRef.delete()
+  revalidatePath('/blog')
+  revalidatePath('/blog/[slug]', 'page')
+  return NextResponse.json({ success: true })
+}
+
+// --- Client SDK implementations (anonymous auth fallback) ---
+
+async function updateBlogWithClientSDK(id: string, validated: Record<string, any>) {
+  const db = await getAuthenticatedServerDb()
+  if (!db) {
+    return NextResponse.json(
+      { error: 'Firebase not configured. Check your Firebase environment variables.' },
+      { status: 503 }
+    )
+  }
+
+  const { setDoc, doc: firestoreDoc, serverTimestamp } = await import('firebase/firestore')
+  const blogsPath = getCollectionPath('blogs')
+  const docRef = firestoreDoc(db, blogsPath, id)
+
+  const updateData: Record<string, unknown> = {
+    title: validated.title,
+    slug: sanitizeSlug(validated.slug),
+    content: validated.content || '',
+    metaDesc: validated.metaDesc || '',
+    excerpt: validated.excerpt || '',
+    keywords: validated.keywords || '',
+    imageUrl: validated.imageUrl || '',
+    published: validated.published,
+    status: validated.status || (validated.published ? 'published' : 'draft'),
+    category: validated.category || '',
+    updatedAt: serverTimestamp(),
+  }
+
+  if (validated.wordCount) updateData.wordCount = validated.wordCount
+  if (validated.readingTime) updateData.readingTime = validated.readingTime
+  if (validated.contentBlocks) updateData.contentBlocks = validated.contentBlocks
+  if (validated.contentVersion) updateData.contentVersion = validated.contentVersion
+
+  await setDoc(docRef, updateData, { merge: true })
+  revalidatePath('/blog')
+  revalidatePath(`/blog/${updateData.slug}`)
+  return NextResponse.json({ id, ...updateData })
+}
+
+async function deleteBlogWithClientSDK(id: string) {
+  const db = await getAuthenticatedServerDb()
+  if (!db) {
+    return NextResponse.json(
+      { error: 'Firebase not configured. Check your Firebase environment variables.' },
+      { status: 503 }
+    )
+  }
+
+  const { deleteDoc, doc: firestoreDoc } = await import('firebase/firestore')
+  const blogsPath = getCollectionPath('blogs')
+  const docRef = firestoreDoc(db, blogsPath, id)
+
+  await deleteDoc(docRef)
+  revalidatePath('/blog')
+  revalidatePath('/blog/[slug]', 'page')
+  return NextResponse.json({ success: true })
 }

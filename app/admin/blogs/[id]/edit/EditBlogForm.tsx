@@ -13,32 +13,40 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { slugify, sanitizeSlug } from '@/lib/utils'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { slugify, sanitizeSlug, MAX_SLUG_LENGTH } from '@/lib/utils'
 import Image from 'next/image'
 import {
   ArrowLeft,
   Save,
   Eye,
   Loader2,
-  Flame,
-  ImageIcon,
+  FileText,
+  LayoutGrid,
 } from 'lucide-react'
 import Link from 'next/link'
 import { FileUpload } from '@/components/ui/FileUpload'
-import { USE_FIREBASE } from '@/lib/config'
-import { fetchDocument, updateDocument } from '@/lib/hooks/useFirestore'
 import { useToast } from '@/components/ui/use-toast'
+import { BlockEditor } from '@/components/admin/blog/BlockEditor'
+import { ContentRenderer } from '@/components/blog/ContentRenderer'
+import { DEFAULT_CATEGORIES, type ContentBlock, type ContentVersion } from '@/lib/types/blog'
 
 const blogSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
-  slug: z.string().min(3, 'Slug must be at least 3 characters'),
-  content: z.string().min(100, 'Content must be at least 100 characters'),
+  slug: z.string().min(3, 'Slug must be at least 3 characters').max(MAX_SLUG_LENGTH, `Slug must be under ${MAX_SLUG_LENGTH} characters`),
+  content: z.string().optional(),
   metaDesc: z.string().max(160, 'Meta description must be under 160 characters').optional(),
   excerpt: z.string().max(300, 'Excerpt must be under 300 characters').optional(),
   keywords: z.string().optional(),
   imageUrl: z.string().optional().or(z.literal('')),
   published: z.boolean(),
+  category: z.string().optional(),
 })
 
 type BlogFormData = z.infer<typeof blogSchema>
@@ -48,11 +56,32 @@ interface Blog {
   title: string
   slug: string
   content: string
+  contentBlocks?: ContentBlock[]
+  contentVersion?: ContentVersion
   metaDesc: string | null
   excerpt: string | null
   keywords: string | null
   imageUrl: string | null
   published: boolean
+  category?: string
+}
+
+// Helper to convert blocks to markdown for word count
+function blocksToText(blocks: ContentBlock[]): string {
+  return blocks
+    .map((block) => {
+      switch (block.type) {
+        case 'paragraph':
+        case 'heading':
+        case 'quote':
+          return block.content
+        case 'list':
+          return block.items.join(' ')
+        default:
+          return ''
+      }
+    })
+    .join(' ')
 }
 
 export default function EditBlogForm() {
@@ -61,6 +90,8 @@ export default function EditBlogForm() {
   const [blog, setBlog] = useState<Blog | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editorMode, setEditorMode] = useState<'markdown' | 'blocks'>('markdown')
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([])
   const { toast } = useToast()
 
   const {
@@ -81,6 +112,7 @@ export default function EditBlogForm() {
       keywords: '',
       imageUrl: '',
       published: false,
+      category: '',
     },
   })
 
@@ -92,18 +124,22 @@ export default function EditBlogForm() {
     const loadBlog = async () => {
       try {
         let data: Blog | null = null
-
-        if (USE_FIREBASE) {
-          data = await fetchDocument<Blog>('blogs', params.id as string)
-        } else {
-          const res = await fetch(`/api/blogs/${params.id}`)
-          if (!res.ok) throw new Error('Blog not found')
-          data = await res.json()
-        }
+        const res = await fetch(`/api/blogs/${params.id}`)
+        if (!res.ok) throw new Error('Blog not found')
+        data = await res.json()
 
         if (!data) throw new Error('Blog not found')
 
         setBlog(data)
+
+        // Set editor mode based on content version
+        if (data.contentVersion === 2 && data.contentBlocks) {
+          setEditorMode('blocks')
+          setContentBlocks(data.contentBlocks)
+        } else {
+          setEditorMode('markdown')
+        }
+
         reset({
           title: data.title || '',
           slug: data.slug || '',
@@ -113,6 +149,7 @@ export default function EditBlogForm() {
           keywords: data.keywords || '',
           imageUrl: data.imageUrl || '',
           published: data.published || false,
+          category: data.category || '',
         })
       } catch (error) {
         console.error('Error fetching blog:', error)
@@ -139,39 +176,50 @@ export default function EditBlogForm() {
   }
 
   const onSubmit = async (data: BlogFormData) => {
+    // Validate content based on editor mode
+    if (editorMode === 'markdown' && (!data.content || data.content.length < 100)) {
+      toast({
+        title: 'Error',
+        description: 'Content must be at least 100 characters',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    if (editorMode === 'blocks' && contentBlocks.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Please add at least one content block',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      const wordCount = data.content.trim().split(/\s+/).length
+      const textContent = editorMode === 'blocks' ? blocksToText(contentBlocks) : (data.content || '')
+      const wordCount = textContent.trim().split(/\s+/).length
       const readingTime = Math.max(1, Math.ceil(wordCount / 200))
 
-      if (USE_FIREBASE) {
-        await updateDocument('blogs', params.id as string, {
-          title: data.title,
+      const res = await fetch(`/api/blogs/${params.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
           slug: sanitizeSlug(data.slug),
-          content: data.content,
-          metaDesc: data.metaDesc || '',
-          excerpt: data.excerpt || '',
-          keywords: data.keywords || '',
-          imageUrl: data.imageUrl || '',
-          published: data.published,
+          content: editorMode === 'blocks' ? '' : (data.content || ''),
+          contentBlocks: editorMode === 'blocks' ? contentBlocks : undefined,
+          contentVersion: editorMode === 'blocks' ? 2 : 1,
+          category: data.category || '',
           status: data.published ? 'published' : 'draft',
           wordCount,
           readingTime,
-        })
-      } else {
-        const res = await fetch(`/api/blogs/${params.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...data,
-            slug: sanitizeSlug(data.slug),
-            status: data.published ? 'published' : 'draft',
-            wordCount,
-            readingTime,
-          }),
-        })
-        if (!res.ok) throw new Error('Failed to update blog')
+        }),
+      })
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Failed to update blog')
       }
 
       toast({
@@ -181,9 +229,12 @@ export default function EditBlogForm() {
       router.push('/admin/blogs')
     } catch (error) {
       console.error('Error updating blog:', error)
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to update blog. Please try again.'
       toast({
         title: 'Error',
-        description: 'Failed to update blog. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       })
     } finally {
@@ -221,14 +272,8 @@ export default function EditBlogForm() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">Edit Blog Post</h1>
-          <span className="text-muted-foreground flex items-center gap-2">
+          <span className="text-muted-foreground">
             Update the blog article
-            {USE_FIREBASE && (
-              <Badge variant="outline" className="text-xs gap-1">
-                <Flame className="w-3 h-3 text-orange-500" />
-                Saves to Firebase
-              </Badge>
-            )}
           </span>
         </div>
       </div>
@@ -285,7 +330,7 @@ export default function EditBlogForm() {
               </CardContent>
             </Card>
 
-            {/* Title, Slug, Content */}
+            {/* Title and Slug */}
             <Card>
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-2">
@@ -317,9 +362,38 @@ export default function EditBlogForm() {
                     <p className="text-sm text-red-500">{errors.slug.message}</p>
                   )}
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="space-y-2">
-                  <Label>Content</Label>
+            {/* Content Editor */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Content</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant={editorMode === 'markdown' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setEditorMode('markdown')}
+                    >
+                      <FileText className="w-4 h-4 mr-1" />
+                      Markdown
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={editorMode === 'blocks' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setEditorMode('blocks')}
+                    >
+                      <LayoutGrid className="w-4 h-4 mr-1" />
+                      Blocks
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {editorMode === 'markdown' ? (
                   <Tabs defaultValue="write">
                     <TabsList>
                       <TabsTrigger value="write">Write</TabsTrigger>
@@ -349,7 +423,36 @@ export default function EditBlogForm() {
                       </div>
                     </TabsContent>
                   </Tabs>
-                </div>
+                ) : (
+                  <Tabs defaultValue="edit">
+                    <TabsList>
+                      <TabsTrigger value="edit">Edit</TabsTrigger>
+                      <TabsTrigger value="preview">
+                        <Eye className="w-4 h-4 mr-1" />
+                        Preview
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="edit">
+                      <BlockEditor
+                        blocks={contentBlocks}
+                        onChange={setContentBlocks}
+                      />
+                    </TabsContent>
+                    <TabsContent value="preview">
+                      <div className="min-h-[400px] p-4 border rounded-lg bg-background">
+                        {contentBlocks.length > 0 ? (
+                          <ContentRenderer
+                            content=""
+                            contentBlocks={contentBlocks}
+                            contentVersion={2}
+                          />
+                        ) : (
+                          <p className="text-muted-foreground">No content blocks yet...</p>
+                        )}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -390,6 +493,30 @@ export default function EditBlogForm() {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Category */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select
+                  value={watch('category') || ''}
+                  onValueChange={(value) => setValue('category', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEFAULT_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </CardContent>
             </Card>
 

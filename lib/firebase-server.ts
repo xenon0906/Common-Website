@@ -56,6 +56,7 @@
 // ==============================================================================
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app'
+import { getAuth, signInAnonymously, Auth } from 'firebase/auth'
 import { getFirestore, Firestore, doc, getDoc, collection, getDocs, query, orderBy, where, Timestamp } from 'firebase/firestore'
 
 // Firebase config from environment variables
@@ -132,6 +133,46 @@ export function getServerDb(): Firestore | null {
     }
   }
   return serverDb
+}
+
+// Ensure server-side Firebase is authenticated (anonymous auth)
+// This is needed because Firestore rules require request.auth != null for writes
+let serverAuth: Auth | null = null
+let serverAuthPromise: Promise<void> | null = null
+
+export async function ensureServerAuth(): Promise<void> {
+  const app = initializeServerFirebase()
+  if (!app) throw new Error('Firebase not configured')
+
+  if (!serverAuth) {
+    serverAuth = getAuth(app)
+  }
+
+  // Already authenticated
+  if (serverAuth.currentUser) return
+
+  // Avoid duplicate sign-in attempts
+  if (serverAuthPromise) return serverAuthPromise
+
+  serverAuthPromise = signInAnonymously(serverAuth)
+    .then(() => {
+      serverAuthPromise = null
+    })
+    .catch((err) => {
+      serverAuthPromise = null
+      console.error('[firebase-server] Anonymous auth failed:', err.message)
+      throw err
+    })
+
+  return serverAuthPromise
+}
+
+// Get an authenticated server DB for write operations
+export async function getAuthenticatedServerDb(): Promise<Firestore | null> {
+  const db = getServerDb()
+  if (!db) return null
+  await ensureServerAuth()
+  return db
 }
 
 // Helper functions to fetch data from Firestore

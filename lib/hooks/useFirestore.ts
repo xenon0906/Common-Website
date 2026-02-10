@@ -20,6 +20,7 @@ import {
   getCountFromServer,
 } from 'firebase/firestore'
 import { getFirebaseDb, getCollectionPath } from '@/lib/firebase'
+import { sanitizeSlug, MAX_SLUG_LENGTH } from '@/lib/utils'
 
 // Generic type for Firestore documents
 export interface FirestoreDoc {
@@ -261,6 +262,100 @@ export function useCollectionCounts(collectionNames: string[]) {
   }, [JSON.stringify(collectionNames)])
 
   return { counts, loading, error }
+}
+
+// Validation error class
+export class BlogValidationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'BlogValidationError'
+  }
+}
+
+// Validated blog data interface
+export interface BlogData {
+  title: string
+  slug: string
+  content: string
+  metaDesc?: string
+  excerpt?: string
+  keywords?: string
+  imageUrl?: string
+  published?: boolean
+  status?: 'draft' | 'published'
+  wordCount?: number
+  readingTime?: number
+  category?: string
+  tags?: string[]
+  author?: {
+    id: string
+    name: string
+    avatar?: string
+    bio?: string
+  }
+  contentBlocks?: any[]
+  contentVersion?: 1 | 2
+}
+
+/**
+ * Validates and sanitizes blog data before writing to Firestore
+ * Throws BlogValidationError if validation fails
+ */
+export function validateBlogData(data: BlogData): BlogData {
+  // Validate title
+  if (!data.title || data.title.trim().length < 10) {
+    throw new BlogValidationError('Title must be at least 10 characters')
+  }
+
+  // Sanitize and validate slug
+  const sanitizedSlug = sanitizeSlug(data.slug)
+  if (!sanitizedSlug || sanitizedSlug.length < 3) {
+    throw new BlogValidationError('Slug must be at least 3 characters')
+  }
+  if (sanitizedSlug.length > MAX_SLUG_LENGTH) {
+    throw new BlogValidationError(`Slug cannot exceed ${MAX_SLUG_LENGTH} characters`)
+  }
+
+  // Validate content
+  if (!data.content || data.content.trim().length < 100) {
+    throw new BlogValidationError('Content must be at least 100 characters')
+  }
+
+  return {
+    ...data,
+    slug: sanitizedSlug,
+    title: data.title.trim(),
+    content: data.content.trim(),
+  }
+}
+
+/**
+ * Create a blog post with validation
+ * Enforces slug length limits to prevent filesystem errors
+ */
+export async function createBlogPost(data: BlogData): Promise<string> {
+  const validatedData = validateBlogData(data)
+  return createDoc('blogs', validatedData)
+}
+
+/**
+ * Update a blog post with validation
+ * Enforces slug length limits to prevent filesystem errors
+ */
+export async function updateBlogPost(
+  documentId: string,
+  data: Partial<BlogData>
+): Promise<void> {
+  // If slug is being updated, validate it
+  if (data.slug) {
+    const sanitizedSlug = sanitizeSlug(data.slug)
+    if (sanitizedSlug.length > MAX_SLUG_LENGTH) {
+      throw new BlogValidationError(`Slug cannot exceed ${MAX_SLUG_LENGTH} characters`)
+    }
+    data.slug = sanitizedSlug
+  }
+
+  return updateDocument('blogs', documentId, data)
 }
 
 // Export Firestore query helpers for convenience

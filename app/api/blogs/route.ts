@@ -3,7 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { getBlogs, DEFAULT_BLOGS } from '@/lib/content'
 import { requireAuth } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { getServerDb, getServerAppId } from '@/lib/firebase-server'
+import { getAdminDb, getAdminCollectionPath } from '@/lib/firebase-admin'
+import { getAuthenticatedServerDb, getCollectionPath } from '@/lib/firebase-server'
 import { sanitizeSlug } from '@/lib/utils'
 import { createBlogSchema, validateBody } from '@/lib/validations'
 
@@ -32,55 +33,14 @@ export async function POST(request: NextRequest) {
     }
     const validated = validation.data
 
-    const db = getServerDb()
-    if (!db) {
-      return NextResponse.json(
-        { error: 'Firebase not configured' },
-        { status: 503 }
-      )
+    // Try Admin SDK first, fall back to authenticated client SDK
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      return await createBlogWithAdminSDK(adminDb, validated)
     }
 
-    const { addDoc, collection, serverTimestamp, getDocs, query, where } = await import('firebase/firestore')
-    const appId = getServerAppId()
-    const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'blogs')
-
-    // Check for duplicate slug
-    const slug = sanitizeSlug(validated.slug)
-    const slugQuery = query(collRef, where('slug', '==', slug))
-    const existingBlogs = await getDocs(slugQuery)
-    if (!existingBlogs.empty) {
-      return NextResponse.json(
-        { error: `A blog with slug "${slug}" already exists` },
-        { status: 409 }
-      )
-    }
-
-    const wordCount = validated.content.trim().split(/\s+/).length
-    const readingTime = Math.max(1, Math.ceil(wordCount / 200))
-
-    const blogData = {
-      title: validated.title,
-      slug,
-      content: validated.content,
-      metaDesc: validated.metaDesc,
-      excerpt: validated.excerpt,
-      keywords: validated.keywords,
-      imageUrl: validated.imageUrl,
-      published: validated.published,
-      status: validated.published ? 'published' : 'draft',
-      wordCount,
-      readingTime,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }
-
-    const docRef = await addDoc(collRef, blogData)
-
-    // Revalidate blog pages to reflect the new blog immediately
-    revalidatePath('/blog')
-    revalidatePath('/blog/[slug]', 'page')
-
-    return NextResponse.json({ id: docRef.id, ...blogData }, { status: 201 })
+    // Fallback: authenticated client SDK (anonymous auth)
+    return await createBlogWithClientSDK(validated)
   } catch (error) {
     console.error('Error creating blog:', error)
     return NextResponse.json(
@@ -88,4 +48,96 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+async function createBlogWithAdminSDK(adminDb: FirebaseFirestore.Firestore, validated: Record<string, any>) {
+  const admin = await import('firebase-admin')
+  const blogsPath = getAdminCollectionPath('blogs')
+  const collRef = adminDb.collection(blogsPath)
+
+  const slug = sanitizeSlug(validated.slug)
+  const existingBlogs = await collRef.where('slug', '==', slug).get()
+  if (!existingBlogs.empty) {
+    return NextResponse.json({ error: `A blog with slug "${slug}" already exists` }, { status: 409 })
+  }
+
+  const contentText = validated.content || ''
+  const wordCount = contentText.trim().split(/\s+/).length
+  const readingTime = Math.max(1, Math.ceil(wordCount / 200))
+
+  const blogData: Record<string, unknown> = {
+    title: validated.title,
+    slug,
+    content: validated.content || '',
+    metaDesc: validated.metaDesc || '',
+    excerpt: validated.excerpt || '',
+    keywords: validated.keywords || '',
+    imageUrl: validated.imageUrl || '',
+    published: validated.published ?? false,
+    status: validated.published ? 'published' : 'draft',
+    category: validated.category || '',
+    tags: validated.tags || [],
+    wordCount,
+    readingTime,
+    createdAt: admin.default.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.default.firestore.FieldValue.serverTimestamp(),
+  }
+
+  if (validated.contentBlocks) blogData.contentBlocks = validated.contentBlocks
+  if (validated.contentVersion) blogData.contentVersion = validated.contentVersion
+
+  const docRef = await collRef.add(blogData)
+  revalidatePath('/blog')
+  revalidatePath('/blog/[slug]', 'page')
+  return NextResponse.json({ id: docRef.id, ...blogData }, { status: 201 })
+}
+
+async function createBlogWithClientSDK(validated: Record<string, any>) {
+  const db = await getAuthenticatedServerDb()
+  if (!db) {
+    return NextResponse.json(
+      { error: 'Firebase not configured. Check your Firebase environment variables.' },
+      { status: 503 }
+    )
+  }
+
+  const { addDoc, collection, serverTimestamp, getDocs, query, where } = await import('firebase/firestore')
+  const blogsPath = getCollectionPath('blogs')
+  const collRef = collection(db, blogsPath)
+
+  const slug = sanitizeSlug(validated.slug)
+  const slugQuery = query(collRef, where('slug', '==', slug))
+  const existingBlogs = await getDocs(slugQuery)
+  if (!existingBlogs.empty) {
+    return NextResponse.json({ error: `A blog with slug "${slug}" already exists` }, { status: 409 })
+  }
+
+  const contentText = validated.content || ''
+  const wordCount = contentText.trim().split(/\s+/).length
+  const readingTime = Math.max(1, Math.ceil(wordCount / 200))
+
+  const blogData = {
+    title: validated.title,
+    slug,
+    content: validated.content || '',
+    metaDesc: validated.metaDesc || '',
+    excerpt: validated.excerpt || '',
+    keywords: validated.keywords || '',
+    imageUrl: validated.imageUrl || '',
+    published: validated.published ?? false,
+    status: validated.published ? 'published' : 'draft',
+    category: validated.category || '',
+    tags: validated.tags || [],
+    wordCount,
+    readingTime,
+    contentBlocks: validated.contentBlocks || undefined,
+    contentVersion: validated.contentVersion || undefined,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }
+
+  const docRef = await addDoc(collRef, blogData)
+  revalidatePath('/blog')
+  revalidatePath('/blog/[slug]', 'page')
+  return NextResponse.json({ id: docRef.id, ...blogData }, { status: 201 })
 }
