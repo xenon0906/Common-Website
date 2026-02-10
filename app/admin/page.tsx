@@ -32,15 +32,12 @@ import {
   ExternalLink,
   Settings,
   Loader2,
-  AlertCircle,
   Database,
   MessageSquare,
   HelpCircle,
   Image as ImageIcon,
-  Search,
   Plus,
   LayoutGrid,
-  Upload,
   UserPlus,
   AlertTriangle,
   CheckCircle,
@@ -286,17 +283,8 @@ export default function AdminDashboard() {
     change: `${p.percentage}%`,
   })) || []
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <AlertCircle className="w-12 h-12 text-destructive" />
-        <p className="text-lg text-muted-foreground">{error}</p>
-        <Link href="/admin/login" className="text-primary hover:underline">
-          Go to Login
-        </Link>
-      </div>
-    )
-  }
+  // Don't show full-page error for analytics failure - the rest of the dashboard still works
+  // Analytics sections will simply be empty/hidden when data is null
 
   return (
     <div className="space-y-8">
@@ -332,8 +320,8 @@ export default function AdminDashboard() {
             { label: 'New Blog Post', icon: Plus, href: '/admin/blogs/create', color: 'bg-primary/10 text-primary' },
             { label: 'Manage Team', icon: UserPlus, href: '/admin/team', color: 'bg-teal/10 text-teal' },
             { label: 'Content', icon: LayoutGrid, href: '/admin/content', color: 'bg-purple-500/10 text-purple-600' },
-            { label: 'Media Library', icon: Upload, href: '/admin/media', color: 'bg-orange-500/10 text-orange-600' },
-            { label: 'SEO Tools', icon: Search, href: '/admin/seo', color: 'bg-blue-500/10 text-blue-600' },
+            { label: 'FAQ', icon: HelpCircle, href: '/admin/faq', color: 'bg-orange-500/10 text-orange-600' },
+            { label: 'Achievements', icon: Award, href: '/admin/achievements', color: 'bg-blue-500/10 text-blue-600' },
             { label: 'Settings', icon: Settings, href: '/admin/settings', color: 'bg-gray-500/10 text-gray-600' },
           ].map((action) => {
             const Icon = action.icon

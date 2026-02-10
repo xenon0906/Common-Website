@@ -269,16 +269,19 @@ export function getAdminFirestore() {
               }
             },
             update: async (data: Record<string, unknown>) => {
+              await ensureServerAuth()
               const { setDoc } = await import('firebase/firestore')
               await setDoc(docRef, data, { merge: true })
             },
             delete: async () => {
+              await ensureServerAuth()
               const { deleteDoc } = await import('firebase/firestore')
               await deleteDoc(docRef)
             },
           }
         },
         add: async (data: Record<string, unknown>) => {
+          await ensureServerAuth()
           const { addDoc } = await import('firebase/firestore')
           const newDoc = await addDoc(collRef, data)
           return { id: newDoc.id }

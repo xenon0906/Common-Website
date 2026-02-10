@@ -31,10 +31,7 @@ import {
   Smartphone,
   Mail,
   Share2,
-  Search,
-  Globe,
   Image as ImageIcon,
-  Instagram,
   HelpCircle,
   FileStack,
   Navigation,
@@ -69,10 +66,7 @@ const sidebarLinks = [
   { href: '/admin/team', icon: Users, label: 'Team Manager' },
   { href: '/admin/achievements', icon: Award, label: 'Achievements' },
   { href: '/admin/faq', icon: HelpCircle, label: 'FAQ Manager' },
-  { href: '/admin/instagram', icon: Instagram, label: 'Instagram Reels' },
-  { href: '/admin/media', icon: ImageIcon, label: 'Media Library' },
   { href: '/admin/navigation', icon: Navigation, label: 'Navigation Editor' },
-  { href: '/admin/seo', icon: Search, label: 'SEO & Optimization' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
 
