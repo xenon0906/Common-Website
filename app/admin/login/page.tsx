@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -8,15 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Lock, User, Eye, EyeOff, AlertCircle, Loader2, CheckCircle } from 'lucide-react'
+import { Lock, User, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/constants'
-import { USE_FIREBASE } from '@/lib/config'
-import {
-  signInAnonymously,
-  signInWithCustomToken,
-  onAuthStateChanged,
-} from 'firebase/auth'
-import { getFirebaseAuth, getInitialAuthToken } from '@/lib/firebase'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -25,100 +18,7 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [firebaseLoading, setFirebaseLoading] = useState(USE_FIREBASE)
-  const [firebaseStatus, setFirebaseStatus] = useState<'checking' | 'success' | 'error' | 'idle'>('idle')
 
-  // Firebase auto-login on mount
-  useEffect(() => {
-    if (!USE_FIREBASE) {
-      setFirebaseLoading(false)
-      return
-    }
-
-    setFirebaseStatus('checking')
-    const auth = getFirebaseAuth()
-
-    // Helper function to create session cookies after Firebase auth
-    // Returns true if cookies were created successfully, false otherwise
-    const createSessionCookies = async (user: any): Promise<boolean> => {
-      try {
-        const idToken = await user.getIdToken()
-        const res = await fetch('/api/admin/firebase-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken }),
-        })
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}))
-          console.error('Session cookie creation failed:', data.error || res.statusText)
-          return false
-        }
-        return true
-      } catch (err) {
-        console.error('Failed to create session cookies:', err)
-        return false
-      }
-    }
-
-    // Check if already authenticated
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Already logged in, create session cookies and redirect to admin
-        const cookiesCreated = await createSessionCookies(user)
-        if (!cookiesCreated) {
-          setFirebaseStatus('error')
-          setFirebaseLoading(false)
-          setError('Session cookie creation failed. Please try the traditional login.')
-          return
-        }
-        setFirebaseStatus('success')
-        setFirebaseLoading(false)
-        // Refresh to ensure cookies are registered before middleware checks
-        router.refresh()
-        router.replace('/admin')
-        return
-      }
-
-      // Not logged in, try auto-login
-      const token = getInitialAuthToken()
-      try {
-        let loggedInUser
-        if (token) {
-          // Try custom token auth
-          const userCredential = await signInWithCustomToken(auth, token)
-          loggedInUser = userCredential.user
-        } else {
-          // Fall back to anonymous auth
-          const userCredential = await signInAnonymously(auth)
-          loggedInUser = userCredential.user
-        }
-        // Create session cookies for API auth
-        if (loggedInUser) {
-          const cookiesCreated = await createSessionCookies(loggedInUser)
-          if (!cookiesCreated) {
-            setFirebaseStatus('error')
-            setFirebaseLoading(false)
-            setError('Session cookie creation failed. Please try the traditional login.')
-            return
-          }
-        }
-        setFirebaseStatus('success')
-        // Refresh to ensure cookies are registered before middleware checks
-        router.refresh()
-        router.replace('/admin')
-      } catch (err: any) {
-        console.error('Firebase auto-login error:', err)
-        setFirebaseStatus('error')
-        setError('Firebase authentication failed. You can still use the traditional login.')
-      } finally {
-        setFirebaseLoading(false)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [router])
-
-  // Traditional API login + Firebase Auth sign-in
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -137,22 +37,8 @@ export default function AdminLoginPage() {
         throw new Error(data.error || 'Login failed')
       }
 
-      // After successful traditional login, also sign into Firebase Auth
-      // This gives the browser a Firebase Auth context so client SDK writes work
-      // (Firestore rules require request.auth != null for writes)
-      if (USE_FIREBASE) {
-        try {
-          const auth = getFirebaseAuth()
-          if (!auth.currentUser) {
-            await signInAnonymously(auth)
-          }
-        } catch (fbErr) {
-          // Non-blocking: admin panel still works via API routes with server-side auth
-          console.warn('Firebase Auth sign-in failed (non-blocking):', fbErr)
-        }
-      }
-
       // Redirect to admin dashboard
+      // The admin layout will handle Firebase anonymous auth
       router.push('/admin')
       router.refresh()
     } catch (err: any) {
@@ -160,59 +46,6 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  // Show Firebase loading state
-  if (firebaseLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-dark via-primary/20 to-dark flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <motion.div
-            className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-teal/10 blur-[120px]"
-            animate={{ scale: [1, 1.3, 1], x: [0, 50, 0] }}
-            transition={{ duration: 12, repeat: Infinity }}
-          />
-          <motion.div
-            className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/10 blur-[100px]"
-            animate={{ scale: [1.2, 1, 1.2], y: [0, -50, 0] }}
-            transition={{ duration: 10, repeat: Infinity }}
-          />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative z-10 text-center"
-        >
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <Image
-              src="/images/logo/Snapgo%20Logo%20White.png"
-              alt={SITE_CONFIG.name}
-              fill
-              className="object-contain brightness-110"
-            />
-          </div>
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Loader2 className="w-6 h-6 animate-spin text-teal" />
-            <span className="text-white/80">
-              {firebaseStatus === 'checking' && 'Checking authentication...'}
-              {firebaseStatus === 'success' && 'Authentication successful!'}
-            </span>
-          </div>
-          {firebaseStatus === 'success' && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center justify-center gap-2 text-teal"
-            >
-              <CheckCircle className="w-5 h-5" />
-              <span>Redirecting to dashboard...</span>
-            </motion.div>
-          )}
-        </motion.div>
-      </div>
-    )
   }
 
   return (
@@ -262,36 +95,13 @@ export default function AdminLoginPage() {
             </motion.div>
             <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
             <CardDescription>
-              {USE_FIREBASE && firebaseStatus === 'error'
-                ? 'Firebase login failed. Use credentials below.'
-                : 'Enter your credentials to access the admin panel'}
+              Enter your credentials to access the admin panel
             </CardDescription>
           </CardHeader>
 
           <CardContent>
-            {/* Firebase status indicator */}
-            {USE_FIREBASE && (
-              <div className={`mb-4 p-3 rounded-lg text-sm flex items-center gap-2 ${
-                firebaseStatus === 'error'
-                  ? 'bg-amber-500/10 border border-amber-500/20 text-amber-500'
-                  : 'bg-teal/10 border border-teal/20 text-teal'
-              }`}>
-                {firebaseStatus === 'error' ? (
-                  <>
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>Firebase unavailable - using traditional login</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>Firebase connected</span>
-                  </>
-                )}
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && !error.includes('Firebase') && (
+              {error && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}

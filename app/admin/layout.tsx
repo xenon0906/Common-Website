@@ -9,7 +9,7 @@ import { SITE_CONFIG } from '@/lib/constants'
 import { USE_FIREBASE } from '@/lib/config'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { onAuthStateChanged, signOut, User } from 'firebase/auth'
+import { onAuthStateChanged, signInAnonymously, signOut, User } from 'firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase'
 import {
   LayoutDashboard,
@@ -94,6 +94,7 @@ export default function AdminLayout({
   const [firebaseConnected, setFirebaseConnected] = useState(false)
 
   // Firebase auth state listener (skip for login page)
+  // Ensures anonymous auth is signed in before rendering admin pages
   useEffect(() => {
     if (!USE_FIREBASE || isLoginPage) {
       setAuthLoading(false)
@@ -101,27 +102,38 @@ export default function AdminLayout({
     }
 
     const auth = getFirebaseAuth()
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
-      setFirebaseConnected(true)
-      setAuthLoading(false)
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser)
+        setFirebaseConnected(true)
+        setAuthLoading(false)
+      } else {
+        // No Firebase Auth context - sign in anonymously to satisfy Firestore rules
+        try {
+          await signInAnonymously(auth)
+          // onAuthStateChanged will fire again with the new anonymous user
+        } catch (err) {
+          console.error('Anonymous auth failed:', err)
+          setFirebaseConnected(false)
+          setAuthLoading(false)
+        }
+      }
     })
 
     return () => unsubscribe()
-  }, [pathname, router, isLoginPage])
+  }, [isLoginPage])
 
   const handleLogout = async () => {
     try {
+      // Always clear session cookies
+      await fetch('/api/admin/logout', { method: 'POST' })
+      // Also clear Firebase auth state
       if (USE_FIREBASE) {
         const auth = getFirebaseAuth()
         await signOut(auth)
-        router.push('/admin/login')
-        router.refresh()
-      } else {
-        await fetch('/api/admin/logout', { method: 'POST' })
-        router.push('/admin/login')
-        router.refresh()
       }
+      router.push('/admin/login')
+      router.refresh()
     } catch (error) {
       console.error('Logout error:', error)
     }
