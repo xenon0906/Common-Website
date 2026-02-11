@@ -261,6 +261,7 @@ export function getAdminFirestore() {
           const docRef = doc(db, path, docId)
           return {
             get: async () => {
+              await ensureServerAuth()
               const snap = await getDoc(docRef)
               return {
                 exists: snap.exists(),
@@ -286,11 +287,23 @@ export function getAdminFirestore() {
           const newDoc = await addDoc(collRef, data)
           return { id: newDoc.id }
         },
+        get: async () => {
+          await ensureServerAuth()
+          const snapshot = await getDocs(collRef)
+          return {
+            empty: snapshot.empty,
+            docs: snapshot.docs.map(d => ({
+              id: d.id,
+              data: () => d.data(),
+            })),
+          }
+        },
         orderBy: (field: string, direction: 'asc' | 'desc' = 'asc') => {
           return {
             limit: (n: number) => {
               return {
                 get: async () => {
+                  await ensureServerAuth()
                   const { query: firestoreQuery, orderBy: firestoreOrderBy, limit: firestoreLimit } = await import('firebase/firestore')
                   const q = firestoreQuery(collRef, firestoreOrderBy(field, direction), firestoreLimit(n))
                   const snapshot = await getDocs(q)
