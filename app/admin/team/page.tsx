@@ -7,15 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import {
-  getFirebaseDb,
-  getAppId,
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from '@/lib/firebase'
+import { useToast } from '@/components/ui/use-toast'
+import { teamAPI } from '@/lib/admin-client'
+import type { TeamMemberData } from '@/lib/content'
 import {
   Plus,
   Search,
@@ -31,21 +25,6 @@ import {
   RefreshCw,
 } from 'lucide-react'
 
-interface TeamMember {
-  id: string
-  name: string
-  bio: string | null
-  details: string | null
-  imageUrl: string | null
-  portraitUrl: string | null
-  email: string | null
-  linkedin: string | null
-  twitter: string | null
-  order: number
-  isActive: boolean
-  createdAt?: string
-}
-
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -56,9 +35,10 @@ function getInitials(name: string): string {
 }
 
 export default function TeamManagementPage() {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMemberData[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchTeamMembers()
@@ -67,31 +47,25 @@ export default function TeamManagementPage() {
   const fetchTeamMembers = async () => {
     setLoading(true)
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const teamRef = collection(db, 'artifacts', appId, 'public', 'data', 'team')
-      const querySnapshot = await getDocs(teamRef)
-
-      const members: TeamMember[] = querySnapshot.docs.map(docSnap => ({
-        id: docSnap.id,
-        name: '',
-        bio: null,
-        details: null,
-        imageUrl: null,
-        portraitUrl: null,
-        email: null,
-        linkedin: null,
-        twitter: null,
-        order: 0,
-        isActive: true,
-        ...docSnap.data()
-      }))
-
-      // Sort by order
-      members.sort((a, b) => (a.order || 0) - (b.order || 0))
-      setTeamMembers(members)
+      const { data, error } = await teamAPI.list()
+      if (error) {
+        console.error('Error fetching team members:', error)
+        toast({
+          title: 'Failed to load team members',
+          description: error,
+          variant: 'destructive',
+        })
+        setTeamMembers([])
+      } else {
+        setTeamMembers(data || [])
+      }
     } catch (error) {
       console.error('Error fetching team members:', error)
+      toast({
+        title: 'Failed to load team members',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
       setTeamMembers([])
     } finally {
       setLoading(false)
@@ -107,28 +81,55 @@ export default function TeamManagementPage() {
     if (!confirm('Are you sure you want to delete this team member?')) return
 
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'team', id))
-      setTeamMembers(teamMembers.filter((m) => m.id !== id))
+      const { error } = await teamAPI.delete(id)
+      if (error) {
+        toast({
+          title: 'Failed to delete team member',
+          description: error,
+          variant: 'destructive',
+        })
+      } else {
+        setTeamMembers(teamMembers.filter((m) => m.id !== id))
+        toast({
+          title: 'Team member deleted',
+          description: 'The team member has been successfully removed.',
+        })
+      }
     } catch (error) {
       console.error('Error deleting team member:', error)
-      alert('Failed to delete team member')
+      toast({
+        title: 'Failed to delete team member',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     }
   }
 
-  const toggleActive = async (member: TeamMember) => {
+  const toggleActive = async (member: TeamMemberData) => {
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const memberRef = doc(db, 'artifacts', appId, 'public', 'data', 'team', member.id)
-      await updateDoc(memberRef, { isActive: !member.isActive })
-      setTeamMembers(teamMembers.map((m) =>
-        m.id === member.id ? { ...m, isActive: !m.isActive } : m
-      ))
+      const { error } = await teamAPI.update(member.id, { isActive: !member.isActive })
+      if (error) {
+        toast({
+          title: 'Failed to update team member',
+          description: error,
+          variant: 'destructive',
+        })
+      } else {
+        setTeamMembers(teamMembers.map((m) =>
+          m.id === member.id ? { ...m, isActive: !m.isActive } : m
+        ))
+        toast({
+          title: 'Team member updated',
+          description: `${member.name} is now ${!member.isActive ? 'active' : 'inactive'}.`,
+        })
+      }
     } catch (error) {
       console.error('Error toggling team member status:', error)
-      alert('Failed to update team member status')
+      toast({
+        title: 'Failed to update team member',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     }
   }
 

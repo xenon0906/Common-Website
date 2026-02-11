@@ -6,11 +6,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import NextImage from 'next/image'
 import { motion } from 'framer-motion'
 import { SITE_CONFIG } from '@/lib/constants'
-import { USE_FIREBASE } from '@/lib/config'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { onAuthStateChanged, signInAnonymously, signOut, User } from 'firebase/auth'
-import { getFirebaseAuth } from '@/lib/firebase'
 import {
   LayoutDashboard,
   FileText,
@@ -35,9 +32,6 @@ import {
   HelpCircle,
   FileStack,
   Navigation,
-  AlertTriangle,
-  CheckCircle,
-  Flame,
   Loader2,
   Scale,
   Shield,
@@ -83,49 +77,11 @@ export default function AdminLayout({
   const isLoginPage = pathname?.includes('/admin/login')
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [authLoading, setAuthLoading] = useState(USE_FIREBASE && !isLoginPage)
-  const [user, setUser] = useState<User | null>(null)
-  const [firebaseConnected, setFirebaseConnected] = useState(false)
-
-  // Firebase auth state listener (skip for login page)
-  // Ensures anonymous auth is signed in before rendering admin pages
-  useEffect(() => {
-    if (!USE_FIREBASE || isLoginPage) {
-      setAuthLoading(false)
-      return
-    }
-
-    const auth = getFirebaseAuth()
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser)
-        setFirebaseConnected(true)
-        setAuthLoading(false)
-      } else {
-        // No Firebase Auth context - sign in anonymously to satisfy Firestore rules
-        try {
-          await signInAnonymously(auth)
-          // onAuthStateChanged will fire again with the new anonymous user
-        } catch (err) {
-          console.error('Anonymous auth failed:', err)
-          setFirebaseConnected(false)
-          setAuthLoading(false)
-        }
-      }
-    })
-
-    return () => unsubscribe()
-  }, [isLoginPage])
 
   const handleLogout = async () => {
     try {
-      // Always clear session cookies
+      // Clear session cookies
       await fetch('/api/admin/logout', { method: 'POST' })
-      // Also clear Firebase auth state
-      if (USE_FIREBASE) {
-        const auth = getFirebaseAuth()
-        await signOut(auth)
-      }
       router.push('/admin/login')
       router.refresh()
     } catch (error) {
@@ -136,18 +92,6 @@ export default function AdminLayout({
   // For login page, just render children without the admin layout
   if (isLoginPage) {
     return <>{children}</>
-  }
-
-  // Show loading state while checking auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Checking authentication...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -258,56 +202,6 @@ export default function AdminLayout({
           </Button>
           <span className="ml-4 font-semibold">Admin Panel</span>
         </header>
-
-        {/* Firebase/Static Mode Banner */}
-        {USE_FIREBASE ? (
-          <div className={cn(
-            'border-b px-4 py-3',
-            firebaseConnected
-              ? 'bg-teal/5 border-teal/20'
-              : 'bg-amber-50 border-amber-200'
-          )}>
-            <div className="flex items-center gap-3 max-w-7xl mx-auto">
-              {firebaseConnected ? (
-                <>
-                  <Flame className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm text-foreground">
-                      <span className="font-semibold text-teal">Firebase Connected</span>
-                      {user && (
-                        <span className="text-muted-foreground ml-2">
-                          • {user.isAnonymous ? 'Anonymous user' : user.email || user.uid}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-teal flex-shrink-0" />
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm text-amber-800">
-                      <span className="font-semibold">Connecting to Firebase...</span>
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
-            <div className="flex items-center gap-3 max-w-7xl mx-auto">
-              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="text-sm text-amber-800">
-                  <span className="font-semibold">Static Mode Active:</span> Database is not connected.
-                  Content changes will not be saved. To enable persistence, configure DATABASE_URL and update lib/config.ts.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="p-6 lg:p-8">
           {children}

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { useToast } from '@/components/ui/use-toast'
 import { ArrowLeft, Save, User, Loader2, ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 
@@ -37,6 +38,7 @@ function getInitials(name: string): string {
 export default function EditTeamForm() {
   const router = useRouter()
   const params = useParams()
+  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
@@ -71,19 +73,27 @@ export default function EditTeamForm() {
             isActive: data.isActive,
           })
         } else {
-          alert('Team member not found')
+          toast({
+            title: 'Team member not found',
+            description: 'This team member may have been deleted.',
+            variant: 'destructive',
+          })
           router.push('/admin/team')
         }
       } catch (error) {
         console.error('Error fetching team member:', error)
-        alert('Failed to load team member')
+        toast({
+          title: 'Failed to load team member',
+          description: 'An unexpected error occurred',
+          variant: 'destructive',
+        })
         router.push('/admin/team')
       } finally {
         setLoading(false)
       }
     }
     fetchMember()
-  }, [params.id, router])
+  }, [params.id, router, toast])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,14 +110,26 @@ export default function EditTeamForm() {
       })
 
       if (res.ok) {
+        toast({
+          title: 'Team member updated',
+          description: 'Changes have been saved successfully.',
+        })
         router.push('/admin/team')
       } else {
         const error = await res.json()
-        alert(error.error || 'Failed to update team member')
+        toast({
+          title: 'Failed to update team member',
+          description: error.error || 'An unexpected error occurred',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Error updating team member:', error)
-      alert('Failed to update team member')
+      toast({
+        title: 'Failed to update team member',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     } finally {
       setSaving(false)
     }
