@@ -8,16 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, Loader2, Plus, Trash2, GripVertical, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
-import {
-  getFirebaseDb,
-  getAppId,
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-} from '@/lib/firebase'
+import { contentAPI } from '@/lib/admin-client'
+import { useToast } from '@/components/ui/use-toast'
 
 interface Statistic {
   id: string
@@ -41,7 +33,7 @@ export default function StatsPage() {
   const [stats, setStats] = useState<Statistic[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchStats()
@@ -50,24 +42,27 @@ export default function StatsPage() {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'stats')
-      const snapshot = await getDocs(collRef)
+      const { data, error } = await contentAPI.stats.list()
 
-      if (snapshot.empty) {
-        // No stats exist, use defaults
+      if (error) {
+        toast({
+          title: 'Failed to load statistics',
+          description: error,
+          variant: 'destructive',
+        })
         setStats([])
+      } else if (data) {
+        setStats(data.sort((a, b) => a.order - b.order))
       } else {
-        const items = snapshot.docs.map(d => ({
-          id: d.id,
-          ...d.data()
-        })) as Statistic[]
-        setStats(items.sort((a, b) => a.order - b.order))
+        setStats([])
       }
     } catch (error) {
       console.error('Error fetching stats:', error)
-      setMessage({ type: 'error', text: 'Failed to load statistics from Firestore' })
+      toast({
+        title: 'Failed to load statistics',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
       setStats([])
     } finally {
       setLoading(false)
@@ -76,18 +71,29 @@ export default function StatsPage() {
 
   const handleSave = async (stat: Statistic) => {
     setSaving(true)
-    setMessage(null)
 
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', stat.id)
       const { id, ...statData } = stat
-      await updateDoc(docRef, statData)
-      setMessage({ type: 'success', text: 'Statistic updated successfully!' })
+      const { error } = await contentAPI.stats.update(id, statData)
+
+      if (error) {
+        toast({
+          title: 'Failed to update statistic',
+          description: error,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Statistic updated successfully',
+        })
+      }
     } catch (error) {
       console.error('Error saving stat:', error)
-      setMessage({ type: 'error', text: 'Failed to save statistic' })
+      toast({
+        title: 'Failed to update statistic',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     } finally {
       setSaving(false)
     }
@@ -95,13 +101,8 @@ export default function StatsPage() {
 
   const handleAdd = async () => {
     setSaving(true)
-    setMessage(null)
 
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'stats')
-
       const newStat = {
         label: 'New Statistic',
         value: 0,
@@ -112,12 +113,27 @@ export default function StatsPage() {
         isActive: true,
       }
 
-      const docRef = await addDoc(collRef, newStat)
-      setStats([...stats, { id: docRef.id, ...newStat }])
-      setMessage({ type: 'success', text: 'New statistic added!' })
+      const { data, error } = await contentAPI.stats.create(newStat)
+
+      if (error) {
+        toast({
+          title: 'Failed to add statistic',
+          description: error,
+          variant: 'destructive',
+        })
+      } else if (data) {
+        setStats([...stats, data])
+        toast({
+          title: 'New statistic added successfully',
+        })
+      }
     } catch (error) {
       console.error('Error adding stat:', error)
-      setMessage({ type: 'error', text: 'Failed to add statistic' })
+      toast({
+        title: 'Failed to add statistic',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     } finally {
       setSaving(false)
     }
@@ -127,15 +143,27 @@ export default function StatsPage() {
     if (!confirm('Are you sure you want to delete this statistic?')) return
 
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', id)
-      await deleteDoc(docRef)
-      setStats(stats.filter((s) => s.id !== id))
-      setMessage({ type: 'success', text: 'Statistic deleted!' })
+      const { error } = await contentAPI.stats.delete(id)
+
+      if (error) {
+        toast({
+          title: 'Failed to delete statistic',
+          description: error,
+          variant: 'destructive',
+        })
+      } else {
+        setStats(stats.filter((s) => s.id !== id))
+        toast({
+          title: 'Statistic deleted successfully',
+        })
+      }
     } catch (error) {
       console.error('Error deleting stat:', error)
-      setMessage({ type: 'error', text: 'Failed to delete statistic' })
+      toast({
+        title: 'Failed to delete statistic',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -143,24 +171,30 @@ export default function StatsPage() {
     if (!confirm('This will initialize the stats collection with default values. Continue?')) return
 
     setSaving(true)
-    setMessage(null)
 
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'stats')
-
       const newStats: Statistic[] = []
       for (const stat of defaultStats) {
-        const docRef = await addDoc(collRef, stat)
-        newStats.push({ id: docRef.id, ...stat })
+        const { data, error } = await contentAPI.stats.create(stat)
+        if (data) {
+          newStats.push(data)
+        } else if (error) {
+          console.error('Error creating stat:', error)
+        }
       }
 
       setStats(newStats)
-      setMessage({ type: 'success', text: 'Statistics initialized with defaults!' })
+      toast({
+        title: 'Statistics initialized successfully',
+        description: `Created ${newStats.length} statistics`,
+      })
     } catch (error) {
       console.error('Error initializing stats:', error)
-      setMessage({ type: 'error', text: 'Failed to initialize statistics' })
+      toast({
+        title: 'Failed to initialize statistics',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     } finally {
       setSaving(false)
     }
@@ -208,22 +242,6 @@ export default function StatsPage() {
           </Button>
         </div>
       </div>
-
-      {/* Status Message */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-2 p-4 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-500/10 border border-green-500/20 text-green-600'
-              : 'bg-red-500/10 border border-red-500/20 text-red-500'
-          }`}
-        >
-          {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          {message.text}
-        </motion.div>
-      )}
 
       <div className="grid gap-4">
         <AnimatePresence>

@@ -38,17 +38,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  useCollection,
-  orderBy,
-  FirestoreDoc,
-} from '@/lib/hooks/useFirestore'
 import { Timestamp } from 'firebase/firestore'
 import { DEFAULT_CATEGORIES, BlogCategory, BlogPost } from '@/lib/types/blog'
 import { CategoryBadge } from './components'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useToast } from '@/components/ui/use-toast'
 import { StatCardSkeleton, CardSkeleton } from '@/components/ui/skeleton'
+import { blogAPI } from '@/lib/admin-client'
+
+interface FirestoreDoc {
+  id: string
+  createdAt?: Timestamp | Date | string
+  updatedAt?: Timestamp | Date | string
+}
 
 interface Blog extends FirestoreDoc {
   title: string
@@ -73,20 +75,45 @@ export default function BlogsPage() {
   const { confirm, ConfirmDialog } = useConfirmDialog()
   const { toast } = useToast()
 
-  const {
-    data: firestoreBlogs,
-    loading: firestoreLoading,
-  } = useCollection<Blog>(
-    'blogs',
-    [orderBy('createdAt', 'desc')]
-  )
-
   useEffect(() => {
-    if (!firestoreLoading) {
-      setBlogs(firestoreBlogs)
+    fetchBlogs()
+  }, [])
+
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await blogAPI.list()
+
+      if (error) {
+        toast({
+          title: 'Failed to load blogs',
+          description: error,
+          variant: 'destructive',
+        })
+        setBlogs([])
+      } else if (data) {
+        // Sort by createdAt descending
+        const sortedBlogs = data.sort((a, b) => {
+          const dateA = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime()
+          const dateB = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime()
+          return dateB - dateA
+        })
+        setBlogs(sortedBlogs)
+      } else {
+        setBlogs([])
+      }
+    } catch (error) {
+      console.error('Error fetching blogs:', error)
+      toast({
+        title: 'Failed to load blogs',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
+      setBlogs([])
+    } finally {
       setLoading(false)
     }
-  }, [firestoreBlogs, firestoreLoading])
+  }
 
   const filteredBlogs = (blogs || []).filter((blog) => {
     const matchesSearch = blog.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -108,13 +135,20 @@ export default function BlogsPage() {
     if (!confirmed) return
 
     try {
-      const res = await fetch(`/api/blogs/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed to delete blog')
-      setBlogs(blogs.filter((b) => b.id !== id))
-      toast({
-        title: 'Blog deleted',
-        description: 'The blog post has been permanently deleted.',
-      })
+      const { error } = await blogAPI.delete(id)
+      if (error) {
+        toast({
+          title: 'Error',
+          description: error || 'Failed to delete blog. Please try again.',
+          variant: 'destructive',
+        })
+      } else {
+        setBlogs(blogs.filter((b) => b.id !== id))
+        toast({
+          title: 'Blog deleted',
+          description: 'The blog post has been permanently deleted.',
+        })
+      }
     } catch (error) {
       console.error('Error deleting blog:', error)
       toast({
@@ -138,10 +172,11 @@ export default function BlogsPage() {
     let deletedCount = 0
     for (const id of selectedBlogs) {
       try {
-        const res = await fetch(`/api/blogs/${id}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error('Failed to delete blog')
-        setBlogs(prev => prev.filter((b) => b.id !== id))
-        deletedCount++
+        const { error } = await blogAPI.delete(id)
+        if (!error) {
+          setBlogs(prev => prev.filter((b) => b.id !== id))
+          deletedCount++
+        }
       } catch (error) {
         console.error('Error deleting blog:', error)
       }

@@ -9,13 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, User, Loader2, ImageIcon } from 'lucide-react'
 import Link from 'next/link'
-import {
-  getFirebaseDb,
-  getAppId,
-  collection,
-  addDoc,
-  getDocs,
-} from '@/lib/firebase'
+import { teamAPI } from '@/lib/admin-client'
+import { useToast } from '@/components/ui/use-toast'
 
 function getInitials(name: string): string {
   return name
@@ -29,6 +24,7 @@ function getInitials(name: string): string {
 export default function CreateTeamMemberPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
@@ -46,35 +42,37 @@ export default function CreateTeamMemberPage() {
     setLoading(true)
 
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const teamRef = collection(db, 'artifacts', appId, 'public', 'data', 'team')
-
-      // Get next order number if not specified
-      let orderNum = formData.order ? parseInt(formData.order) : undefined
-      if (!orderNum) {
-        const snapshot = await getDocs(teamRef)
-        orderNum = snapshot.size + 1
-      }
-
-      await addDoc(teamRef, {
+      const { data, error } = await teamAPI.create({
         name: formData.name,
-        bio: formData.bio || null,
-        details: formData.details || null,
-        email: formData.email || null,
-        linkedin: formData.linkedin || null,
-        twitter: formData.twitter || null,
-        imageUrl: formData.imageUrl || null,
-        portraitUrl: formData.portraitUrl || null,
-        order: orderNum,
-        isActive: true,
-        createdAt: new Date().toISOString(),
+        bio: formData.bio || undefined,
+        details: formData.details || undefined,
+        email: formData.email || undefined,
+        linkedin: formData.linkedin || undefined,
+        twitter: formData.twitter || undefined,
+        imageUrl: formData.imageUrl || undefined,
+        portraitUrl: formData.portraitUrl || undefined,
+        order: formData.order ? parseInt(formData.order) : undefined,
       })
 
-      router.push('/admin/team')
+      if (error) {
+        toast({
+          title: 'Failed to create team member',
+          description: error,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Team member created successfully',
+        })
+        router.push('/admin/team')
+      }
     } catch (error) {
       console.error('Error creating team member:', error)
-      alert('Failed to create team member')
+      toast({
+        title: 'Failed to create team member',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(false)
     }

@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
-import { getFirestoreDocument, isFirebaseConfigured } from '@/lib/firebase-server'
+import { NextRequest, NextResponse } from 'next/server'
+import { getFirestoreDocument, isFirebaseConfigured, getAdminFirestore, getCollectionPath } from '@/lib/firebase-server'
 import { DEFAULT_CONTACT } from '@/lib/content'
+import { requireAuth } from '@/lib/api-auth'
 
 interface ContactInfo {
   email: string
@@ -39,5 +40,34 @@ export async function GET() {
       status: 200,
       headers: { 'X-Data-Source': 'fallback' },
     })
+  }
+}
+
+// PUT - Update contact info in Firestore
+export async function PUT(req: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
+  try {
+    if (!isFirebaseConfigured()) {
+      return NextResponse.json(
+        { error: 'Firebase not configured' },
+        { status: 503 }
+      )
+    }
+
+    const data = await req.json()
+    const db = getAdminFirestore()
+    const docPath = getCollectionPath('content')
+
+    await db.collection(docPath).doc('contact').update(data)
+
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    console.error('Error updating contact info:', error)
+    return NextResponse.json(
+      { error: 'Failed to update contact info' },
+      { status: 500 }
+    )
   }
 }

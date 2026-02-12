@@ -1,46 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getFirestoreDocument, isFirebaseConfigured, getAdminFirestore, getCollectionPath } from '@/lib/firebase-server'
-import { DEFAULT_APP_LINKS } from '@/lib/content'
 import { requireAuth } from '@/lib/api-auth'
 
-interface AppStoreLinks {
-  android: {
-    url: string
-    isLive: boolean
-    qrCodeUrl: string
-  }
-  ios: {
-    url: string
-    isLive: boolean
-    qrCodeUrl: string
-  }
+interface HomepageContent {
+  hero?: any
+  features?: any
+  stats?: any
+  testimonials?: any
+  cta?: any
+  [key: string]: any
 }
 
-// GET - Fetch app store links from Firestore or return defaults
+const DEFAULT_HOMEPAGE: HomepageContent = {
+  hero: {},
+  features: {},
+  stats: {},
+  testimonials: {},
+  cta: {},
+}
+
+// GET - Fetch homepage content from Firestore or return defaults
 export async function GET() {
   try {
-    // If Firebase is configured, try to fetch from Firestore
     if (isFirebaseConfigured()) {
-      const apps = await getFirestoreDocument<AppStoreLinks>(
+      const homepage = await getFirestoreDocument<HomepageContent>(
         'content',
-        'apps',
-        DEFAULT_APP_LINKS as AppStoreLinks
+        'homepage',
+        DEFAULT_HOMEPAGE
       )
-      return NextResponse.json(apps)
+      return NextResponse.json(homepage)
     }
 
-    // Otherwise return static defaults
-    return NextResponse.json(DEFAULT_APP_LINKS)
+    return NextResponse.json(DEFAULT_HOMEPAGE)
   } catch (error) {
-    console.error('Error fetching app store links:', error)
-    return NextResponse.json(DEFAULT_APP_LINKS, {
+    console.error('Error fetching homepage content:', error)
+    return NextResponse.json(DEFAULT_HOMEPAGE, {
       status: 200,
       headers: { 'X-Data-Source': 'fallback' },
     })
   }
 }
 
-// PUT - Update app store links in Firestore
+// PUT - Update homepage content in Firestore
 export async function PUT(req: NextRequest) {
   const authError = await requireAuth()
   if (authError) return authError
@@ -57,13 +58,13 @@ export async function PUT(req: NextRequest) {
     const db = getAdminFirestore()
     const docPath = getCollectionPath('content')
 
-    await db.collection(docPath).doc('apps').update(data)
+    await db.collection(docPath).doc('homepage').update(data)
 
     return NextResponse.json({ success: true, data })
   } catch (error) {
-    console.error('Error updating app store links:', error)
+    console.error('Error updating homepage content:', error)
     return NextResponse.json(
-      { error: 'Failed to update app store links' },
+      { error: 'Failed to update homepage content' },
       { status: 500 }
     )
   }

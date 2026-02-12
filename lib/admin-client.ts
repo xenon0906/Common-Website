@@ -48,18 +48,90 @@ export const teamAPI = {
   delete: (id: string) => apiFetch<void>(`/api/team/${id}`, { method: 'DELETE' }),
 }
 
-// Content operations (hero, stats, etc.) - to be added as needed
+// Blog operations
+export const blogAPI = {
+  list: () => apiFetch<any[]>('/api/blogs'),
+  get: (id: string) => apiFetch<any>(`/api/blogs/${id}`),
+  create: (data: any) => apiFetch<any>('/api/blogs', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id: string, data: any) => apiFetch<any>(`/api/blogs/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id: string) => apiFetch<void>(`/api/blogs/${id}`, { method: 'DELETE' }),
+}
+
+// Content operations - all admin content pages
 export const contentAPI = {
+  // Document-based content (single documents updated with PUT)
   hero: {
     get: () => apiFetch<any>('/api/content/hero'),
     update: (data: any) => apiFetch<any>('/api/content/hero', { method: 'PUT', body: JSON.stringify(data) }),
   },
+  about: {
+    get: () => apiFetch<any>('/api/content/about'),
+    update: (data: any) => apiFetch<any>('/api/content/about', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  apps: {
+    get: () => apiFetch<any>('/api/content/apps'),
+    update: (data: any) => apiFetch<any>('/api/content/apps', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  contact: {
+    get: () => apiFetch<any>('/api/content/contact'),
+    update: (data: any) => apiFetch<any>('/api/content/contact', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  social: {
+    get: () => apiFetch<any>('/api/content/social'),
+    update: (data: any) => apiFetch<any>('/api/content/social', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  images: {
+    get: () => apiFetch<any>('/api/content/images'),
+    update: (data: any) => apiFetch<any>('/api/content/images', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  safety: {
+    get: () => apiFetch<any>('/api/content/safety'),
+    update: (data: any) => apiFetch<any>('/api/content/safety', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  homepage: {
+    get: () => apiFetch<any>('/api/content/homepage'),
+    update: (data: any) => apiFetch<any>('/api/content/homepage', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+
+  // Collection-based content (multiple documents with CRUD)
   stats: {
-    get: () => apiFetch<any>('/api/content/stats'),
-    update: (data: any) => apiFetch<any>('/api/content/stats', { method: 'PUT', body: JSON.stringify(data) }),
+    list: () => apiFetch<any[]>('/api/content/stats'),
+    create: (data: any) => apiFetch<any>('/api/content/stats', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => apiFetch<any>(`/api/content/stats/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => apiFetch<void>(`/api/content/stats/${id}`, { method: 'DELETE' }),
   },
   features: {
-    get: () => apiFetch<any>('/api/content/features'),
-    update: (data: any) => apiFetch<any>('/api/content/features', { method: 'PUT', body: JSON.stringify(data) }),
+    list: () => apiFetch<any[]>('/api/content/features'),
+    create: (data: any) => apiFetch<any>('/api/content/features', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => apiFetch<any>(`/api/content/features/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => apiFetch<void>(`/api/content/features/${id}`, { method: 'DELETE' }),
+  },
+  howItWorks: {
+    list: () => apiFetch<any[]>('/api/content/how-it-works'),
+    create: (data: any) => apiFetch<any>('/api/content/how-it-works', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => apiFetch<any>(`/api/content/how-it-works/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => apiFetch<void>(`/api/content/how-it-works/${id}`, { method: 'DELETE' }),
+  },
+  testimonials: {
+    list: () => apiFetch<any[]>('/api/content/testimonials'),
+    create: (data: any) => apiFetch<any>('/api/content/testimonials', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => apiFetch<any>(`/api/content/testimonials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => apiFetch<void>(`/api/content/testimonials/${id}`, { method: 'DELETE' }),
+  },
+  legal: {
+    get: (type: string) => apiFetch<any>(`/api/content/legal?type=${type}`),
+    update: (type: string, data: any) => apiFetch<any>(`/api/content/legal?type=${type}`, { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  featuresPage: {
+    list: () => apiFetch<any[]>('/api/content/features-page'),
+    create: (data: any) => apiFetch<any>('/api/content/features-page', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => apiFetch<any>(`/api/content/features-page/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => apiFetch<void>(`/api/content/features-page/${id}`, { method: 'DELETE' }),
   },
 }

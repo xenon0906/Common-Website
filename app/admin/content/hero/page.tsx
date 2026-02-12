@@ -10,13 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { ArrowLeft, Save, Loader2, Eye, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
-import {
-  getFirebaseDb,
-  getAppId,
-  doc,
-  getDoc,
-  setDoc,
-} from '@/lib/firebase'
+import { contentAPI } from '@/lib/admin-client'
+import { useToast } from '@/components/ui/use-toast'
 
 interface HeroContent {
   headline: string
@@ -40,7 +35,7 @@ export default function HeroContentPage() {
   const [hero, setHero] = useState<HeroContent>(defaultHero)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchHeroContent()
@@ -49,20 +44,27 @@ export default function HeroContentPage() {
   const fetchHeroContent = async () => {
     try {
       setLoading(true)
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'content', 'hero')
-      const docSnap = await getDoc(docRef)
+      const { data, error } = await contentAPI.hero.get()
 
-      if (docSnap.exists()) {
-        const data = docSnap.data() as Partial<HeroContent>
+      if (error) {
+        toast({
+          title: 'Failed to load hero content',
+          description: error,
+          variant: 'destructive',
+        })
+        setHero(defaultHero)
+      } else if (data) {
         setHero({ ...defaultHero, ...data })
       } else {
         setHero(defaultHero)
       }
     } catch (error) {
       console.error('Error fetching hero content:', error)
-      setMessage({ type: 'error', text: 'Failed to load hero content from Firestore' })
+      toast({
+        title: 'Failed to load hero content',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
       setHero(defaultHero)
     } finally {
       setLoading(false)
@@ -71,17 +73,29 @@ export default function HeroContentPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    setMessage(null)
 
     try {
-      const db = getFirebaseDb()
-      const appId = getAppId()
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'content', 'hero')
-      await setDoc(docRef, hero)
-      setMessage({ type: 'success', text: 'Hero content saved to Firestore!' })
+      const { error } = await contentAPI.hero.update(hero)
+
+      if (error) {
+        toast({
+          title: 'Failed to save hero content',
+          description: error,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Hero content saved successfully',
+          description: 'Your changes have been saved to Firestore',
+        })
+      }
     } catch (error) {
       console.error('Error saving hero content:', error)
-      setMessage({ type: 'error', text: 'Failed to save hero content to Firestore' })
+      toast({
+        title: 'Failed to save hero content',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      })
     } finally {
       setSaving(false)
     }
@@ -130,22 +144,6 @@ export default function HeroContentPage() {
           </Button>
         </div>
       </div>
-
-      {/* Status Message */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-2 p-4 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-500/10 border border-green-500/20 text-green-600'
-              : 'bg-red-500/10 border border-red-500/20 text-red-500'
-          }`}
-        >
-          {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          {message.text}
-        </motion.div>
-      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
