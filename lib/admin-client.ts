@@ -63,6 +63,23 @@ export const blogAPI = {
   delete: (id: string) => apiFetch<void>(`/api/blogs/${id}`, { method: 'DELETE' }),
 }
 
+// Category operations
+export const categoryAPI = {
+  list: () => apiFetch<any[]>('/api/categories'),
+  get: (id: string) => apiFetch<any>(`/api/categories/${id}`),
+  create: (data: { name: string; slug?: string; color?: string; description?: string }) =>
+    apiFetch<any>('/api/categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  update: (id: string, data: Partial<{ name: string; slug: string; color: string; description: string }>) =>
+    apiFetch<any>(`/api/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) => apiFetch<void>(`/api/categories/${id}`, { method: 'DELETE' }),
+}
+
 // Content operations - all admin content pages
 export const contentAPI = {
   // Document-based content (single documents updated with PUT)

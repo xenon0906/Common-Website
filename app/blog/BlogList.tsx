@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import { Calendar, Clock, ArrowRight, BookOpen, TrendingUp } from 'lucide-react'
 import { CategoryFilter } from './components/CategoryFilter'
-import { DEFAULT_CATEGORIES } from '@/lib/types/blog'
 
 interface Blog {
   id: string
@@ -19,8 +18,16 @@ interface Blog {
   createdAt: Date | string
   category?: string
   categoryName?: string
+  categoryColor?: string
   tags?: string[]
   readingTime?: number
+}
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  color?: string
 }
 
 function formatDate(date: Date | string): string {
@@ -40,9 +47,14 @@ function estimateReadTime(excerpt: string | null, readingTime?: number): string 
   return `${minutes} min`
 }
 
-function getCategoryInfo(categoryId?: string) {
-  if (!categoryId) return null
-  return DEFAULT_CATEGORIES.find((c) => c.id === categoryId)
+// Category info helper - uses blog's categoryName and categoryColor if available
+function getCategoryInfo(blog: Blog) {
+  if (!blog.category || !blog.categoryName) return null
+  return {
+    id: blog.category,
+    name: blog.categoryName,
+    color: blog.categoryColor || 'bg-primary',
+  }
 }
 
 // Hero section
@@ -108,7 +120,7 @@ function BlogHero({ onScrollDown }: { onScrollDown: () => void }) {
 function FeaturedBlogCard({ blog }: { blog: Blog }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
-  const category = getCategoryInfo(blog.category)
+  const category = getCategoryInfo(blog)
 
   return (
     <motion.div
@@ -119,9 +131,9 @@ function FeaturedBlogCard({ blog }: { blog: Blog }) {
       className="mb-12"
     >
       <Link href={`/blog/${blog.slug}`} className="group block">
-        <div className="relative grid md:grid-cols-2 gap-8 bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 dark:border-gray-800">
+        <div className="relative grid md:grid-cols-5 gap-10 bg-white dark:bg-gray-900 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 p-8">
           {/* Image */}
-          <div className="relative h-64 md:h-auto min-h-[300px] overflow-hidden">
+          <div className="relative md:col-span-2 h-72 md:h-full min-h-[300px] overflow-hidden rounded-xl">
             {blog.imageUrl ? (
               <Image
                 src={blog.imageUrl}
@@ -129,6 +141,8 @@ function FeaturedBlogCard({ blog }: { blog: Blog }) {
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
                 unoptimized={blog.imageUrl.startsWith('/uploads/')}
+                priority
+                sizes="(max-width: 768px) 100vw, 40vw"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary via-teal-500 to-emerald-500 flex items-center justify-center">
@@ -154,52 +168,48 @@ function FeaturedBlogCard({ blog }: { blog: Blog }) {
           </div>
 
           {/* Content */}
-          <div className="p-8 md:p-10 flex flex-col justify-center">
+          <div className="md:col-span-3 flex flex-col justify-center">
+            {/* Category badge */}
+            {category && (
+              <div className="mb-3">
+                <Badge className={`${category.color} text-white border-0 text-xs uppercase tracking-wide`}>
+                  {category.name}
+                </Badge>
+              </div>
+            )}
+
+            {/* Title */}
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight group-hover:text-primary transition-colors line-clamp-3">
+              {blog.title}
+            </h2>
+
+            {/* Excerpt */}
+            {blog.excerpt && (
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 line-clamp-2 leading-relaxed">
+                {blog.excerpt}
+              </p>
+            )}
+
             {/* Meta */}
             <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
                 {formatDate(blog.createdAt)}
               </span>
+              <span>·</span>
               <span className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
-                {estimateReadTime(blog.excerpt, blog.readingTime)}
+                {estimateReadTime(blog.excerpt, blog.readingTime)} read
               </span>
             </div>
 
-            {/* Title */}
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-primary transition-colors">
-              {blog.title}
-            </h2>
-
-            {/* Excerpt */}
-            {blog.excerpt && (
-              <p className="text-gray-600 dark:text-gray-400 mb-6 line-clamp-3 leading-relaxed">
-                {blog.excerpt}
-              </p>
-            )}
-
-            {/* Tags */}
-            {blog.tags && blog.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {blog.tags.slice(0, 3).map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded-md"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
             {/* Read more */}
             <motion.div
-              className="inline-flex items-center gap-2 text-primary font-semibold"
+              className="inline-flex items-center gap-2 text-primary font-medium text-sm mt-2"
               whileHover={{ x: 5 }}
             >
-              Read Full Article
-              <ArrowRight className="w-5 h-5" />
+              Continue reading
+              <ArrowRight className="w-4 h-4" />
             </motion.div>
           </div>
         </div>
@@ -212,7 +222,7 @@ function FeaturedBlogCard({ blog }: { blog: Blog }) {
 function BlogCard({ blog, index }: { blog: Blog; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
-  const category = getCategoryInfo(blog.category)
+  const category = getCategoryInfo(blog)
 
   return (
     <motion.div
@@ -222,9 +232,9 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
       <Link href={`/blog/${blog.slug}`} className="group block h-full">
-        <div className="h-full flex flex-col bg-white dark:bg-gray-900 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:border-primary/20">
+        <article className="h-full flex flex-col bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700">
           {/* Image */}
-          <div className="relative h-48 overflow-hidden">
+          <div className="relative h-56 overflow-hidden bg-gray-100 dark:bg-gray-800">
             {blog.imageUrl ? (
               <Image
                 src={blog.imageUrl}
@@ -232,6 +242,9 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                 unoptimized={blog.imageUrl.startsWith('/uploads/')}
+                loading={index < 6 ? 'eager' : 'lazy'}
+                priority={index < 3}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary to-teal flex items-center justify-center">
@@ -252,41 +265,36 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
           </div>
 
           {/* Content */}
-          <div className="flex-1 flex flex-col p-5">
-            {/* Meta */}
-            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                {formatDate(blog.createdAt)}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" />
-                {estimateReadTime(blog.excerpt, blog.readingTime)}
-              </span>
-            </div>
+          <div className="flex-1 flex flex-col p-6">
+            {/* Category badge */}
+            {category && (
+              <div className="mb-3">
+                <Badge className={`${category.color} text-white border-0 text-xs uppercase tracking-wide`}>
+                  {category.name}
+                </Badge>
+              </div>
+            )}
 
             {/* Title */}
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors line-clamp-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
               {blog.title}
             </h3>
 
             {/* Excerpt */}
             {blog.excerpt && (
-              <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4 flex-1">
+              <p className="text-gray-600 dark:text-gray-400 text-base line-clamp-3 mb-4 flex-1 leading-relaxed">
                 {blog.excerpt}
               </p>
             )}
 
-            {/* Read more */}
-            <motion.div
-              className="inline-flex items-center gap-2 text-primary font-medium text-sm mt-auto"
-              whileHover={{ x: 5 }}
-            >
-              Read more
-              <ArrowRight className="w-4 h-4" />
-            </motion.div>
+            {/* Meta */}
+            <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-800">
+              <span>{formatDate(blog.createdAt)}</span>
+              <span>·</span>
+              <span>{estimateReadTime(blog.excerpt, blog.readingTime)} read</span>
+            </div>
           </div>
-        </div>
+        </article>
       </Link>
     </motion.div>
   )
@@ -333,9 +341,9 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
       <BlogHero onScrollDown={scrollToContent} />
 
       {/* Blog Content */}
-      <section ref={contentRef} className="py-16 md:py-24 bg-gray-50 dark:bg-gray-950">
-        <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
-          <div className="max-w-6xl mx-auto">
+      <section ref={contentRef} className="py-16 md:py-24 bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-16">
+          <div className="max-w-7xl mx-auto">
             {/* Category Filter */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -372,7 +380,7 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
                 )}
 
                 {/* Blog grid */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {remainingBlogs.map((blog, index) => (
                     <BlogCard key={blog.id} blog={blog} index={index} />
                   ))}

@@ -21,7 +21,7 @@ export default async function BlogPage() {
     title: blog.title,
     slug: blog.slug,
     excerpt: blog.excerpt,
-    imageUrl: blog.imageUrl,
+    imageUrl: blog.imageUrl || null,
     createdAt: blog.createdAt,
   }))
 

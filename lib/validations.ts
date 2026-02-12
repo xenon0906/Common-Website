@@ -84,6 +84,21 @@ export const registerMediaSchema = z.object({
   alt: z.string().max(500).optional().default(''),
 })
 
+// ===== CATEGORY SCHEMAS =====
+export const createCategorySchema = z.object({
+  name: z.string().min(1, 'Category name is required').max(50, 'Name too long'),
+  slug: z.string().max(50).optional(), // Auto-generated from name if not provided
+  color: z.string().max(50).optional().default('bg-primary'), // Tailwind color class
+  description: z.string().max(500).optional().default(''),
+})
+
+export const updateCategorySchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  slug: z.string().max(50).optional(),
+  color: z.string().max(50).optional(),
+  description: z.string().max(500).optional(),
+})
+
 // ===== SETTINGS SCHEMAS =====
 export const updateSettingSchema = z.object({
   category: z.string().min(1, 'Category is required').max(50),

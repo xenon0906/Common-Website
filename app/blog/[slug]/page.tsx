@@ -50,22 +50,58 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  const canonicalUrl = `${SITE_CONFIG.url}/blog/${blog.slug}`
+  const description = blog.excerpt || `Read ${blog.title} on Snapgo blog`
+  const keywords = blog.tags?.join(', ') || undefined
+
   return {
     title: blog.title,
-    description: blog.excerpt || `Read ${blog.title} on snapgo blog`,
+    description,
+    keywords,
+    authors: blog.author
+      ? [{ name: blog.author.name }]
+      : [{ name: SITE_CONFIG.name }],
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: blog.title,
-      description: blog.excerpt || undefined,
+      description,
       type: 'article',
+      url: canonicalUrl,
       publishedTime: toISOStringSafe(blog.createdAt),
-      modifiedTime: toISOStringSafe(blog.updatedAt),
-      images: blog.imageUrl ? [{ url: blog.imageUrl }] : undefined,
+      modifiedTime: toISOStringSafe(blog.updatedAt || blog.createdAt),
+      authors: blog.author ? [blog.author.name] : [SITE_CONFIG.name],
+      section: blog.categoryName,
+      tags: blog.tags,
+      images: blog.imageUrl
+        ? [
+            {
+              url: blog.imageUrl,
+              width: 1200,
+              height: 630,
+              alt: blog.title,
+            },
+          ]
+        : undefined,
+      siteName: SITE_CONFIG.name,
+      locale: 'en_IN',
     },
     twitter: {
       card: 'summary_large_image',
       title: blog.title,
-      description: blog.excerpt || undefined,
+      description,
       images: blog.imageUrl ? [blog.imageUrl] : undefined,
+      creator: '@snapgo_india', // Update with actual Twitter handle if different
+      site: '@snapgo_india',
+    },
+    robots: {
+      index: blog.published,
+      follow: blog.published,
+      googleBot: {
+        index: blog.published,
+        follow: blog.published,
+      },
     },
   }
 }

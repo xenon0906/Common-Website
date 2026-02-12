@@ -37,21 +37,71 @@ interface InstagramReel {
 }
 
 function InstagramEmbed({ reelId, isActive }: { reelId: string; isActive: boolean }) {
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [embedError, setEmbedError] = useState(false)
 
   useEffect(() => {
-    setIsLoaded(false)
+    if (!isActive) return
 
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      if (isActive && typeof window !== 'undefined' && (window as any).instgrm) {
-        (window as any).instgrm.Embeds.process()
-        setIsLoaded(true)
+    setIsLoading(true)
+    setEmbedError(false)
+
+    let attempts = 0
+    const maxAttempts = 3
+    let timeoutId: NodeJS.Timeout
+
+    const processEmbed = () => {
+      if ((window as any).instgrm?.Embeds) {
+        try {
+          (window as any).instgrm.Embeds.process()
+          setIsLoading(false)
+        } catch (err) {
+          console.error('Instagram embed error:', err)
+          if (attempts < maxAttempts) {
+            attempts++
+            timeoutId = setTimeout(processEmbed, 500)
+          } else {
+            setEmbedError(true)
+            setIsLoading(false)
+          }
+        }
+      } else if (attempts < maxAttempts) {
+        attempts++
+        timeoutId = setTimeout(processEmbed, 500)
+      } else {
+        setEmbedError(true)
+        setIsLoading(false)
       }
-    }, 100)
+    }
 
-    return () => clearTimeout(timer)
+    // Initial delay to ensure DOM is ready
+    const timer = setTimeout(processEmbed, 200)
+
+    return () => {
+      clearTimeout(timer)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [isActive, reelId])
+
+  // Fallback UI for failed embeds
+  if (embedError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-black rounded-3xl p-6">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <Instagram className="w-12 h-12 text-white/40" />
+          <p className="text-white/60 text-sm">Unable to load Instagram embed</p>
+          <a
+            href={`https://instagram.com/reel/${reelId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm transition-colors border border-white/20"
+          >
+            View on Instagram
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-black">
@@ -71,12 +121,14 @@ function InstagramEmbed({ reelId, isActive }: { reelId: string; isActive: boolea
           maxWidth: '540px',
         }}
       >
-        <div className="flex items-center justify-center h-full min-h-[400px] sm:min-h-[500px]">
-          <div className="animate-pulse flex flex-col items-center gap-4">
-            <Instagram className="w-12 h-12 text-white/50" />
-            <p className="text-white/50 text-sm">Loading reel...</p>
+        {isLoading && (
+          <div className="flex items-center justify-center h-full min-h-[400px] sm:min-h-[500px]">
+            <div className="animate-pulse flex flex-col items-center gap-4">
+              <Instagram className="w-12 h-12 text-white/50" />
+              <p className="text-white/50 text-sm">Loading reel...</p>
+            </div>
           </div>
-        </div>
+        )}
       </blockquote>
     </div>
   )
@@ -143,11 +195,14 @@ export default function InstagramSection() {
       {/* Instagram Embed Script */}
       <Script
         src="https://www.instagram.com/embed.js"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         onLoad={() => {
           if ((window as any).instgrm) {
             (window as any).instgrm.Embeds.process()
           }
+        }}
+        onError={() => {
+          console.error('Failed to load Instagram embed script')
         }}
       />
 

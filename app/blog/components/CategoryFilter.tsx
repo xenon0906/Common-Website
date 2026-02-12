@@ -3,7 +3,13 @@
 import { useRef, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { DEFAULT_CATEGORIES } from '@/lib/types/blog'
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  color?: string
+}
 
 interface CategoryFilterProps {
   selectedCategory: string | null
@@ -19,6 +25,28 @@ export function CategoryFilter({
   const scrollRef = useRef<HTMLDivElement>(null)
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories')
+      if (response.ok) {
+        const data = await response.json()
+        setCategories(data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      setCategories([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Check scroll position
   const checkScrollPosition = () => {
@@ -45,8 +73,18 @@ export function CategoryFilter({
 
   const allCategories = [
     { id: null, name: 'All', slug: 'all', color: 'bg-primary' },
-    ...DEFAULT_CATEGORIES,
+    ...categories,
   ]
+
+  if (isLoading) {
+    return (
+      <div className="flex gap-2 py-2">
+        <div className="h-9 w-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse" />
+        <div className="h-9 w-24 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse" />
+        <div className="h-9 w-20 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse" />
+      </div>
+    )
+  }
 
   return (
     <div className={`relative ${className}`}>

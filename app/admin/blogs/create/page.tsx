@@ -35,7 +35,8 @@ import { FileUpload } from '@/components/ui/FileUpload'
 import { useToast } from '@/components/ui/use-toast'
 import { BlockEditor } from '@/components/admin/blog/BlockEditor'
 import { ContentRenderer } from '@/components/blog/ContentRenderer'
-import { DEFAULT_CATEGORIES, type ContentBlock, type ContentVersion } from '@/lib/types/blog'
+import { CategoryManager } from '@/components/blog/CategoryManager'
+import type { ContentBlock, ContentVersion } from '@/lib/types/blog'
 
 const blogSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
@@ -423,21 +424,10 @@ export default function CreateBlogPage() {
                 <CardTitle>Category</CardTitle>
               </CardHeader>
               <CardContent>
-                <Select
+                <CategoryManager
                   value={watch('category') || ''}
-                  onValueChange={(value) => setValue('category', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DEFAULT_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(value) => setValue('category', value)}
+                />
               </CardContent>
             </Card>
 

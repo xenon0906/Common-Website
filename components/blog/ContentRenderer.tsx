@@ -55,7 +55,7 @@ function InlineMarkdown({ content }: { content: string }) {
 
 function ParagraphBlockRenderer({ block }: { block: ParagraphBlock }) {
   return (
-    <p className="mb-4 leading-relaxed text-gray-600 dark:text-gray-300">
+    <p className="mb-6 text-lg leading-[1.8] text-gray-700 dark:text-gray-300">
       <InlineMarkdown content={block.content} />
     </p>
   )
@@ -63,9 +63,9 @@ function ParagraphBlockRenderer({ block }: { block: ParagraphBlock }) {
 
 function HeadingBlockRenderer({ block }: { block: HeadingBlock }) {
   const className = {
-    1: 'text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white',
-    2: 'text-2xl font-bold mt-8 mb-4 text-primary',
-    3: 'text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-white',
+    1: 'text-4xl font-bold mt-12 mb-6 text-gray-900 dark:text-white leading-tight tracking-tight',
+    2: 'text-3xl font-bold mt-10 mb-4 text-gray-900 dark:text-white leading-snug tracking-tight',
+    3: 'text-2xl font-semibold mt-8 mb-3 text-gray-900 dark:text-white leading-snug',
   }[block.level]
 
   if (block.level === 1) {
@@ -78,6 +78,15 @@ function HeadingBlockRenderer({ block }: { block: HeadingBlock }) {
 }
 
 function ImageBlockRenderer({ block }: { block: ImageBlock }) {
+  // Handle both 'url' and 'imageUrl' fields for backward compatibility
+  const imageUrl = block.url || (block as any).imageUrl || ''
+
+  // Skip rendering if no valid image URL
+  if (!imageUrl) {
+    console.warn('ImageBlock missing url/imageUrl:', block)
+    return null
+  }
+
   return (
     <motion.figure
       initial={{ opacity: 0, y: 20 }}
@@ -87,11 +96,11 @@ function ImageBlockRenderer({ block }: { block: ImageBlock }) {
     >
       <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
         <Image
-          src={block.url}
-          alt={block.alt}
+          src={imageUrl}
+          alt={block.alt || ''}
           fill
           className="object-cover"
-          unoptimized={block.url.startsWith('/uploads/')}
+          unoptimized={imageUrl.startsWith('/uploads/')}
         />
       </div>
       {block.caption && (
@@ -105,12 +114,12 @@ function ImageBlockRenderer({ block }: { block: ImageBlock }) {
 
 function QuoteBlockRenderer({ block }: { block: QuoteBlock }) {
   return (
-    <blockquote className="border-l-4 border-primary pl-4 py-2 my-6 bg-primary/5 rounded-r-lg">
-      <p className="italic text-gray-700 dark:text-gray-300 text-lg">
+    <blockquote className="border-l-4 border-primary pl-6 py-3 my-8 bg-gray-50 dark:bg-gray-900 rounded-r">
+      <p className="italic text-gray-800 dark:text-gray-200 text-xl leading-relaxed">
         <InlineMarkdown content={block.content} />
       </p>
       {block.attribution && (
-        <footer className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <footer className="mt-3 text-base text-gray-600 dark:text-gray-400 not-italic">
           — {block.attribution}
         </footer>
       )}
@@ -121,13 +130,13 @@ function QuoteBlockRenderer({ block }: { block: QuoteBlock }) {
 function ListBlockRenderer({ block }: { block: ListBlock }) {
   const ListTag = block.ordered ? 'ol' : 'ul'
   const listClass = block.ordered
-    ? 'list-decimal pl-6 mb-4 space-y-2'
-    : 'list-disc pl-6 mb-4 space-y-2'
+    ? 'list-decimal pl-8 mb-6 space-y-3'
+    : 'list-disc pl-8 mb-6 space-y-3'
 
   return (
     <ListTag className={listClass}>
       {block.items.map((item, index) => (
-        <li key={index} className="text-gray-600 dark:text-gray-300">
+        <li key={index} className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
           <InlineMarkdown content={item} />
         </li>
       ))}
