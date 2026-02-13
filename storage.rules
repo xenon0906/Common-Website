@@ -1,0 +1,30 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for Snapgo
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Match all files in category folders: blog/, team/, achievements/, etc.
+    match /{category}/{filename} {
+
+      // Public read for common categories (so images display publicly)
+      allow read: if category in ['blog', 'team', 'general', 'achievements', 'logo', 'media'];
+
+      // Authenticated users can upload
+      allow create: if request.auth != null
+                    && request.resource.size < 10 * 1024 * 1024  // 10MB max
+                    && request.resource.contentType.matches('image/.*|application/pdf');
+
+      // Authenticated users can delete their uploads
+      allow delete: if request.auth != null;
+
+      // Authenticated users can update metadata
+      allow update: if request.auth != null;
+    }
+
+    // Fallback: deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

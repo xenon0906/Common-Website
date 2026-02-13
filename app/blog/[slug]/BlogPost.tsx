@@ -158,7 +158,7 @@ export function BlogPost({ blog, relatedPosts = [] }: BlogPostProps) {
                   fill
                   className="object-cover"
                   priority
-                  unoptimized={blog.imageUrl.startsWith('/uploads/')}
+                  unoptimized={blog.imageUrl?.includes('firebasestorage') || !blog.imageUrl?.startsWith('/uploads/')}
                 />
               </div>
             </motion.div>
