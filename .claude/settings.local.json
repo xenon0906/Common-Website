@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nHarden backend security, add input validation, and expand test coverage\n\n- Add timing-safe comparisons for admin login \\(prevent timing attacks\\)\n- Harden Firebase token fallback to reject unverified tokens in production\n- Add rate limiting to 7 mutation API routes \\(upload, blogs, team, achievements, navigation, settings, firebase-session\\)\n- Create centralized Zod validation schemas \\(lib/validations.ts\\) for all mutation routes\n- Apply input validation to all POST/PUT API handlers\n- Add duplicate slug check on blog creation \\(409 conflict\\)\n- Add physical file cleanup on media DELETE\n- Add X-Data-Source: fallback header to all 12 content API error responses\n- Fix middleware timing-safe comparison to not leak string length\n- Add 4 new test files \\(92 total tests\\): validations, rate-limit, api-auth-extended, middleware\n- Expand vitest coverage config to include app/api routes\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx vercel:*)"
+    ]
+  }
+}
