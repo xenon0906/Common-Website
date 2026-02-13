@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import { Calendar, Clock, ArrowRight, BookOpen, TrendingUp } from 'lucide-react'
 import { CategoryFilter } from './components/CategoryFilter'
+import { DEFAULT_CATEGORIES } from '@/lib/types/blog'
 
 interface Blog {
   id: string
@@ -39,13 +40,9 @@ function estimateReadTime(excerpt: string | null, readingTime?: number): string 
   return `${minutes} min`
 }
 
-function getCategoryInfo(blog: Blog) {
-  if (!blog.categoryName) return null
-  return {
-    id: blog.category || '',
-    name: blog.categoryName,
-    color: 'bg-primary', // Default color, can be customized later
-  }
+function getCategoryInfo(categoryId?: string) {
+  if (!categoryId) return null
+  return DEFAULT_CATEGORIES.find((c) => c.id === categoryId)
 }
 
 // Hero section
@@ -111,7 +108,7 @@ function BlogHero({ onScrollDown }: { onScrollDown: () => void }) {
 function FeaturedBlogCard({ blog }: { blog: Blog }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
-  const category = getCategoryInfo(blog)
+  const category = getCategoryInfo(blog.category)
 
   return (
     <motion.div
@@ -215,7 +212,7 @@ function FeaturedBlogCard({ blog }: { blog: Blog }) {
 function BlogCard({ blog, index }: { blog: Blog; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
-  const category = getCategoryInfo(blog)
+  const category = getCategoryInfo(blog.category)
 
   return (
     <motion.div

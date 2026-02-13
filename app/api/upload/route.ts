@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { uploadFile, FileCategory, validateUpload, formatFileSize, UPLOAD_CONFIG } from '@/lib/upload'
+import { FileCategory, validateUpload, formatFileSize, UPLOAD_CONFIG } from '@/lib/upload'
+import { uploadToFirebaseStorage } from '@/lib/firebase-storage'
 import { requireAuth } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -50,20 +51,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload the file
-    const result = await uploadFile(file, { category })
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 500 }
-      )
-    }
+    // Upload to Firebase Storage
+    const { url, filename } = await uploadToFirebaseStorage(file, category)
 
     return NextResponse.json({
       success: true,
-      url: result.publicUrl,
-      filename: result.filename,
+      url,
+      filename,
       size: formatFileSize(file.size),
       type: file.type
     })

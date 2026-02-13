@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
 import { getServerDb, getServerAppId } from '@/lib/firebase-server'
 import { registerMediaSchema, validateBody } from '@/lib/validations'
+import { deleteFromFirebaseStorage } from '@/lib/firebase-storage'
 
 export async function GET(request: NextRequest) {
   try {
@@ -103,16 +104,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
 
-    // Clean up actual file from disk for local uploads
+    // Delete file from Firebase Storage
     const fileData = docSnap.data()
-    if (fileData?.url && typeof fileData.url === 'string' && fileData.url.startsWith('/uploads/')) {
+    if (fileData?.url && typeof fileData.url === 'string') {
       try {
-        const { unlink } = await import('fs/promises')
-        const path = await import('path')
-        const filePath = path.join(process.cwd(), 'public', fileData.url)
-        await unlink(filePath)
-      } catch (fsError) {
-        console.warn('Failed to delete file from disk:', fsError)
+        // Only delete from Firebase Storage (not local files)
+        if (fileData.url.includes('firebasestorage.googleapis.com')) {
+          await deleteFromFirebaseStorage(fileData.url)
+        }
+      } catch (storageError) {
+        console.warn('Failed to delete file from Firebase Storage:', storageError)
+        // Continue anyway to clean up Firestore record
       }
     }
 
