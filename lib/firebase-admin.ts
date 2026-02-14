@@ -9,23 +9,27 @@ function getApp(): admin.app.App | null {
 
   const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
   if (!serviceAccountKey) {
-    console.warn(
+    const errorMsg =
       '[firebase-admin] FIREBASE_SERVICE_ACCOUNT_KEY not configured. ' +
-      'Server-side token verification is disabled. ' +
-      'Set this env var to a JSON string of your Firebase service account key.'
-    )
+      'Server-side operations (uploads, token verification) are disabled. ' +
+      'Run: npm run setup:service-account for instructions.'
+    console.warn(errorMsg)
     return null
   }
 
   try {
     const serviceAccount = JSON.parse(serviceAccountKey)
+    const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
+      storageBucket: storageBucket,
     })
     initialized = true
+    console.log('[firebase-admin] ✅ Initialized successfully with storage bucket:', storageBucket)
     return admin.app()
   } catch (error) {
-    console.error('[firebase-admin] Failed to initialize:', error)
+    console.error('[firebase-admin] ❌ Failed to initialize:', error)
     return null
   }
 }
@@ -50,6 +54,15 @@ export function isAdminConfigured(): boolean {
 export function getAdminDb(): admin.firestore.Firestore | null {
   const app = getApp()
   return app ? app.firestore() : null
+}
+
+/**
+ * Returns a Storage instance from the Admin SDK.
+ * Use for server-side file uploads/deletes - bypasses storage security rules.
+ */
+export function getAdminStorage(): admin.storage.Storage | null {
+  const app = getApp()
+  return app ? app.storage() : null
 }
 
 /**

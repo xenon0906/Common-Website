@@ -14,7 +14,8 @@
     "fix:blog-slugs": "dotenv -e .env.local -- tsx scripts/fix-blog-slugs.ts",
     "delete:blogs": "dotenv -e .env.local -- tsx scripts/delete-all-blogs.ts",
     "setup:firebase": "tsx scripts/setup-firebase.ts",
-    "deploy:rules": "firebase deploy --only firestore:rules,storage:rules"
+    "deploy:rules": "firebase deploy --only firestore:rules,storage:rules",
+    "setup:service-account": "tsx scripts/get-service-account.ts"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.9.0",

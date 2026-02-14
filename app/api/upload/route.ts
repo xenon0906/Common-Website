@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { FileCategory, validateUpload, formatFileSize, UPLOAD_CONFIG } from '@/lib/upload'
-import { uploadToFirebaseStorage } from '@/lib/firebase-storage'
+import { uploadToStorageAdmin } from '@/lib/firebase-admin-storage'
 import { requireAuth } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -51,20 +51,45 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload to Firebase Storage
-    const { url, filename } = await uploadToFirebaseStorage(file, category)
+    // Convert File to Buffer for Admin SDK
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    // Upload to Firebase Storage using Admin SDK (server-side)
+    // This bypasses client-side authentication requirements
+    const { url, filename, path } = await uploadToStorageAdmin(
+      buffer,
+      file.name,
+      category,
+      file.type
+    )
+
+    console.log(`[upload-api] ✅ Uploaded successfully: ${path}`)
 
     return NextResponse.json({
       success: true,
       url,
       filename,
+      path,
       size: formatFileSize(file.size),
       type: file.type
     })
-  } catch (error) {
-    console.error('Upload API error:', error)
+  } catch (error: any) {
+    console.error('[upload-api] ❌ Upload error:', error)
+
+    // Provide helpful error messages
+    if (error.message?.includes('FIREBASE_SERVICE_ACCOUNT_KEY')) {
+      return NextResponse.json(
+        {
+          error: 'Server configuration error: Firebase Admin SDK not configured',
+          details: 'Contact administrator to set up Firebase service account key'
+        },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error.message || 'Upload failed' },
       { status: 500 }
     )
   }
