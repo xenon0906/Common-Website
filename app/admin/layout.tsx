@@ -1,67 +1,43 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import NextImage from 'next/image'
-import { motion } from 'framer-motion'
+import { useTheme } from 'next-themes'
 import { SITE_CONFIG } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard,
   FileText,
-  Award,
-  Settings,
+  LogOut,
+  Home,
+  Sun,
+  Moon,
+  Hash,
+  Instagram,
+  User,
   Menu,
   X,
-  LogOut,
-  ChevronRight,
-  Home,
-  Users,
-  Layers,
-  Sparkles,
-  BarChart3,
-  Star,
-  MessageSquare,
-  Info,
-  Smartphone,
-  Mail,
-  Share2,
-  Image as ImageIcon,
-  HelpCircle,
-  FileStack,
-  Navigation,
-  Loader2,
-  Scale,
-  Shield,
-  LayoutGrid,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Toaster } from '@/components/ui/toaster'
+import { glassEffects, animations, spacing } from '@/lib/design-tokens'
 
-const sidebarLinks = [
+// Simplified navigation - only 4 essential sections
+const navLinks = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/admin/pages', icon: FileStack, label: 'Pages Overview' },
-  { href: '/admin/content', icon: Layers, label: 'Content Manager', isSection: true },
-  { href: '/admin/content/hero', icon: Sparkles, label: 'Hero Section', parent: '/admin/content' },
-  { href: '/admin/content/stats', icon: BarChart3, label: 'Statistics', parent: '/admin/content' },
-  { href: '/admin/content/features', icon: Star, label: 'Features', parent: '/admin/content' },
-  { href: '/admin/content/how-it-works', icon: Layers, label: 'How It Works', parent: '/admin/content' },
-  { href: '/admin/content/testimonials', icon: MessageSquare, label: 'Testimonials', parent: '/admin/content' },
-  { href: '/admin/content/about', icon: Info, label: 'About Content', parent: '/admin/content' },
-  { href: '/admin/content/apps', icon: Smartphone, label: 'App Store Links', parent: '/admin/content' },
-  { href: '/admin/content/contact', icon: Mail, label: 'Contact Info', parent: '/admin/content' },
-  { href: '/admin/content/social', icon: Share2, label: 'Social Links', parent: '/admin/content' },
-  { href: '/admin/content/images', icon: ImageIcon, label: 'Images & Assets', parent: '/admin/content' },
-  { href: '/admin/content/legal', icon: Scale, label: 'Legal Pages', parent: '/admin/content' },
-  { href: '/admin/content/safety', icon: Shield, label: 'Safety Page', parent: '/admin/content' },
-  { href: '/admin/content/homepage', icon: LayoutGrid, label: 'Homepage Sections', parent: '/admin/content' },
-  { href: '/admin/blogs', icon: FileText, label: 'Blog Manager' },
-  { href: '/admin/team', icon: Users, label: 'Team Manager' },
-  { href: '/admin/achievements', icon: Award, label: 'Achievements' },
-  { href: '/admin/faq', icon: HelpCircle, label: 'FAQ Manager' },
-  { href: '/admin/navigation', icon: Navigation, label: 'Navigation Editor' },
-  { href: '/admin/settings', icon: Settings, label: 'Settings' },
+  { href: '/admin/blogs', icon: FileText, label: 'Blogs' },
+  { href: '/admin/numbers', icon: Hash, label: 'Numbers' },
+  { href: '/admin/instagram', icon: Instagram, label: 'Instagram' },
 ]
 
 export default function AdminLayout({
@@ -71,16 +47,14 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // IMPORTANT: Check for login page FIRST, before any state that could cause loading UI
-  // This must be before other useState calls to ensure login page renders immediately
+  // Check for login page FIRST
   const isLoginPage = pathname?.includes('/admin/login')
-
-  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const handleLogout = async () => {
     try {
-      // Clear session cookies
       await fetch('/api/admin/logout', { method: 'POST' })
       router.push('/admin/login')
       router.refresh()
@@ -89,132 +63,175 @@ export default function AdminLayout({
     }
   }
 
-  // For login page, just render children without the admin layout
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
+  }
+
+  // For login page, render children without layout
   if (isLoginPage) {
     return <>{children}</>
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Sidebar */}
-      <aside
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+      {/* Floating Glassmorphism Navbar */}
+      <nav
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen bg-background border-r transition-all duration-300',
-          sidebarOpen ? 'w-64' : 'w-20'
+          glassEffects.navbar,
+          'fixed top-0 left-0 right-0 z-50 h-16'
         )}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="relative w-10 h-10">
-              <NextImage
-                src="/images/logo/Snapgo%20Logo%20White.png"
-                alt={SITE_CONFIG.name}
-                fill
-                className="object-contain brightness-110"
-              />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex items-center justify-between h-full">
+            {/* Logo */}
+            <Link href="/admin" className="flex items-center gap-3 group">
+              <div className="relative w-10 h-10 transition-transform duration-200 group-hover:scale-110">
+                <NextImage
+                  src="/images/logo/Snapgo%20Logo%20White.png"
+                  alt={SITE_CONFIG.name}
+                  fill
+                  className="object-contain brightness-110"
+                />
+              </div>
+              <span className="font-bold text-lg text-gray-900 dark:text-white hidden sm:block">
+                Snapgo Admin
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-2">
+              {navLinks.map((link) => {
+                const Icon = link.icon
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== '/admin' && pathname.startsWith(link.href))
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200',
+                      isActive
+                        ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+                    )}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{link.label}</span>
+                  </Link>
+                )
+              })}
             </div>
-            {sidebarOpen && (
-              <span className="font-bold text-lg">Admin</span>
-            )}
-          </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden lg:flex"
-          >
-            <ChevronRight className={cn(
-              'w-5 h-5 transition-transform',
-              !sidebarOpen && 'rotate-180'
-            )} />
-          </Button>
-        </div>
 
-        {/* Navigation */}
-        <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
-          {sidebarLinks.map((link) => {
-            const Icon = link.icon
-            const isActive = pathname === link.href ||
-              (link.href !== '/admin' && pathname.startsWith(link.href))
-            const isParentActive = link.parent && pathname.startsWith(link.parent)
-            const hasParent = 'parent' in link
-
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-2">
+              {/* Theme Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
                 className={cn(
-                  'flex items-center gap-3 py-2.5 rounded-lg transition-all duration-200',
-                  hasParent ? 'pl-8 pr-4' : 'px-4',
-                  hasParent && !sidebarOpen && 'pl-4',
-                  isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                  'isSection' in link && 'font-semibold text-foreground mt-4 first:mt-0'
+                  'rounded-lg',
+                  animations.smooth
                 )}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                <Icon className={cn('flex-shrink-0', hasParent ? 'w-4 h-4' : 'w-5 h-5')} />
-                {sidebarOpen && <span className={hasParent ? 'text-sm' : ''}>{link.label}</span>}
-              </Link>
-            )
-          })}
-        </nav>
+                {theme === 'dark' ? (
+                  <Sun className="w-5 h-5 text-yellow-500" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-700" />
+                )}
+              </Button>
 
-        {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t space-y-2">
-          <Link
-            href="/"
-            className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors'
-            )}
-          >
-            <Home className="w-5 h-5 flex-shrink-0" />
-            {sidebarOpen && <span>Back to Site</span>}
-          </Link>
-          <button
-            onClick={handleLogout}
-            className={cn(
-              'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors'
-            )}
-          >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {sidebarOpen && <span>Logout</span>}
-          </button>
+              {/* User Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-lg"
+                  >
+                    <User className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className={cn(glassEffects.card, 'w-48')}>
+                  <DropdownMenuLabel className="text-gray-900 dark:text-white">
+                    Admin Account
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/" className="flex items-center gap-2 cursor-pointer">
+                      <Home className="w-4 h-4" />
+                      <span>Back to Site</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600 dark:text-red-400 cursor-pointer focus:text-red-600 dark:focus:text-red-400"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Mobile Menu Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden rounded-lg"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
-      </aside>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/20 dark:border-white/10">
+            <div className="px-4 py-4 space-y-2">
+              {navLinks.map((link) => {
+                const Icon = link.icon
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== '/admin' && pathname.startsWith(link.href))
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200',
+                      isActive
+                        ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50'
+                    )}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{link.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </nav>
 
       {/* Main Content */}
-      <main
-        className={cn(
-          'min-h-screen transition-all duration-300',
-          sidebarOpen ? 'lg:pl-64' : 'lg:pl-20'
-        )}
-      >
-        {/* Mobile Header */}
-        <header className="lg:hidden h-16 bg-background border-b flex items-center px-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <Menu className="w-6 h-6" />
-          </Button>
-          <span className="ml-4 font-semibold">Admin Panel</span>
-        </header>
-
-        <div className="p-6 lg:p-8">
+      <main className="pt-20 px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="max-w-7xl mx-auto">
           {children}
         </div>
       </main>
-
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
 
       {/* Toast Notifications */}
       <Toaster />
