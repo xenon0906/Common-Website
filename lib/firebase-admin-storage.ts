@@ -132,7 +132,7 @@ export async function listFilesAdmin(category?: string): Promise<Array<{
 
   return files.map(file => ({
     name: file.name,
-    size: parseInt(file.metadata.size || '0'),
+    size: Number(file.metadata.size) || 0,
     contentType: file.metadata.contentType || 'application/octet-stream',
     created: file.metadata.timeCreated || '',
     updated: file.metadata.updated || '',
