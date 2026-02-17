@@ -10,9 +10,45 @@ import {
 import { sanitizeSlug, MAX_SLUG_LENGTH } from './utils'
 import { SiteImagesConfig, DEFAULT_IMAGES } from './types/images'
 
+// Import new homepage types
+import type {
+  CabPoolingComparisonData,
+  WhySnapgoReason,
+  CO2ImpactData,
+  SavingsCalculatorData,
+  TrustBadge,
+  CTASectionData,
+  AppPreviewData,
+  HomepageConfig as HomepageConfigType,
+} from './types/homepage'
+
+// Import new default constants
+import {
+  DEFAULT_COMPARISON,
+  DEFAULT_WHY_SNAPGO,
+  DEFAULT_CO2_CONFIG,
+  DEFAULT_SAVINGS_CONFIG,
+  DEFAULT_TRUST_BADGES,
+  DEFAULT_CTA_SECTIONS,
+  DEFAULT_APP_PREVIEW,
+  DEFAULT_HOMEPAGE_CONFIG as DEFAULT_HOMEPAGE_CONFIG_CONST,
+} from './constants'
+
 // Re-export image types for convenience
 export type { SiteImagesConfig }
 export { DEFAULT_IMAGES }
+
+// Re-export homepage types
+export type {
+  CabPoolingComparisonData,
+  WhySnapgoReason,
+  CO2ImpactData,
+  SavingsCalculatorData,
+  TrustBadge,
+  CTASectionData,
+  AppPreviewData,
+  HomepageConfigType,
+}
 
 // Types for content
 export interface HeroContentData {
@@ -760,6 +796,57 @@ export async function getLegalContent(type: 'terms' | 'privacy' | 'refund'): Pro
   return getFirestoreDocument<LegalPageData>('legal', type, defaultValue)
 }
 
+// Fetch cab pooling comparison data
+export async function getCabPoolingComparison(): Promise<CabPoolingComparisonData> {
+  if (!isFirebaseConfigured()) return DEFAULT_COMPARISON
+  return getFirestoreDocument<CabPoolingComparisonData>('content', 'comparisons', DEFAULT_COMPARISON)
+}
+
+// Fetch Why Snapgo reasons
+export async function getWhySnapgoReasons(): Promise<WhySnapgoReason[]> {
+  if (!isFirebaseConfigured()) return DEFAULT_WHY_SNAPGO
+  const reasons = await getFirestoreCollection<WhySnapgoReason>('whySnapgo', DEFAULT_WHY_SNAPGO, 'order')
+  return reasons.filter(r => r.isActive !== false)
+}
+
+// Fetch CO2 impact tracker configuration
+export async function getCO2ImpactConfig(): Promise<CO2ImpactData> {
+  if (!isFirebaseConfigured()) return DEFAULT_CO2_CONFIG
+  return getFirestoreDocument<CO2ImpactData>('content', 'environmentImpact', DEFAULT_CO2_CONFIG)
+}
+
+// Fetch savings calculator configuration
+export async function getSavingsCalculatorConfig(): Promise<SavingsCalculatorData> {
+  if (!isFirebaseConfigured()) return DEFAULT_SAVINGS_CONFIG
+  return getFirestoreDocument<SavingsCalculatorData>('content', 'savingsCalculator', DEFAULT_SAVINGS_CONFIG)
+}
+
+// Fetch trust badges
+export async function getTrustBadges(): Promise<TrustBadge[]> {
+  if (!isFirebaseConfigured()) return DEFAULT_TRUST_BADGES
+  const badges = await getFirestoreCollection<TrustBadge>('trustBadges', DEFAULT_TRUST_BADGES, 'order')
+  return badges.filter(b => b.isActive !== false)
+}
+
+// Fetch CTA sections
+export async function getCTASections(): Promise<CTASectionData[]> {
+  if (!isFirebaseConfigured()) return DEFAULT_CTA_SECTIONS
+  const sections = await getFirestoreCollection<CTASectionData>('ctaSections', DEFAULT_CTA_SECTIONS, 'order')
+  return sections.filter(s => s.isActive !== false)
+}
+
+// Fetch app preview configuration
+export async function getAppPreviewConfig(): Promise<AppPreviewData> {
+  if (!isFirebaseConfigured()) return DEFAULT_APP_PREVIEW
+  return getFirestoreDocument<AppPreviewData>('content', 'appPreview', DEFAULT_APP_PREVIEW)
+}
+
+// Fetch homepage section configuration (new version with proper type)
+export async function getHomepageSectionConfig(): Promise<HomepageConfigType> {
+  if (!isFirebaseConfigured()) return DEFAULT_HOMEPAGE_CONFIG_CONST
+  return getFirestoreDocument<HomepageConfigType>('content', 'homepageConfig', DEFAULT_HOMEPAGE_CONFIG_CONST)
+}
+
 // Fetch safety page content
 export async function getSafetyContent(): Promise<SafetyContentData> {
   if (!isFirebaseConfigured()) return DEFAULT_SAFETY
@@ -791,4 +878,12 @@ export {
   DEFAULT_HOMEPAGE_CONFIG,
   DEFAULT_HOW_IT_WORKS_DETAILED,
   DEFAULT_HOW_IT_WORKS_COMPARISONS,
+  // New homepage content defaults
+  DEFAULT_COMPARISON,
+  DEFAULT_WHY_SNAPGO,
+  DEFAULT_CO2_CONFIG,
+  DEFAULT_SAVINGS_CONFIG,
+  DEFAULT_TRUST_BADGES,
+  DEFAULT_CTA_SECTIONS,
+  DEFAULT_APP_PREVIEW,
 }

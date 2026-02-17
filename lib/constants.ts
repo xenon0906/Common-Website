@@ -1,3 +1,17 @@
+/**
+ * @deprecated This file serves ONLY as fallback when Firebase is unavailable.
+ *
+ * All constants here now serve as DEFAULT fallback values when:
+ * 1. Firebase is not configured
+ * 2. Firestore data fetch fails
+ * 3. Running in development without Firebase
+ *
+ * To update content, use the admin panel at /admin instead of editing this file.
+ * Changes made here will NOT appear on the website unless Firebase is unavailable.
+ *
+ * See lib/content.ts for the primary data fetching layer.
+ */
+
 export const SITE_CONFIG = {
   name: 'Snapgo',
   legalName: 'Snapgo Service Private Limited',
@@ -201,4 +215,229 @@ export const COLORS = {
   dark: '#111827',
   light: '#f3f4f6',
   white: '#ffffff',
+}
+
+// ============================================
+// NEW DEFAULT CONSTANTS (ADMIN-EDITABLE CONTENT)
+// ============================================
+
+/**
+ * Cab Pooling Comparison - Default Data
+ * Used in CabPoolingComparison component
+ */
+export const DEFAULT_COMPARISON = {
+  carpooling: {
+    title: 'Traditional Carpooling',
+    subtitle: 'Private Cars',
+    iconName: 'X',
+    colorScheme: 'red' as const,
+    points: [
+      { text: 'Uses private vehicles for commercial use', negative: true },
+      { text: 'Not legal in India', negative: true },
+      { text: 'Bypasses taxi drivers', negative: true },
+      { text: 'Same emissions per car', negative: true },
+    ],
+  },
+  cabPooling: {
+    title: 'Snapgo Cab Pooling',
+    subtitle: 'Commercial Cabs',
+    iconName: 'Check',
+    colorScheme: 'green' as const,
+    points: [
+      { text: 'Uses licensed commercial cabs', negative: false },
+      { text: '100% legal and regulated', negative: false },
+      { text: "Doesn't bypass taxi drivers", negative: false },
+      { text: '75% less emissions per person', negative: false },
+    ],
+  },
+  benefits: [
+    {
+      iconName: 'Leaf',
+      title: 'Planet Wins',
+      description: '4 people in 1 cab instead of 4 separate cabs = 75% less pollution',
+      colorScheme: 'emerald' as const,
+      order: 0
+    },
+    {
+      iconName: 'Wallet',
+      title: 'You Win',
+      description: 'Split the fare and save up to 75% on every ride',
+      colorScheme: 'blue' as const,
+      order: 1
+    },
+    {
+      iconName: 'Users',
+      title: 'Flexible Pooling',
+      description: 'No car? Book together. Have a car? Offer rides. Your choice, same savings.',
+      colorScheme: 'purple' as const,
+      order: 2
+    },
+  ],
+  tagline: 'Why pay for the full cab when you can save money AND the environment?',
+  isActive: true,
+}
+
+/**
+ * Why Snapgo - Default Reasons
+ * Used in WhySnapgoSection component
+ */
+export const DEFAULT_WHY_SNAPGO = [
+  {
+    id: 'reason_1',
+    iconName: 'Wallet',
+    title: 'Save Up to 75%',
+    description: 'Pool a cab with verified co-riders and split the fare',
+    gradient: 'from-teal-50 to-primary-50',
+    order: 0,
+    isActive: true
+  },
+  {
+    id: 'reason_2',
+    iconName: 'Shield',
+    title: '100% Legal & Verified',
+    description: 'We pool commercial cabs with Aadhaar-verified riders',
+    gradient: 'from-primary-50 to-purple-50',
+    order: 1,
+    isActive: true
+  },
+  {
+    id: 'reason_3',
+    iconName: 'Car',
+    title: 'Pool Your Way',
+    description: 'No car? Book together. Have a car? Share your ride',
+    gradient: 'from-purple-50 to-teal-50',
+    order: 2,
+    isActive: true
+  },
+  {
+    id: 'reason_4',
+    iconName: 'Leaf',
+    title: 'Green Cab Pooling',
+    description: '4 people, 1 cab = 75% less emissions',
+    gradient: 'from-teal-50 to-primary-50',
+    order: 3,
+    isActive: true
+  },
+]
+
+/**
+ * CO2 Impact Tracker - Default Config
+ * Used in CO2ImpactTracker component
+ */
+export const DEFAULT_CO2_CONFIG = {
+  headline: 'Your Green Impact',
+  subheadline: 'Track your contribution to a cleaner planet',
+  defaultRides: 10,
+  co2PerRide: 2.5, // kg
+  treesEquivalent: 0.1, // trees per ride
+  metricsLabels: {
+    rides: 'Pooled Rides',
+    co2Saved: 'CO₂ Saved (kg)',
+    treesEquiv: 'Trees Equivalent',
+  },
+  isActive: true,
+}
+
+/**
+ * Savings Calculator - Default Config
+ * Used in SavingsCalculator component
+ */
+export const DEFAULT_SAVINGS_CONFIG = {
+  headline: 'Calculate Your Savings',
+  subheadline: 'See how much you can save by pooling cabs',
+  defaultFare: 400,
+  defaultRiders: 4,
+  riderOptions: [2, 3, 4],
+  currencySymbol: '₹',
+  isActive: true,
+}
+
+/**
+ * Trust Badges - Default Data
+ * Used in TrustBadgesSection component
+ */
+export const DEFAULT_TRUST_BADGES = [
+  {
+    id: 'badge_1',
+    iconName: 'Award',
+    title: 'DPIIT Recognized',
+    description: 'Government certified startup',
+    order: 0,
+    isActive: true
+  },
+  {
+    id: 'badge_2',
+    iconName: 'Shield',
+    title: 'Startup India',
+    description: 'Official initiative member',
+    order: 1,
+    isActive: true
+  },
+  {
+    id: 'badge_3',
+    iconName: 'Lock',
+    title: 'Data Protected',
+    description: 'Industry-standard encryption',
+    order: 2,
+    isActive: true
+  },
+]
+
+/**
+ * CTA Sections - Default Data
+ * Used in CTASection component
+ */
+export const DEFAULT_CTA_SECTIONS = [
+  {
+    id: 'cta_1',
+    quote: 'Join thousands saving money while saving the planet',
+    badge: '10,000+ Downloads',
+    buttonText: 'Download Now',
+    buttonLink: '/#download',
+    backgroundStyle: 'gradient' as const,
+    order: 0,
+    isActive: true,
+  },
+]
+
+/**
+ * App Preview - Default Data
+ * Used in AppPreviewSection component
+ */
+export const DEFAULT_APP_PREVIEW = {
+  headline: 'Experience Snapgo',
+  subheadline: 'Simple, safe, and eco-friendly cab pooling',
+  features: [
+    { title: 'Real-time Matching', description: 'Find co-riders instantly' },
+    { title: 'Verified Profiles', description: 'Aadhaar KYC for all users' },
+    { title: 'Secure Payments', description: 'Split fares seamlessly' },
+  ],
+  mockupImages: {
+    primary: '/images/mockups/home-screen.png',
+    secondary: '/images/mockups/matching-screen.png',
+  },
+  isActive: true,
+}
+
+/**
+ * Homepage Config - Default Section Visibility & Order
+ * Controls which sections appear on homepage and in what order
+ */
+export const DEFAULT_HOMEPAGE_CONFIG = {
+  sections: [
+    { componentName: 'hero', label: 'Hero Section', visible: true, order: 1 },
+    { componentName: 'trustBadges', label: 'Trust Badges', visible: true, order: 2 },
+    { componentName: 'whySnapgo', label: 'Why Snapgo', visible: true, order: 3 },
+    { componentName: 'comparison', label: 'Cab Pooling Comparison', visible: true, order: 4 },
+    { componentName: 'stats', label: 'Statistics Counter', visible: true, order: 5 },
+    { componentName: 'co2Impact', label: 'CO2 Impact Tracker', visible: true, order: 6 },
+    { componentName: 'savingsCalc', label: 'Savings Calculator', visible: true, order: 7 },
+    { componentName: 'features', label: 'Features Grid', visible: true, order: 8 },
+    { componentName: 'howItWorks', label: 'How It Works', visible: true, order: 9 },
+    { componentName: 'appPreview', label: 'App Preview', visible: true, order: 10 },
+    { componentName: 'download', label: 'Download Section', visible: true, order: 11 },
+    { componentName: 'testimonials', label: 'Testimonials', visible: true, order: 12 },
+    { componentName: 'instagram', label: 'Instagram Feed', visible: true, order: 13 },
+    { componentName: 'cta', label: 'Call to Action', visible: true, order: 14 },
+  ],
 }
