@@ -20,7 +20,7 @@ function StatCard({ title, value, change, icon: Icon, trend = 'neutral' }: StatC
     neutral: 'text-gray-600 dark:text-gray-400',
   }
 
-  const trendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : null
+  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : null
 
   return (
     <GlassCard
@@ -37,7 +37,7 @@ function StatCard({ title, value, change, icon: Icon, trend = 'neutral' }: StatC
           </h3>
           {change !== undefined && (
             <div className={cn('flex items-center gap-1 text-sm font-medium', trendColor[trend])}>
-              {trendIcon && <trendIcon className="w-4 h-4" />}
+              {TrendIcon && <TrendIcon className="w-4 h-4" />}
               <span>{change > 0 ? '+' : ''}{change}%</span>
               <span className="text-gray-500 dark:text-gray-400 font-normal ml-1">vs last week</span>
             </div>

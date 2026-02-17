@@ -5,9 +5,9 @@ import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardDescription, Glass
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { MicroLoader } from '@/components/admin/MicroLoader'
-import { Save, Hash, DollarSign, Phone, TrendingUp } from 'lucide-react'
+import { Save, DollarSign, Phone, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-tokens'
 

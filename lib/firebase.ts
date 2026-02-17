@@ -132,6 +132,7 @@ export {
   query,
   orderBy,
   where,
+  limit,
 } from 'firebase/firestore'
 
 // Export for convenience
