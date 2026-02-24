@@ -45,7 +45,7 @@ export async function PUT(req: NextRequest) {
     const db = getAdminFirestore()
     const docPath = getCollectionPath('images')
 
-    await db.collection(docPath).doc('config').update(data)
+    await db.collection(docPath).doc('config').set(data, { merge: true })
 
     return NextResponse.json({ success: true, data })
   } catch (error) {

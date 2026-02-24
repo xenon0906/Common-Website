@@ -100,7 +100,7 @@ function ImageBlockRenderer({ block }: { block: ImageBlock }) {
           alt={block.alt || ''}
           fill
           className="object-cover"
-          unoptimized={imageUrl.startsWith('/uploads/')}
+          unoptimized
         />
       </div>
       {block.caption && (

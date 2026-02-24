@@ -54,7 +54,7 @@ export async function PUT(request: NextRequest) {
     const db = getAdminFirestore()
     const collectionPath = getCollectionPath('legal')
 
-    await db.collection(collectionPath).doc(type).update(data)
+    await db.collection(collectionPath).doc(type).set(data, { merge: true })
 
     return NextResponse.json({ success: true, data })
   } catch (error) {

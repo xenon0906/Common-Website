@@ -3,8 +3,8 @@ import { requireAuth } from '@/lib/api-auth'
 import {
   getFirestoreCollection,
   addFirestoreDocument,
+  updateFirestoreDocument,
   isFirebaseConfigured,
-  getAdminFirestore
 } from '@/lib/firebase-server'
 import { DEFAULT_WHY_SNAPGO } from '@/lib/constants'
 import type { WhySnapgoReason } from '@/lib/types/homepage'
@@ -109,25 +109,14 @@ export async function PUT(req: NextRequest) {
       )
     }
 
-    // Batch update using Firestore batch
-    const db = getAdminFirestore()
-    const batch = db.batch()
-
-    reasons.forEach((reason) => {
-      const docRef = db.collection('artifacts')
-        .doc(process.env.NEXT_PUBLIC_APP_ID || 'default')
-        .collection('public')
-        .doc('data')
-        .collection('whySnapgo')
-        .doc(reason.id)
-
-      batch.update(docRef, {
-        order: reason.order,
-        updatedAt: new Date().toISOString(),
-      })
-    })
-
-    await batch.commit()
+    await Promise.all(
+      reasons.map((reason) =>
+        updateFirestoreDocument('whySnapgo', reason.id, {
+          order: reason.order,
+          updatedAt: new Date().toISOString(),
+        })
+      )
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -52,7 +52,7 @@ export async function PUT(req: NextRequest) {
     const db = getAdminFirestore()
     const docPath = getCollectionPath('content')
 
-    await db.collection(docPath).doc('social').update(data)
+    await db.collection(docPath).doc('social').set(data, { merge: true })
 
     return NextResponse.json({ success: true, data })
   } catch (error) {

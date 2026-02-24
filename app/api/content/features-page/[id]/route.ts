@@ -37,7 +37,7 @@ export async function PUT(
       )
     }
 
-    await docRef.update(data)
+    await docRef.set(data, { merge: true })
 
     const updated = await docRef.get()
     return NextResponse.json({ id: updated.id, ...updated.data() })

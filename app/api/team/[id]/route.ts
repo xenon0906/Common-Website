@@ -116,7 +116,7 @@ export async function PUT(
       isActive: isActive ?? existingMember.isActive,
     }
 
-    await docRef.update(updatedData)
+    await docRef.set(updatedData, { merge: true })
 
     const teamMember: TeamMemberData = {
       id,

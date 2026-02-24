@@ -11,6 +11,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'img.youtube.com' },
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com' },
       { protocol: 'https', hostname: '*.firebasestorage.app' },
     ],
@@ -80,7 +81,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             // Note: 'unsafe-inline' required for Next.js inline scripts, styled-components
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.instagram.com https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://img.youtube.com https://www.instagram.com https://firebasestorage.googleapis.com https://*.firebasestorage.app; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google-analytics.com wss://*.firebaseio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.ingest.sentry.io; frame-src https://www.instagram.com; object-src 'none'; base-uri 'self';"
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.instagram.com https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://img.youtube.com https://www.instagram.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://*.firebasestorage.app; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google-analytics.com wss://*.firebaseio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.ingest.sentry.io; frame-src https://www.instagram.com; object-src 'none'; base-uri 'self';"
           },
         ],
       },

@@ -4,7 +4,6 @@ import { requireAuth } from '@/lib/api-auth'
 import { getAdminDb, getAdminCollectionPath } from '@/lib/firebase-admin'
 import {
   getServerDb,
-  getServerAppId,
   getAuthenticatedServerDb,
   getCollectionPath,
   doc,
@@ -33,8 +32,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const appId = getServerAppId()
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'blogs', id)
+    const blogsPath = getCollectionPath('blogs')
+    const docRef = doc(db, blogsPath, id)
     const docSnap = await getDoc(docRef)
 
     if (!docSnap.exists()) {

@@ -246,8 +246,21 @@ export async function getFirestoreCollection<T extends { id?: string }>(
 export { doc, getDoc, collection, getDocs, query, orderBy, where }
 
 // Admin Firestore access - returns a Firestore-like object for API routes
-// This is a compatibility layer for routes that use Admin SDK patterns
+// Uses the real Admin SDK when available (bypasses security rules),
+// falls back to client SDK with anonymous auth otherwise.
 export function getAdminFirestore() {
+  // Try real Admin SDK first (preferred — bypasses Firestore security rules)
+  try {
+    const { getAdminDb } = require('@/lib/firebase-admin')
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      return adminDb
+    }
+  } catch {
+    // Admin SDK not available, fall through to client SDK wrapper
+  }
+
+  // Fallback: client SDK wrapper with anonymous auth
   const db = getServerDb()
   if (!db) {
     throw new Error('Firebase not configured')
@@ -328,4 +341,105 @@ export function getAdminFirestore() {
 export function getCollectionPath(collectionName: string): string {
   const appId = getServerAppId()
   return `artifacts/${appId}/public/data/${collectionName}`
+}
+
+// ===== CRUD HELPERS FOR CONTENT API ROUTES =====
+
+/**
+ * Set/overwrite a Firestore document at a given path.
+ * Used for singleton documents like content/appPreview, content/homepageConfig, etc.
+ */
+export async function setFirestoreDocument(
+  collectionPath: string,
+  documentId: string,
+  data: Record<string, unknown>
+): Promise<void> {
+  const db = await getAuthenticatedServerDb()
+  if (!db) throw new Error('Firebase not configured')
+
+  const { setDoc } = await import('firebase/firestore')
+  const appId = getServerAppId()
+  const pathSegments = collectionPath.split('/').filter(Boolean)
+  const docRef = doc(db, 'artifacts', appId, 'public', 'data', ...pathSegments, documentId)
+  await setDoc(docRef, data)
+}
+
+/**
+ * Fetch a single document by ID from a collection. Returns null if not found.
+ */
+export async function getFirestoreDocumentById<T>(
+  collectionName: string,
+  documentId: string
+): Promise<T | null> {
+  try {
+    const db = getServerDb()
+    if (!db) return null
+
+    const appId = getServerAppId()
+    const pathSegments = collectionName.split('/').filter(Boolean)
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', ...pathSegments, documentId)
+    const docSnap = await getDoc(docRef)
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as T
+    }
+    return null
+  } catch (error) {
+    console.error(`Error fetching document ${collectionName}/${documentId}:`, error)
+    return null
+  }
+}
+
+/**
+ * Create a new document with an auto-generated ID in a collection.
+ * Returns the generated document ID.
+ */
+export async function addFirestoreDocument(
+  collectionName: string,
+  data: Record<string, unknown>
+): Promise<string> {
+  const db = await getAuthenticatedServerDb()
+  if (!db) throw new Error('Firebase not configured')
+
+  const { addDoc } = await import('firebase/firestore')
+  const appId = getServerAppId()
+  const pathSegments = collectionName.split('/').filter(Boolean)
+  const collRef = collection(db, 'artifacts', appId, 'public', 'data', ...pathSegments)
+  const newDoc = await addDoc(collRef, data)
+  return newDoc.id
+}
+
+/**
+ * Perform a partial/merge update on an existing document.
+ */
+export async function updateFirestoreDocument(
+  collectionName: string,
+  documentId: string,
+  updates: Record<string, unknown>
+): Promise<void> {
+  const db = await getAuthenticatedServerDb()
+  if (!db) throw new Error('Firebase not configured')
+
+  const { setDoc } = await import('firebase/firestore')
+  const appId = getServerAppId()
+  const pathSegments = collectionName.split('/').filter(Boolean)
+  const docRef = doc(db, 'artifacts', appId, 'public', 'data', ...pathSegments, documentId)
+  await setDoc(docRef, updates, { merge: true })
+}
+
+/**
+ * Delete a document from a collection by ID.
+ */
+export async function deleteFirestoreDocument(
+  collectionName: string,
+  documentId: string
+): Promise<void> {
+  const db = await getAuthenticatedServerDb()
+  if (!db) throw new Error('Firebase not configured')
+
+  const { deleteDoc } = await import('firebase/firestore')
+  const appId = getServerAppId()
+  const pathSegments = collectionName.split('/').filter(Boolean)
+  const docRef = doc(db, 'artifacts', appId, 'public', 'data', ...pathSegments, documentId)
+  await deleteDoc(docRef)
 }

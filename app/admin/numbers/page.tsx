@@ -5,55 +5,33 @@ import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardDescription, Glass
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
 import { MicroLoader } from '@/components/admin/MicroLoader'
-import { Save, DollarSign, Phone, TrendingUp } from 'lucide-react'
+import { Save, TrendingUp, Plus, Trash2, GripVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-tokens'
 
-interface NumbersData {
-  // Homepage Stats
-  stats: {
-    totalRides: number
-    activeUsers: number
-    cities: number
-    drivers: number
-  }
-  // Pricing
-  pricing: {
-    basePrice: number
-    pricePerKm: number
-    pricePerMinute: number
-  }
-  // Contact
-  contact: {
-    phone: string
-    email: string
-    address: string
-  }
+interface StatItem {
+  id?: string
+  label: string
+  value: number
+  prefix: string
+  suffix: string
+  icon: string | null
+  order: number
+  isActive: boolean
 }
 
-const defaultData: NumbersData = {
-  stats: {
-    totalRides: 50000,
-    activeUsers: 10000,
-    cities: 25,
-    drivers: 5000,
-  },
-  pricing: {
-    basePrice: 30,
-    pricePerKm: 8,
-    pricePerMinute: 1,
-  },
-  contact: {
-    phone: '+91 9876543210',
-    email: 'support@snapgo.co.in',
-    address: 'Mumbai, Maharashtra, India',
-  },
-}
+const DEFAULT_STATS: StatItem[] = [
+  { label: 'App Downloads', value: 10000, prefix: '', suffix: '+', icon: null, order: 0, isActive: true },
+  { label: 'Peak Daily Rides', value: 150, prefix: '', suffix: '+', icon: null, order: 1, isActive: true },
+  { label: 'Cost Savings', value: 75, prefix: '', suffix: '%', icon: null, order: 2, isActive: true },
+  { label: 'Trees Equivalent', value: 500, prefix: '', suffix: '+', icon: null, order: 3, isActive: true },
+]
 
 export default function NumbersPage() {
-  const [data, setData] = useState<NumbersData>(defaultData)
+  const [stats, setStats] = useState<StatItem[]>(DEFAULT_STATS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
@@ -63,11 +41,13 @@ export default function NumbersPage() {
       try {
         const res = await fetch('/api/admin/numbers')
         if (res.ok) {
-          const fetchedData = await res.json()
-          setData(fetchedData)
+          const data = await res.json()
+          if (Array.isArray(data) && data.length > 0) {
+            setStats(data)
+          }
         }
       } catch (err) {
-        console.error('Error fetching numbers:', err)
+        console.error('Error fetching stats:', err)
       } finally {
         setLoading(false)
       }
@@ -75,48 +55,50 @@ export default function NumbersPage() {
     fetchData()
   }, [])
 
-  const handleStatChange = (key: keyof NumbersData['stats'], value: string) => {
-    const numValue = parseInt(value) || 0
-    setData((prev) => ({
-      ...prev,
-      stats: { ...prev.stats, [key]: numValue },
-    }))
+  const updateStat = (index: number, field: keyof StatItem, value: string | number | boolean) => {
+    setStats(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s))
   }
 
-  const handlePricingChange = (key: keyof NumbersData['pricing'], value: string) => {
-    const numValue = parseFloat(value) || 0
-    setData((prev) => ({
+  const addStat = () => {
+    setStats(prev => [
       ...prev,
-      pricing: { ...prev.pricing, [key]: numValue },
-    }))
+      { label: '', value: 0, prefix: '', suffix: '+', icon: null, order: prev.length, isActive: true },
+    ])
   }
 
-  const handleContactChange = (key: keyof NumbersData['contact'], value: string) => {
-    setData((prev) => ({
-      ...prev,
-      contact: { ...prev.contact, [key]: value },
-    }))
+  const removeStat = (index: number) => {
+    setStats(prev => prev.filter((_, i) => i !== index).map((s, i) => ({ ...s, order: i })))
   }
 
   const handleSave = async () => {
+    // Validate
+    const invalid = stats.some(s => !s.label.trim())
+    if (invalid) {
+      toast({ title: 'Validation Error', description: 'All stats must have a label.', variant: 'destructive' })
+      return
+    }
+
     setSaving(true)
     try {
       const res = await fetch('/api/admin/numbers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(stats),
       })
 
-      if (!res.ok) throw new Error('Failed to save')
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Failed to save')
+      }
 
       toast({
-        title: 'Numbers updated',
-        description: 'All numbers have been saved successfully.',
+        title: 'Stats updated',
+        description: 'Homepage statistics have been saved successfully.',
       })
     } catch (err) {
       toast({
         title: 'Error',
-        description: 'Failed to save numbers. Please try again.',
+        description: err instanceof Error ? err.message : 'Failed to save stats. Please try again.',
         variant: 'destructive',
       })
     } finally {
@@ -127,7 +109,7 @@ export default function NumbersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <MicroLoader size="lg" text="Loading numbers..." />
+        <MicroLoader size="lg" text="Loading stats..." />
       </div>
     )
   }
@@ -135,242 +117,154 @@ export default function NumbersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Numbers</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Update all editable numbers across your website from one place
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Homepage Stats</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Edit the statistics displayed on the homepage counter section
+          </p>
+        </div>
+        <Button
+          onClick={addStat}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Add Stat
+        </Button>
       </div>
 
-      {/* Homepage Stats */}
+      {/* Stats Editor */}
       <GlassCard>
         <GlassCardHeader>
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-            <GlassCardTitle>Homepage Statistics</GlassCardTitle>
+            <GlassCardTitle>Statistics</GlassCardTitle>
           </div>
           <GlassCardDescription>
-            The big numbers displayed on your homepage hero section
-          </GlassCardDescription>
-        </GlassCardHeader>
-        <GlassCardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="totalRides" className="text-gray-700 dark:text-gray-300">
-                Total Rides Completed
-              </Label>
-              <Input
-                id="totalRides"
-                type="number"
-                value={data.stats.totalRides}
-                onChange={(e) => handleStatChange('totalRides', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="activeUsers" className="text-gray-700 dark:text-gray-300">
-                Active Users
-              </Label>
-              <Input
-                id="activeUsers"
-                type="number"
-                value={data.stats.activeUsers}
-                onChange={(e) => handleStatChange('activeUsers', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cities" className="text-gray-700 dark:text-gray-300">
-                Cities Covered
-              </Label>
-              <Input
-                id="cities"
-                type="number"
-                value={data.stats.cities}
-                onChange={(e) => handleStatChange('cities', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="drivers" className="text-gray-700 dark:text-gray-300">
-                Verified Drivers
-              </Label>
-              <Input
-                id="drivers"
-                type="number"
-                value={data.stats.drivers}
-                onChange={(e) => handleStatChange('drivers', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-              />
-            </div>
-          </div>
-        </GlassCardContent>
-      </GlassCard>
-
-      {/* Pricing Information */}
-      <GlassCard>
-        <GlassCardHeader>
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-            <GlassCardTitle>Pricing</GlassCardTitle>
-          </div>
-          <GlassCardDescription>
-            Base pricing information displayed on the pricing page
-          </GlassCardDescription>
-        </GlassCardHeader>
-        <GlassCardContent>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="basePrice" className="text-gray-700 dark:text-gray-300">
-                Base Price (₹)
-              </Label>
-              <Input
-                id="basePrice"
-                type="number"
-                step="0.01"
-                value={data.pricing.basePrice}
-                onChange={(e) => handlePricingChange('basePrice', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Initial charge per ride
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pricePerKm" className="text-gray-700 dark:text-gray-300">
-                Price per KM (₹)
-              </Label>
-              <Input
-                id="pricePerKm"
-                type="number"
-                step="0.01"
-                value={data.pricing.pricePerKm}
-                onChange={(e) => handlePricingChange('pricePerKm', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Per kilometer charge
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pricePerMinute" className="text-gray-700 dark:text-gray-300">
-                Price per Minute (₹)
-              </Label>
-              <Input
-                id="pricePerMinute"
-                type="number"
-                step="0.01"
-                value={data.pricing.pricePerMinute}
-                onChange={(e) => handlePricingChange('pricePerMinute', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Per minute charge
-              </p>
-            </div>
-          </div>
-        </GlassCardContent>
-      </GlassCard>
-
-      {/* Contact Information */}
-      <GlassCard>
-        <GlassCardHeader>
-          <div className="flex items-center gap-2">
-            <Phone className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <GlassCardTitle>Contact Information</GlassCardTitle>
-          </div>
-          <GlassCardDescription>
-            Contact details displayed in the footer and contact page
+            These numbers appear in the &quot;Our Impact&quot; section on the homepage with animated counters
           </GlassCardDescription>
         </GlassCardHeader>
         <GlassCardContent>
           <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="text-gray-700 dark:text-gray-300">
-                Phone Number
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={data.contact.phone}
-                onChange={(e) => handleContactChange('phone', e.target.value)}
+            {stats.map((stat, index) => (
+              <div
+                key={index}
                 className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
+                  'p-4 rounded-lg border',
+                  stat.isActive
+                    ? 'bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+                    : 'bg-gray-100/50 dark:bg-gray-900/50 border-gray-200/50 dark:border-gray-800 opacity-60',
                   animations.smooth
                 )}
-                placeholder="+91 9876543210"
-              />
-            </div>
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      #{index + 1}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor={`active-${index}`} className="text-xs text-gray-500">Active</Label>
+                      <Switch
+                        id={`active-${index}`}
+                        checked={stat.isActive}
+                        onCheckedChange={(checked) => updateStat(index, 'isActive', checked)}
+                      />
+                    </div>
+                    {stats.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                        onClick={() => removeStat(index)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={data.contact.email}
-                onChange={(e) => handleContactChange('email', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-                placeholder="support@snapgo.co.in"
-              />
-            </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`label-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                      Label
+                    </Label>
+                    <Input
+                      id={`label-${index}`}
+                      value={stat.label}
+                      onChange={(e) => updateStat(index, 'label', e.target.value)}
+                      placeholder="e.g. App Downloads"
+                      className={cn(
+                        'bg-white/50 dark:bg-gray-800/50',
+                        'border-gray-200 dark:border-gray-700',
+                      )}
+                    />
+                  </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="address" className="text-gray-700 dark:text-gray-300">
-                Office Address
-              </Label>
-              <Input
-                id="address"
-                type="text"
-                value={data.contact.address}
-                onChange={(e) => handleContactChange('address', e.target.value)}
-                className={cn(
-                  'bg-white/50 dark:bg-gray-800/50',
-                  'border-gray-200 dark:border-gray-700',
-                  animations.smooth
-                )}
-                placeholder="Mumbai, Maharashtra, India"
-              />
-            </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`value-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                      Value
+                    </Label>
+                    <Input
+                      id={`value-${index}`}
+                      type="number"
+                      value={stat.value}
+                      onChange={(e) => updateStat(index, 'value', parseInt(e.target.value) || 0)}
+                      className={cn(
+                        'bg-white/50 dark:bg-gray-800/50',
+                        'border-gray-200 dark:border-gray-700',
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`prefix-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                      Prefix
+                    </Label>
+                    <Input
+                      id={`prefix-${index}`}
+                      value={stat.prefix}
+                      onChange={(e) => updateStat(index, 'prefix', e.target.value)}
+                      placeholder="e.g. $"
+                      className={cn(
+                        'bg-white/50 dark:bg-gray-800/50',
+                        'border-gray-200 dark:border-gray-700',
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`suffix-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                      Suffix
+                    </Label>
+                    <Input
+                      id={`suffix-${index}`}
+                      value={stat.suffix}
+                      onChange={(e) => updateStat(index, 'suffix', e.target.value)}
+                      placeholder="e.g. + or %"
+                      className={cn(
+                        'bg-white/50 dark:bg-gray-800/50',
+                        'border-gray-200 dark:border-gray-700',
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="mt-3 pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
+                  <span className="text-xs text-gray-400 mr-2">Preview:</span>
+                  <span className="text-lg font-bold text-primary">
+                    {stat.prefix}{stat.value.toLocaleString('en-IN')}{stat.suffix}
+                  </span>
+                  <span className="text-sm text-gray-500 ml-2">{stat.label}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </GlassCardContent>
         <GlassCardFooter>
@@ -390,7 +284,7 @@ export default function NumbersPage() {
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save All Changes
+                Save Stats
               </>
             )}
           </Button>

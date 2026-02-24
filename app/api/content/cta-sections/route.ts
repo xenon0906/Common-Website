@@ -3,8 +3,8 @@ import { requireAuth } from '@/lib/api-auth'
 import {
   getFirestoreCollection,
   addFirestoreDocument,
+  updateFirestoreDocument,
   isFirebaseConfigured,
-  getAdminFirestore
 } from '@/lib/firebase-server'
 import { DEFAULT_CTA_SECTIONS } from '@/lib/constants'
 import type { CTASectionData } from '@/lib/types/homepage'
@@ -102,24 +102,14 @@ export async function PUT(req: NextRequest) {
       )
     }
 
-    const db = getAdminFirestore()
-    const batch = db.batch()
-
-    sections.forEach((section) => {
-      const docRef = db.collection('artifacts')
-        .doc(process.env.NEXT_PUBLIC_APP_ID || 'default')
-        .collection('public')
-        .doc('data')
-        .collection('ctaSections')
-        .doc(section.id)
-
-      batch.update(docRef, {
-        order: section.order,
-        updatedAt: new Date().toISOString(),
-      })
-    })
-
-    await batch.commit()
+    await Promise.all(
+      sections.map((section) =>
+        updateFirestoreDocument('ctaSections', section.id, {
+          order: section.order,
+          updatedAt: new Date().toISOString(),
+        })
+      )
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {

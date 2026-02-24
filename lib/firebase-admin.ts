@@ -1,19 +1,17 @@
 import * as admin from 'firebase-admin'
 
-let initialized = false
-
 function getApp(): admin.app.App | null {
-  if (initialized) {
+  // Reuse existing app if already initialized (survives Next.js hot-reload)
+  if (admin.apps.length > 0) {
     return admin.app()
   }
 
   const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
   if (!serviceAccountKey) {
-    const errorMsg =
+    console.warn(
       '[firebase-admin] FIREBASE_SERVICE_ACCOUNT_KEY not configured. ' +
-      'Server-side operations (uploads, token verification) are disabled. ' +
-      'Run: npm run setup:service-account for instructions.'
-    console.warn(errorMsg)
+      'Server-side operations (uploads, token verification) are disabled.'
+    )
     return null
   }
 
@@ -25,7 +23,6 @@ function getApp(): admin.app.App | null {
       credential: admin.credential.cert(serviceAccount),
       storageBucket: storageBucket,
     })
-    initialized = true
     console.log('[firebase-admin] ✅ Initialized successfully with storage bucket:', storageBucket)
     return admin.app()
   } catch (error) {
