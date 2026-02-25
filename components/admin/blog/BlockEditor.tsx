@@ -359,7 +359,7 @@ function BlockEditorItem({
       id={block.id}
       className="relative"
     >
-      <Card className="p-4 bg-white dark:bg-gray-900">
+      <Card className="p-4 bg-white">
         <div className="flex gap-3">
           <div className="cursor-grab active:cursor-grabbing pt-1">
             <GripVertical className="w-4 h-4 text-muted-foreground" />

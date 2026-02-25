@@ -5,6 +5,12 @@ import {
   getFirestoreDocument,
   getFirestoreCollection,
   isFirebaseConfigured,
+  getServerDb,
+  getServerAppId,
+  collection,
+  getDocs,
+  query,
+  where,
 } from './firebase-server'
 
 import { sanitizeSlug, MAX_SLUG_LENGTH } from './utils'
@@ -504,13 +510,46 @@ export async function getBlogs(): Promise<BlogData[]> {
 }
 
 export async function getBlogBySlug(slug: string): Promise<BlogData | null> {
-  const blogs = await getBlogs()
-  // Normalize the search slug (strip leading slashes and /blog/ prefix if present)
-  const normalizedSlug = slug.replace(/^\/+/, '').replace(/^blog\/+/i, '')
-  return blogs.find(blog => {
-    const blogSlug = blog.slug.replace(/^\/+/, '').replace(/^blog\/+/i, '')
-    return blogSlug === normalizedSlug
-  }) || null
+  if (!isFirebaseConfigured()) return null
+
+  // Normalize the search slug (strip leading slashes and /blog/ prefix)
+  const normalizedSlug = sanitizeSlug(
+    slug.replace(/^\/+/, '').replace(/^blog\/+/i, '')
+  )
+  if (normalizedSlug.length < 3 || normalizedSlug.length > MAX_SLUG_LENGTH) return null
+
+  try {
+    // Direct Firestore query — O(1) instead of loading all blogs
+    const db = getServerDb()
+    if (!db) return null
+
+    const appId = getServerAppId()
+    const blogsRef = collection(db, 'artifacts', appId, 'public', 'data', 'blogs')
+    const q = query(blogsRef, where('slug', '==', normalizedSlug))
+    const snapshot = await getDocs(q)
+
+    if (snapshot.empty) return null
+
+    const doc = snapshot.docs[0]
+    const data = doc.data()
+
+    // Convert Firestore Timestamps to JS Dates
+    for (const key of Object.keys(data)) {
+      if (data[key]?.toDate) {
+        data[key] = data[key].toDate()
+      }
+    }
+
+    const blog = { id: doc.id, ...data } as BlogData
+    if (!blog.published) return null
+
+    return { ...blog, slug: sanitizeSlug(blog.slug) }
+  } catch (error) {
+    console.error('Error fetching blog by slug:', error)
+    // Fallback: load all blogs and filter (original behavior)
+    const blogs = await getBlogs()
+    return blogs.find(blog => blog.slug === normalizedSlug) || null
+  }
 }
 
 export async function getRelatedPosts(currentSlug: string, category?: string, limit: number = 3): Promise<BlogData[]> {

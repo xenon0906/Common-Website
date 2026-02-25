@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { User } from 'lucide-react'
 
 interface Author {
   id: string
@@ -32,35 +31,31 @@ export function AuthorSection({
   publishedAt,
   className = '',
 }: AuthorSectionProps) {
-  // Default author if not provided
-  const displayAuthor = author || {
-    id: 'snapgo',
-    name: 'Snapgo Team',
-    bio: 'The Snapgo team is dedicated to making ride-sharing accessible, affordable, and sustainable for everyone across India.',
-  }
+  // If no author name provided, don't render the section at all
+  if (!author?.name) return null
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className={`bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 ${className}`}
+      className={`bg-gray-50 rounded-2xl p-6 ${className}`}
     >
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          {displayAuthor.avatar ? (
+          {author.avatar ? (
             <div className="relative w-16 h-16 rounded-full overflow-hidden">
               <Image
-                src={displayAuthor.avatar}
-                alt={displayAuthor.name}
+                src={author.avatar}
+                alt={author.name}
                 fill
                 className="object-cover"
               />
             </div>
           ) : (
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+              {author.name.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
@@ -68,21 +63,21 @@ export function AuthorSection({
         {/* Author Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              {displayAuthor.name}
+            <h3 className="font-semibold text-gray-900">
+              {author.name}
             </h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Author</span>
+            <span className="text-xs text-gray-500">Author</span>
           </div>
 
           {publishedAt && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            <p className="text-sm text-gray-500 mb-2">
               Published on {formatDate(publishedAt)}
             </p>
           )}
 
-          {displayAuthor.bio && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-              {displayAuthor.bio}
+          {author.bio && (
+            <p className="text-sm text-gray-600 line-clamp-2">
+              {author.bio}
             </p>
           )}
         </div>

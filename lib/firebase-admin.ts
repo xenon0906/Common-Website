@@ -19,11 +19,19 @@ function getApp(): admin.app.App | null {
     const serviceAccount = JSON.parse(serviceAccountKey)
     const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
 
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      storageBucket: storageBucket,
-    })
-    console.log('[firebase-admin] ✅ Initialized successfully with storage bucket:', storageBucket)
+    try {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        storageBucket: storageBucket,
+      })
+      console.log('[firebase-admin] ✅ Initialized successfully with storage bucket:', storageBucket)
+    } catch (initError: any) {
+      // Handle race condition during hot-reload where app is already initialized
+      if (initError?.code === 'app/duplicate-app') {
+        return admin.app()
+      }
+      throw initError
+    }
     return admin.app()
   } catch (error) {
     console.error('[firebase-admin] ❌ Failed to initialize:', error)

@@ -16,9 +16,9 @@ export function MicroLoader({ size = 'md', className, text }: MicroLoaderProps) 
 
   return (
     <div className={cn('flex items-center justify-center gap-2', className)}>
-      <Loader2 className={cn('animate-spin text-teal-500', sizeClasses[size])} />
+      <Loader2 className={cn('animate-spin text-primary', sizeClasses[size])} />
       {text && (
-        <span className="text-sm text-gray-600 dark:text-gray-400 animate-pulse">
+        <span className="text-sm text-gray-600 animate-pulse">
           {text}
         </span>
       )}
@@ -34,7 +34,7 @@ interface MicroSpinnerProps {
 export function MicroSpinner({ size = 20, className }: MicroSpinnerProps) {
   return (
     <svg
-      className={cn('animate-spin text-teal-500', className)}
+      className={cn('animate-spin text-primary', className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -65,9 +65,9 @@ interface LoadingDotsProps {
 export function LoadingDots({ className }: LoadingDotsProps) {
   return (
     <div className={cn('flex items-center gap-1', className)}>
-      <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-      <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-      <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" />
+      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
+      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
+      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
     </div>
   )
 }
@@ -78,6 +78,6 @@ interface SkeletonProps {
 
 export function Skeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn('animate-pulse bg-gray-200 dark:bg-gray-800 rounded', className)} />
+    <div className={cn('animate-pulse bg-gray-200 rounded', className)} />
   )
 }

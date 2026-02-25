@@ -65,6 +65,7 @@ interface Blog {
   imageUrl: string | null
   published: boolean
   category?: string
+  author?: { id: string; name: string; bio?: string; avatar?: string }
 }
 
 // Helper to convert blocks to markdown for word count
@@ -93,6 +94,8 @@ export default function EditBlogForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editorMode, setEditorMode] = useState<'markdown' | 'blocks'>('markdown')
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([])
+  const [authorName, setAuthorName] = useState('')
+  const [authorBio, setAuthorBio] = useState('')
   const { toast } = useToast()
 
   const {
@@ -139,6 +142,12 @@ export default function EditBlogForm() {
           setContentBlocks(data.contentBlocks)
         } else {
           setEditorMode('markdown')
+        }
+
+        // Load author data if present
+        if (data.author?.name) {
+          setAuthorName(data.author.name)
+          setAuthorBio(data.author.bio || '')
         }
 
         reset({
@@ -216,6 +225,11 @@ export default function EditBlogForm() {
           status: data.published ? 'published' : 'draft',
           wordCount,
           readingTime,
+          author: authorName.trim() ? {
+            id: 'custom',
+            name: authorName.trim(),
+            bio: authorBio.trim() || undefined,
+          } : undefined,
         }),
       })
       if (!res.ok) {
@@ -507,6 +521,37 @@ export default function EditBlogForm() {
                   value={watch('category') || ''}
                   onChange={(value) => setValue('category', value)}
                 />
+              </CardContent>
+            </Card>
+
+            {/* Author */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Author</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="authorName">Author Name</Label>
+                  <Input
+                    id="authorName"
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to hide author section
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="authorBio">Author Bio</Label>
+                  <Textarea
+                    id="authorBio"
+                    value={authorBio}
+                    onChange={(e) => setAuthorBio(e.target.value)}
+                    placeholder="Short bio..."
+                    rows={2}
+                  />
+                </div>
               </CardContent>
             </Card>
 

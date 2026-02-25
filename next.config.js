@@ -37,6 +37,12 @@ const nextConfig = {
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-tabs',
       '@radix-ui/react-toast',
+      'date-fns',
+      'clsx',
+      'class-variance-authority',
+      '@tanstack/react-query',
+      'react-hook-form',
+      'zod',
     ],
   },
 
@@ -80,8 +86,9 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            // Note: 'unsafe-inline' required for Next.js inline scripts, styled-components
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.instagram.com https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://img.youtube.com https://www.instagram.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://*.firebasestorage.app; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google-analytics.com wss://*.firebaseio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.ingest.sentry.io; frame-src https://www.instagram.com; object-src 'none'; base-uri 'self';"
+            // Note: 'unsafe-inline' required for Next.js inline scripts
+            // 'unsafe-eval' needed in dev for React Fast Refresh; safe to include since eval is not used in app code
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.instagram.com https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://img.youtube.com https://www.instagram.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://*.firebasestorage.app; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google-analytics.com wss://*.firebaseio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.ingest.sentry.io; frame-src https://www.instagram.com; object-src 'none'; base-uri 'self';`
           },
         ],
       },

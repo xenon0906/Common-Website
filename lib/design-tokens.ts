@@ -1,25 +1,25 @@
 // Glass Design System Tokens
-// Based on 2026 glassmorphism trends
+// Aligned with Snapgo Blue (#0e4493) primary color
 
 export const glassEffects = {
-  // Card styles
-  card: 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-xl',
-  cardHover: 'hover:bg-white/90 dark:hover:bg-gray-900/90 hover:shadow-2xl',
+  // Card styles (light-only)
+  card: 'bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl',
+  cardHover: 'hover:bg-white/90 hover:shadow-2xl',
 
   // Navbar styles
-  navbar: 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-white/20 dark:border-white/10',
+  navbar: 'bg-white/95 backdrop-blur-md border-b border-gray-100',
 
   // Button styles
-  button: 'bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border border-white/20 dark:border-white/10 hover:bg-white/80 dark:hover:bg-gray-800/80',
+  button: 'bg-white/60 backdrop-blur-md border border-white/20 hover:bg-white/80',
 
   // Input styles
-  input: 'bg-white/50 dark:bg-gray-900/50 backdrop-blur-lg border border-white/20 dark:border-white/10 focus:border-teal-500/50',
+  input: 'bg-white/50 backdrop-blur-lg border border-white/20 focus:border-primary/50',
 
   // Overlay styles
   overlay: 'bg-black/20 backdrop-blur-sm',
 
   // Modal styles
-  modal: 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-white/20 dark:border-white/10',
+  modal: 'bg-white/95 backdrop-blur-2xl border border-white/20',
 } as const
 
 export const animations = {
@@ -49,32 +49,25 @@ export const animations = {
 } as const
 
 export const colors = {
-  // Primary (Teal)
+  // Primary (Snapgo Blue - matches tailwind config)
   primary: {
-    50: '#f0fdfa',
-    100: '#ccfbf1',
-    200: '#99f6e4',
-    300: '#5eead4',
-    400: '#2dd4bf',
-    500: '#14b8a6', // Main brand color
-    600: '#0d9488',
-    700: '#0f766e',
-    800: '#115e59',
-    900: '#134e4a',
+    50: '#e8eef7',
+    100: '#d1ddef',
+    200: '#a3bbdf',
+    300: '#7599cf',
+    400: '#4777bf',
+    500: '#0e4493', // Main brand color
+    600: '#0b3676',
+    700: '#082959',
+    800: '#061b3c',
+    900: '#030e1f',
   },
 
-  // Glass overlay colors
+  // Glass overlay colors (light-only)
   glass: {
-    light: {
-      card: 'rgba(255, 255, 255, 0.8)',
-      navbar: 'rgba(255, 255, 255, 0.9)',
-      border: 'rgba(255, 255, 255, 0.2)',
-    },
-    dark: {
-      card: 'rgba(17, 24, 39, 0.8)', // gray-900
-      navbar: 'rgba(17, 24, 39, 0.9)',
-      border: 'rgba(255, 255, 255, 0.1)',
-    },
+    card: 'rgba(255, 255, 255, 0.8)',
+    navbar: 'rgba(255, 255, 255, 0.95)',
+    border: 'rgba(255, 255, 255, 0.2)',
   },
 } as const
 
@@ -94,8 +87,8 @@ export const spacing = {
 export const shadows = {
   glass: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
   glassHover: '0 12px 48px 0 rgba(31, 38, 135, 0.25)',
-  glow: '0 0 20px rgba(20, 184, 166, 0.3)', // teal glow
-  glowHover: '0 0 30px rgba(20, 184, 166, 0.5)',
+  glow: '0 0 20px rgba(14, 68, 147, 0.3)', // Snapgo Blue glow
+  glowHover: '0 0 30px rgba(14, 68, 147, 0.5)',
 } as const
 
 export const blur = {

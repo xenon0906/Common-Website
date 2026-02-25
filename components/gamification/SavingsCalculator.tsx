@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import html2canvas from 'html2canvas'
+// html2canvas loaded dynamically in generateAndShare() to reduce initial bundle
 
 interface SavingsCalculatorProps {
   className?: string
@@ -159,6 +159,7 @@ export default function SavingsCalculator({ className }: SavingsCalculatorProps)
     if (!shareableRef.current) return
     setIsSharing(true)
     try {
+      const { default: html2canvas } = await import('html2canvas')
       const canvas = await html2canvas(shareableRef.current, {
         backgroundColor: null,
         scale: 2,

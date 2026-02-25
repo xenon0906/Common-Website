@@ -50,7 +50,7 @@ interface GlassCardTitleProps {
 
 export function GlassCardTitle({ children, className }: GlassCardTitleProps) {
   return (
-    <h3 className={cn('text-xl font-semibold text-gray-900 dark:text-white', className)}>
+    <h3 className={cn('text-xl font-semibold text-gray-900', className)}>
       {children}
     </h3>
   )
@@ -63,7 +63,7 @@ interface GlassCardDescriptionProps {
 
 export function GlassCardDescription({ children, className }: GlassCardDescriptionProps) {
   return (
-    <p className={cn('text-sm text-gray-600 dark:text-gray-400 mt-1', className)}>
+    <p className={cn('text-sm text-gray-600 mt-1', className)}>
       {children}
     </p>
   )
@@ -89,7 +89,7 @@ interface GlassCardFooterProps {
 
 export function GlassCardFooter({ children, className }: GlassCardFooterProps) {
   return (
-    <div className={cn('flex items-center justify-end gap-3 mt-6 pt-6 border-t border-white/10 dark:border-white/5', className)}>
+    <div className={cn('flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200/50', className)}>
       {children}
     </div>
   )

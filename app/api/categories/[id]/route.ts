@@ -130,6 +130,7 @@ async function updateCategoryWithAdminSDK(
   validated: Record<string, any>
 ) {
   const admin = await import('firebase-admin')
+  const adminModule = (admin as any).default || admin
   const categoriesPath = getAdminCollectionPath('categories')
   const docRef = adminDb.collection(categoriesPath).doc(id)
 
@@ -140,7 +141,7 @@ async function updateCategoryWithAdminSDK(
   }
 
   const updateData: Record<string, any> = {
-    updatedAt: admin.default.firestore.FieldValue.serverTimestamp(),
+    updatedAt: adminModule.firestore.FieldValue.serverTimestamp(),
   }
 
   // Only update fields that are provided

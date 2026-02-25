@@ -131,7 +131,7 @@ function FeaturedBlogCard({ blog }: { blog: Blog }) {
                 alt={blog.title}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
-                unoptimized={blog.imageUrl?.includes('firebasestorage') || !blog.imageUrl?.startsWith('/uploads/')}
+                unoptimized={blog.imageUrl?.includes('storage.googleapis.com') || blog.imageUrl?.includes('firebasestorage') || !blog.imageUrl?.startsWith('/')}
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary via-teal-500 to-emerald-500 flex items-center justify-center">
@@ -234,10 +234,10 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
                 alt={blog.title}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
-                unoptimized={blog.imageUrl?.includes('firebasestorage') || !blog.imageUrl?.startsWith('/uploads/')}
+                unoptimized={blog.imageUrl?.includes('storage.googleapis.com') || blog.imageUrl?.includes('firebasestorage') || !blog.imageUrl?.startsWith('/')}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary to-teal flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-primary to-teal-500 flex items-center justify-center">
                 <span className="text-4xl font-bold text-white/30">
                   {blog.title.charAt(0)}
                 </span>

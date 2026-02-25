@@ -75,6 +75,8 @@ export default function CreateBlogPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editorMode, setEditorMode] = useState<'markdown' | 'blocks'>('markdown')
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([])
+  const [authorName, setAuthorName] = useState('')
+  const [authorBio, setAuthorBio] = useState('')
   const { toast } = useToast()
 
   const {
@@ -151,6 +153,11 @@ export default function CreateBlogPage() {
         wordCount,
         readingTime,
         tags: [] as string[],
+        author: authorName.trim() ? {
+          id: 'custom',
+          name: authorName.trim(),
+          bio: authorBio.trim() || undefined,
+        } : undefined,
       }
 
       const res = await fetch('/api/blogs', {
@@ -428,6 +435,37 @@ export default function CreateBlogPage() {
                   value={watch('category') || ''}
                   onChange={(value) => setValue('category', value)}
                 />
+              </CardContent>
+            </Card>
+
+            {/* Author */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Author</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="authorName">Author Name</Label>
+                  <Input
+                    id="authorName"
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to hide author section
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="authorBio">Author Bio</Label>
+                  <Textarea
+                    id="authorBio"
+                    value={authorBio}
+                    onChange={(e) => setAuthorBio(e.target.value)}
+                    placeholder="Short bio..."
+                    rows={2}
+                  />
+                </div>
               </CardContent>
             </Card>
 

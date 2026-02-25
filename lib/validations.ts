@@ -1,6 +1,13 @@
 import { z } from 'zod'
 
 // ===== BLOG SCHEMAS =====
+const blogAuthorSchema = z.object({
+  id: z.string().max(100).optional().default('custom'),
+  name: z.string().max(100),
+  avatar: z.string().max(2000).optional(),
+  bio: z.string().max(500).optional(),
+}).optional()
+
 export const createBlogSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
   slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long'),
@@ -14,6 +21,7 @@ export const createBlogSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
   contentBlocks: z.array(z.any()).optional(),
   contentVersion: z.number().int().min(1).max(2).optional(),
+  author: blogAuthorSchema,
 })
 
 export const updateBlogSchema = z.object({
@@ -31,6 +39,7 @@ export const updateBlogSchema = z.object({
   category: z.string().max(100).optional().default(''),
   contentBlocks: z.array(z.any()).optional(),
   contentVersion: z.number().int().min(1).max(2).optional(),
+  author: blogAuthorSchema,
 })
 
 // ===== NAVIGATION SCHEMAS =====

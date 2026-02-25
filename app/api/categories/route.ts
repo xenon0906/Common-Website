@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
 
 async function createCategoryWithAdminSDK(adminDb: FirebaseFirestore.Firestore, validated: Record<string, any>) {
   const admin = await import('firebase-admin')
+  const adminModule = (admin as any).default || admin
   const categoriesPath = getAdminCollectionPath('categories')
   const collRef = adminDb.collection(categoriesPath)
 
@@ -101,8 +102,8 @@ async function createCategoryWithAdminSDK(adminDb: FirebaseFirestore.Firestore, 
     slug,
     color: validated.color || 'bg-primary',
     description: validated.description || '',
-    createdAt: admin.default.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.default.firestore.FieldValue.serverTimestamp(),
+    createdAt: adminModule.firestore.FieldValue.serverTimestamp(),
+    updatedAt: adminModule.firestore.FieldValue.serverTimestamp(),
   }
 
   const docRef = await collRef.add(categoryData)

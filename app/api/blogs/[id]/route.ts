@@ -107,6 +107,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
 async function updateBlogWithAdminSDK(adminDb: FirebaseFirestore.Firestore, id: string, validated: Record<string, any>) {
   const admin = await import('firebase-admin')
+  const adminModule = (admin as any).default || admin
   const blogsPath = getAdminCollectionPath('blogs')
   const docRef = adminDb.doc(`${blogsPath}/${id}`)
 
@@ -121,13 +122,14 @@ async function updateBlogWithAdminSDK(adminDb: FirebaseFirestore.Firestore, id: 
     published: validated.published,
     status: validated.status || (validated.published ? 'published' : 'draft'),
     category: validated.category || '',
-    updatedAt: admin.default.firestore.FieldValue.serverTimestamp(),
+    updatedAt: adminModule.firestore.FieldValue.serverTimestamp(),
   }
 
   if (validated.wordCount) updateData.wordCount = validated.wordCount
   if (validated.readingTime) updateData.readingTime = validated.readingTime
   if (validated.contentBlocks) updateData.contentBlocks = validated.contentBlocks
   if (validated.contentVersion) updateData.contentVersion = validated.contentVersion
+  if (validated.author?.name) updateData.author = validated.author
 
   await docRef.set(updateData, { merge: true })
   revalidatePath('/blog')
@@ -177,6 +179,7 @@ async function updateBlogWithClientSDK(id: string, validated: Record<string, any
   if (validated.readingTime) updateData.readingTime = validated.readingTime
   if (validated.contentBlocks) updateData.contentBlocks = validated.contentBlocks
   if (validated.contentVersion) updateData.contentVersion = validated.contentVersion
+  if (validated.author?.name) updateData.author = validated.author
 
   await setDoc(docRef, updateData, { merge: true })
   revalidatePath('/blog')

@@ -11,6 +11,7 @@ export const isGAConfigured = (): boolean => {
 // Page view tracking
 export const pageview = (url: string): void => {
   if (!isGAConfigured()) return
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
 
   window.gtag('config', GA_MEASUREMENT_ID, {
     page_path: url,
@@ -27,6 +28,7 @@ interface GtagEvent {
 
 export const event = ({ action, category, label, value }: GtagEvent): void => {
   if (!isGAConfigured()) return
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
 
   window.gtag('event', action, {
     event_category: category,

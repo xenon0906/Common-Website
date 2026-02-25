@@ -119,8 +119,8 @@ export default function NumbersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Homepage Stats</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-3xl font-bold text-gray-900">Homepage Stats</h1>
+          <p className="text-gray-600 mt-1">
             Edit the statistics displayed on the homepage counter section
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function NumbersPage() {
       <GlassCard>
         <GlassCardHeader>
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            <TrendingUp className="w-5 h-5 text-primary" />
             <GlassCardTitle>Statistics</GlassCardTitle>
           </div>
           <GlassCardDescription>
@@ -154,15 +154,15 @@ export default function NumbersPage() {
                 className={cn(
                   'p-4 rounded-lg border',
                   stat.isActive
-                    ? 'bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
-                    : 'bg-gray-100/50 dark:bg-gray-900/50 border-gray-200/50 dark:border-gray-800 opacity-60',
+                    ? 'bg-white/50 border-gray-200'
+                    : 'bg-gray-100/50 border-gray-200/50 opacity-60',
                   animations.smooth
                 )}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <GripVertical className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <span className="text-sm font-medium text-gray-500">
                       #{index + 1}
                     </span>
                   </div>
@@ -180,7 +180,7 @@ export default function NumbersPage() {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                         onClick={() => removeStat(index)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -191,7 +191,7 @@ export default function NumbersPage() {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor={`label-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                    <Label htmlFor={`label-${index}`} className="text-gray-700 text-sm">
                       Label
                     </Label>
                     <Input
@@ -200,14 +200,14 @@ export default function NumbersPage() {
                       onChange={(e) => updateStat(index, 'label', e.target.value)}
                       placeholder="e.g. App Downloads"
                       className={cn(
-                        'bg-white/50 dark:bg-gray-800/50',
-                        'border-gray-200 dark:border-gray-700',
+                        'bg-white/50',
+                        'border-gray-200',
                       )}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor={`value-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                    <Label htmlFor={`value-${index}`} className="text-gray-700 text-sm">
                       Value
                     </Label>
                     <Input
@@ -216,14 +216,14 @@ export default function NumbersPage() {
                       value={stat.value}
                       onChange={(e) => updateStat(index, 'value', parseInt(e.target.value) || 0)}
                       className={cn(
-                        'bg-white/50 dark:bg-gray-800/50',
-                        'border-gray-200 dark:border-gray-700',
+                        'bg-white/50',
+                        'border-gray-200',
                       )}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor={`prefix-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                    <Label htmlFor={`prefix-${index}`} className="text-gray-700 text-sm">
                       Prefix
                     </Label>
                     <Input
@@ -232,14 +232,14 @@ export default function NumbersPage() {
                       onChange={(e) => updateStat(index, 'prefix', e.target.value)}
                       placeholder="e.g. $"
                       className={cn(
-                        'bg-white/50 dark:bg-gray-800/50',
-                        'border-gray-200 dark:border-gray-700',
+                        'bg-white/50',
+                        'border-gray-200',
                       )}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor={`suffix-${index}`} className="text-gray-700 dark:text-gray-300 text-sm">
+                    <Label htmlFor={`suffix-${index}`} className="text-gray-700 text-sm">
                       Suffix
                     </Label>
                     <Input
@@ -248,15 +248,15 @@ export default function NumbersPage() {
                       onChange={(e) => updateStat(index, 'suffix', e.target.value)}
                       placeholder="e.g. + or %"
                       className={cn(
-                        'bg-white/50 dark:bg-gray-800/50',
-                        'border-gray-200 dark:border-gray-700',
+                        'bg-white/50',
+                        'border-gray-200',
                       )}
                     />
                   </div>
                 </div>
 
                 {/* Preview */}
-                <div className="mt-3 pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
+                <div className="mt-3 pt-3 border-t border-gray-200/50">
                   <span className="text-xs text-gray-400 mr-2">Preview:</span>
                   <span className="text-lg font-bold text-primary">
                     {stat.prefix}{stat.value.toLocaleString('en-IN')}{stat.suffix}
@@ -272,7 +272,7 @@ export default function NumbersPage() {
             onClick={handleSave}
             disabled={saving}
             className={cn(
-              'bg-teal-600 hover:bg-teal-700 text-white',
+              'bg-primary hover:bg-primary-600 text-white',
               animations.smooth
             )}
           >

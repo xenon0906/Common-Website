@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     const admin = await import('firebase-admin')
+    const adminModule = (admin as any).default || admin
     const statsPath = getAdminCollectionPath('stats')
     const batch = adminDb.batch()
 
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
         icon: stat.icon || null,
         order: stat.order,
         isActive: stat.isActive !== false,
-        updatedAt: admin.default.firestore.FieldValue.serverTimestamp(),
+        updatedAt: adminModule.firestore.FieldValue.serverTimestamp(),
       })
     }
 

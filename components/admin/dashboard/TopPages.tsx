@@ -35,7 +35,7 @@ export function TopPages({ pages, loading }: TopPagesProps) {
         <GlassCardContent>
           <div className="space-y-4 animate-pulse">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-800 rounded" />
+              <div key={i} className="h-16 bg-gray-200 rounded" />
             ))}
           </div>
         </GlassCardContent>
@@ -57,22 +57,22 @@ export function TopPages({ pages, loading }: TopPagesProps) {
               target="_blank"
               className={cn(
                 'flex items-center justify-between p-4 rounded-lg',
-                'bg-white/50 dark:bg-gray-800/50',
-                'border border-gray-200/50 dark:border-gray-700/50',
-                'hover:bg-white/80 dark:hover:bg-gray-800/80',
+                'bg-white/50',
+                'border border-gray-200/50',
+                'hover:bg-white/80',
                 'group cursor-pointer',
                 animations.smooth
               )}
             >
               <div className="flex items-center gap-4 flex-1">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold text-sm">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm">
                   {index + 1}
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                  <p className="font-medium text-gray-900 group-hover:text-primary transition-colors">
                     {page.path}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600">
                     {page.views.toLocaleString()} views
                   </p>
                 </div>
@@ -80,7 +80,7 @@ export function TopPages({ pages, loading }: TopPagesProps) {
               <div className="flex items-center gap-3">
                 <div className={cn(
                   'flex items-center gap-1 text-sm font-medium',
-                  page.change > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                  page.change > 0 ? 'text-green-600' : 'text-red-600'
                 )}>
                   <TrendingUp className={cn('w-4 h-4', page.change < 0 && 'rotate-180')} />
                   <span>{page.change > 0 ? '+' : ''}{page.change}%</span>

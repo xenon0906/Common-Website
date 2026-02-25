@@ -3,15 +3,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { QuickStats } from '@/components/admin/dashboard/QuickStats'
-import { TrafficChart } from '@/components/admin/dashboard/TrafficChart'
-import { TopPages } from '@/components/admin/dashboard/TopPages'
 import { QuickActions } from '@/components/admin/dashboard/QuickActions'
 import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardDescription, GlassCardContent } from '@/components/admin/GlassCard'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { USE_FIREBASE } from '@/lib/config'
 
 interface RecentBlog {
   title: string
@@ -40,50 +37,39 @@ function formatCurrentDate(): string {
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [recentBlogs, setRecentBlogs] = useState<RecentBlog[]>([])
-  const [blogCount, setBlogCount] = useState({ total: 0, published: 0 })
+  const [stats, setStats] = useState({
+    publishedBlogs: 0,
+    draftBlogs: 0,
+    categories: 0,
+    teamMembers: 0,
+  })
 
   useEffect(() => {
     const controller = new AbortController()
-    const { signal } = controller
 
-    async function fetchRecentBlogs() {
-      if (!USE_FIREBASE) {
-        setLoading(false)
-        return
-      }
+    async function fetchDashboardData() {
       try {
-        const { getFirebaseDb, getAppId, collection, getDocs, query, orderBy, limit } = await import('@/lib/firebase')
-        if (signal.aborted) return
-        const db = getFirebaseDb()
-        const appId = getAppId()
-        const blogsRef = collection(db, 'artifacts', appId, 'public', 'data', 'blogs')
-        const blogsQuery = query(blogsRef, orderBy('createdAt', 'desc'), limit(5))
-        const snapshot = await getDocs(blogsQuery)
-        if (signal.aborted) return
+        const res = await fetch('/api/admin/dashboard', { signal: controller.signal })
+        if (!res.ok) throw new Error('Failed to fetch dashboard data')
+        const data = await res.json()
 
-        let published = 0
-        const blogs = snapshot.docs.map((d) => {
-          const data = d.data()
-          if (data.published) published++
-          return {
-            title: data.title || 'Untitled',
-            status: data.published ? 'published' : 'draft',
-            views: data.views || 0,
-            imageUrl: data.imageUrl || '',
-            slug: data.slug || '',
-          }
+        setStats({
+          publishedBlogs: data.publishedBlogs || 0,
+          draftBlogs: data.draftBlogs || 0,
+          categories: data.categories || 0,
+          teamMembers: data.teamMembers || 0,
         })
-
-        setRecentBlogs(blogs)
-        setBlogCount({ total: snapshot.docs.length, published })
+        setRecentBlogs(data.recentBlogs || [])
       } catch (err) {
-        if (!signal.aborted) console.error('Error fetching recent blogs:', err)
+        if (!controller.signal.aborted) {
+          console.error('Error fetching dashboard data:', err)
+        }
       } finally {
-        if (!signal.aborted) setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
-    fetchRecentBlogs()
+    fetchDashboardData()
     return () => { controller.abort() }
   }, [])
 
@@ -96,65 +82,35 @@ export default function AdminDashboard() {
         transition={{ duration: 0.5 }}
       >
         <div className="flex items-start gap-3">
-          <Sparkles className="w-8 h-8 text-teal-600 dark:text-teal-400 mt-1" />
+          <Sparkles className="w-8 h-8 text-primary mt-1" />
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-4xl font-bold text-gray-900">
               {getGreeting()}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-gray-600 mt-1">
               {formatCurrentDate()}
             </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats — Real Firebase Data */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
       >
-        <QuickStats loading={loading} />
+        <QuickStats stats={stats} loading={loading} />
       </motion.div>
 
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Traffic Chart - Spans 2 columns */}
+        {/* Recent Blog Posts - Spans 2 columns */}
         <motion.div
           className="lg:col-span-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          <TrafficChart loading={loading} />
-        </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
-          <QuickActions />
-        </motion.div>
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Top Pages */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-        >
-          <TopPages loading={loading} />
-        </motion.div>
-
-        {/* Recent Blog Posts */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
         >
           <GlassCard>
             <GlassCardHeader>
@@ -162,20 +118,20 @@ export default function AdminDashboard() {
                 <GlassCardTitle>Recent Blog Posts</GlassCardTitle>
                 <Link
                   href="/admin/blogs"
-                  className="text-sm text-teal-600 dark:text-teal-400 hover:underline"
+                  className="text-sm text-primary hover:underline font-medium"
                 >
                   View all
                 </Link>
               </div>
               <GlassCardDescription>
-                {blogCount.published} published • {blogCount.total - blogCount.published} drafts
+                {stats.publishedBlogs} published &bull; {stats.draftBlogs} drafts
               </GlassCardDescription>
             </GlassCardHeader>
             <GlassCardContent>
               {loading ? (
                 <div className="space-y-3 animate-pulse">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-16 bg-gray-200 dark:bg-gray-800 rounded" />
+                    <div key={i} className="h-16 bg-gray-200 rounded" />
                   ))}
                 </div>
               ) : recentBlogs.length > 0 ? (
@@ -184,7 +140,7 @@ export default function AdminDashboard() {
                     <Link
                       key={blog.slug}
                       href={`/admin/blogs/${blog.slug}`}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-white/50 border border-gray-200/50 hover:bg-white/80 transition-colors"
                     >
                       {blog.imageUrl && (
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
@@ -198,10 +154,10 @@ export default function AdminDashboard() {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate text-gray-900 dark:text-white">
+                        <p className="font-medium text-sm truncate text-gray-900">
                           {blog.title}
                         </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                        <p className="text-xs text-gray-500">
                           {blog.views > 0 ? `${blog.views} views` : 'No views yet'}
                         </p>
                       </div>
@@ -216,11 +172,11 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600">
                     No blog posts yet.{' '}
                     <Link
                       href="/admin/blogs/create"
-                      className="text-teal-600 dark:text-teal-400 hover:underline"
+                      className="text-primary hover:underline font-medium"
                     >
                       Create your first post
                     </Link>
@@ -229,6 +185,15 @@ export default function AdminDashboard() {
               )}
             </GlassCardContent>
           </GlassCard>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <QuickActions />
         </motion.div>
       </div>
     </div>

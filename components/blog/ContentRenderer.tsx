@@ -20,13 +20,16 @@ interface ContentRendererProps {
   className?: string
 }
 
-// Render inline markdown (bold, italic, links)
+// Render markdown content within paragraph blocks
+// Handles both inline formatting and block-level elements that may exist in stored content
 function InlineMarkdown({ content }: { content: string }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        p: ({ children }) => <>{children}</>,
+        p: ({ children }) => (
+          <p className="mb-4 last:mb-0 leading-[1.8]">{children}</p>
+        ),
         a: ({ href, children }) => (
           <a
             href={href}
@@ -46,6 +49,43 @@ function InlineMarkdown({ content }: { content: string }) {
             {children}
           </code>
         ),
+        h1: ({ children }) => (
+          <h1 className="text-4xl font-bold mt-10 mb-6 text-gray-900 dark:text-white leading-tight tracking-tight">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white leading-snug tracking-tight">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-2xl font-semibold mt-6 mb-3 text-gray-900 dark:text-white leading-snug">{children}</h3>
+        ),
+        hr: () => <hr className="my-8 border-gray-200 dark:border-gray-700" />,
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-4 border-primary pl-6 py-3 my-6 bg-gray-50 dark:bg-gray-900 rounded-r italic text-gray-800 dark:text-gray-200">
+            {children}
+          </blockquote>
+        ),
+        ul: ({ children }) => (
+          <ul className="list-disc pl-8 mb-4 space-y-2">{children}</ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="list-decimal pl-8 mb-4 space-y-2">{children}</ol>
+        ),
+        li: ({ children }) => (
+          <li className="text-gray-700 dark:text-gray-300 leading-relaxed">{children}</li>
+        ),
+        img: ({ src, alt }) => {
+          const imgSrc = typeof src === 'string' ? src : ''
+          return (
+            <figure className="my-8">
+              <div className="relative aspect-video rounded-xl overflow-hidden max-w-4xl mx-auto">
+                <Image src={imgSrc} alt={alt || ''} fill className="object-cover" unoptimized />
+              </div>
+              {alt && (
+                <figcaption className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 italic">{alt}</figcaption>
+              )}
+            </figure>
+          )
+        },
       }}
     >
       {content}
@@ -55,9 +95,9 @@ function InlineMarkdown({ content }: { content: string }) {
 
 function ParagraphBlockRenderer({ block }: { block: ParagraphBlock }) {
   return (
-    <p className="mb-6 text-lg leading-[1.8] text-gray-700 dark:text-gray-300">
+    <div className="mb-6 text-lg text-gray-700 dark:text-gray-300">
       <InlineMarkdown content={block.content} />
-    </p>
+    </div>
   )
 }
 
@@ -92,9 +132,9 @@ function ImageBlockRenderer({ block }: { block: ImageBlock }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="my-8"
+      className="my-10 -mx-4 sm:mx-0"
     >
-      <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
+      <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg max-w-4xl mx-auto">
         <Image
           src={imageUrl}
           alt={block.alt || ''}
@@ -104,7 +144,7 @@ function ImageBlockRenderer({ block }: { block: ImageBlock }) {
         />
       </div>
       {block.caption && (
-        <figcaption className="text-center text-sm text-gray-500 dark:text-gray-400 mt-3 italic">
+        <figcaption className="text-center text-sm text-gray-500 dark:text-gray-400 mt-3 italic max-w-2xl mx-auto">
           {block.caption}
         </figcaption>
       )}
@@ -214,8 +254,8 @@ function MarkdownRenderer({ content }: { content: string }) {
         img: ({ src, alt }) => {
           const imgSrc = typeof src === 'string' ? src : ''
           return (
-            <figure className="my-8">
-              <div className="relative aspect-video rounded-xl overflow-hidden">
+            <figure className="my-10 -mx-4 sm:mx-0">
+              <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg max-w-4xl mx-auto">
                 <Image
                   src={imgSrc}
                   alt={alt || ''}
@@ -225,7 +265,7 @@ function MarkdownRenderer({ content }: { content: string }) {
                 />
               </div>
               {alt && (
-                <figcaption className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+                <figcaption className="text-center text-sm text-gray-500 dark:text-gray-400 mt-3 italic max-w-2xl mx-auto">
                   {alt}
                 </figcaption>
               )}

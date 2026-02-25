@@ -43,8 +43,11 @@ export async function POST(request: NextRequest) {
     return await createBlogWithClientSDK(validated)
   } catch (error) {
     console.error('Error creating blog:', error)
+    const message = process.env.NODE_ENV === 'development'
+      ? `Failed to create blog: ${error instanceof Error ? error.message : String(error)}`
+      : 'Failed to create blog'
     return NextResponse.json(
-      { error: 'Failed to create blog' },
+      { error: message },
       { status: 500 }
     )
   }
@@ -52,6 +55,7 @@ export async function POST(request: NextRequest) {
 
 async function createBlogWithAdminSDK(adminDb: FirebaseFirestore.Firestore, validated: Record<string, any>) {
   const admin = await import('firebase-admin')
+  const adminModule = (admin as any).default || admin
   const blogsPath = getAdminCollectionPath('blogs')
   const collRef = adminDb.collection(blogsPath)
 
@@ -79,12 +83,13 @@ async function createBlogWithAdminSDK(adminDb: FirebaseFirestore.Firestore, vali
     tags: validated.tags || [],
     wordCount,
     readingTime,
-    createdAt: admin.default.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.default.firestore.FieldValue.serverTimestamp(),
+    createdAt: adminModule.firestore.FieldValue.serverTimestamp(),
+    updatedAt: adminModule.firestore.FieldValue.serverTimestamp(),
   }
 
   if (validated.contentBlocks) blogData.contentBlocks = validated.contentBlocks
   if (validated.contentVersion) blogData.contentVersion = validated.contentVersion
+  if (validated.author?.name) blogData.author = validated.author
 
   const docRef = await collRef.add(blogData)
   revalidatePath('/blog')
@@ -132,6 +137,7 @@ async function createBlogWithClientSDK(validated: Record<string, any>) {
     readingTime,
     contentBlocks: validated.contentBlocks || undefined,
     contentVersion: validated.contentVersion || undefined,
+    author: validated.author?.name ? validated.author : undefined,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }

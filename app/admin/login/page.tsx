@@ -49,24 +49,24 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark via-primary/20 to-dark flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-primary/5 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
-          className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-teal/10 blur-[120px]"
+          className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px]"
           animate={{ scale: [1, 1.3, 1], x: [0, 50, 0] }}
           transition={{ duration: 12, repeat: Infinity }}
         />
         <motion.div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/10 blur-[100px]"
+          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-teal/10 blur-[100px]"
           animate={{ scale: [1.2, 1, 1.2], y: [0, -50, 0] }}
           transition={{ duration: 10, repeat: Infinity }}
         />
       </div>
 
       {/* Grid pattern */}
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `radial-gradient(circle at 2px 2px, #0e4493 1px, transparent 0)`,
         backgroundSize: '40px 40px'
       }} />
 
@@ -76,7 +76,7 @@ export default function AdminLoginPage() {
         transition={{ duration: 0.5 }}
         className="relative z-10 w-full max-w-md"
       >
-        <Card className="border-2 border-white/10 bg-background/80 backdrop-blur-xl shadow-2xl">
+        <Card className="border border-gray-200 bg-white/90 backdrop-blur-xl shadow-2xl">
           <CardHeader className="text-center pb-2">
             <motion.div
               initial={{ scale: 0 }}
@@ -86,10 +86,10 @@ export default function AdminLoginPage() {
             >
               <div className="relative w-20 h-20 mx-auto">
                 <Image
-                  src="/images/logo/Snapgo%20Logo%20White.png"
+                  src="/images/logo/Snapgo%20Logo%20Blue.png"
                   alt={SITE_CONFIG.name}
                   fill
-                  className="object-contain brightness-110"
+                  className="object-contain"
                 />
               </div>
             </motion.div>
