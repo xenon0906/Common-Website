@@ -182,12 +182,32 @@ export async function getFirestoreDocument<T>(
   documentId: string,
   defaultValue: T
 ): Promise<T> {
+  // Try Admin SDK first (bypasses security rules, works on Vercel)
+  try {
+    const { getAdminDb, getAdminCollectionPath } = require('@/lib/firebase-admin')
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      const fullPath = getAdminCollectionPath(collectionPath)
+      const docSnap = await adminDb.collection(fullPath).doc(documentId).get()
+      if (docSnap.exists) {
+        const data = docSnap.data()
+        for (const key of Object.keys(data)) {
+          if (data[key]?.toDate) data[key] = data[key].toDate()
+        }
+        return { ...defaultValue, ...data } as T
+      }
+      return defaultValue
+    }
+  } catch {
+    // Admin SDK not available, fall through to client SDK
+  }
+
+  // Fallback: client SDK
   try {
     const db = getServerDb()
     if (!db) return defaultValue
 
     const appId = getServerAppId()
-    // Split the collection path to handle nested paths like 'content' properly
     const pathSegments = collectionPath.split('/').filter(Boolean)
     const docRef = doc(db, 'artifacts', appId, 'public', 'data', ...pathSegments, documentId)
     const docSnap = await getDoc(docRef)
@@ -207,12 +227,36 @@ export async function getFirestoreCollection<T extends { id?: string }>(
   defaultValue: T[],
   orderByField?: string
 ): Promise<T[]> {
+  // Try Admin SDK first (bypasses security rules, works on Vercel)
+  try {
+    const { getAdminDb, getAdminCollectionPath } = require('@/lib/firebase-admin')
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      const fullPath = getAdminCollectionPath(collectionPath)
+      let queryRef: any = adminDb.collection(fullPath)
+      if (orderByField) {
+        queryRef = queryRef.orderBy(orderByField)
+      }
+      const snapshot = await queryRef.get()
+      if (snapshot.empty) return defaultValue
+      return snapshot.docs.map((d: any) => {
+        const data = d.data()
+        for (const key of Object.keys(data)) {
+          if (data[key]?.toDate) data[key] = data[key].toDate()
+        }
+        return { id: d.id, ...data }
+      }) as T[]
+    }
+  } catch {
+    // Admin SDK not available, fall through to client SDK
+  }
+
+  // Fallback: client SDK
   try {
     const db = getServerDb()
     if (!db) return defaultValue
 
     const appId = getServerAppId()
-    // Split the collection path to handle nested paths like 'content/stats'
     const pathSegments = collectionPath.split('/').filter(Boolean)
     const collRef = collection(db, 'artifacts', appId, 'public', 'data', ...pathSegments)
 
@@ -228,7 +272,6 @@ export async function getFirestoreCollection<T extends { id?: string }>(
 
     return snapshot.docs.map(d => {
       const data = d.data()
-      // Convert Firestore Timestamps to JS Dates
       for (const key of Object.keys(data)) {
         if (data[key] instanceof Timestamp) {
           data[key] = data[key].toDate()

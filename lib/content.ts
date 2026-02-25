@@ -518,8 +518,31 @@ export async function getBlogBySlug(slug: string): Promise<BlogData | null> {
   )
   if (normalizedSlug.length < 3 || normalizedSlug.length > MAX_SLUG_LENGTH) return null
 
+  // Try Admin SDK first (bypasses security rules, works on Vercel)
   try {
-    // Direct Firestore query — O(1) instead of loading all blogs
+    const { getAdminDb, getAdminCollectionPath } = require('@/lib/firebase-admin')
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      const blogsPath = getAdminCollectionPath('blogs')
+      const snapshot = await adminDb.collection(blogsPath).where('slug', '==', normalizedSlug).get()
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0]
+        const data = doc.data()
+        for (const key of Object.keys(data)) {
+          if (data[key]?.toDate) data[key] = data[key].toDate()
+        }
+        const blog = { id: doc.id, ...data } as BlogData
+        if (!blog.published) return null
+        return { ...blog, slug: sanitizeSlug(blog.slug) }
+      }
+      return null
+    }
+  } catch {
+    // Admin SDK not available, fall through to client SDK
+  }
+
+  // Fallback: client SDK
+  try {
     const db = getServerDb()
     if (!db) return null
 
@@ -533,7 +556,6 @@ export async function getBlogBySlug(slug: string): Promise<BlogData | null> {
     const doc = snapshot.docs[0]
     const data = doc.data()
 
-    // Convert Firestore Timestamps to JS Dates
     for (const key of Object.keys(data)) {
       if (data[key]?.toDate) {
         data[key] = data[key].toDate()
@@ -546,7 +568,6 @@ export async function getBlogBySlug(slug: string): Promise<BlogData | null> {
     return { ...blog, slug: sanitizeSlug(blog.slug) }
   } catch (error) {
     console.error('Error fetching blog by slug:', error)
-    // Fallback: load all blogs and filter (original behavior)
     const blogs = await getBlogs()
     return blogs.find(blog => blog.slug === normalizedSlug) || null
   }
