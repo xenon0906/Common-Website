@@ -24,12 +24,29 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
+
+    // Try Admin SDK first (bypasses security rules, works on Vercel)
+    const adminDb = getAdminDb()
+    if (adminDb) {
+      const blogsPath = getAdminCollectionPath('blogs')
+      const docSnap = await adminDb.doc(`${blogsPath}/${id}`).get()
+      if (!docSnap.exists) {
+        return NextResponse.json({ error: 'Blog not found' }, { status: 404 })
+      }
+      const data = docSnap.data()
+      // Convert Timestamps
+      if (data) {
+        for (const key of Object.keys(data)) {
+          if (data[key]?.toDate) data[key] = data[key].toDate()
+        }
+      }
+      return NextResponse.json({ id: docSnap.id, ...data })
+    }
+
+    // Fallback: client SDK
     const db = getServerDb()
     if (!db) {
-      return NextResponse.json(
-        { error: 'Firebase not configured' },
-        { status: 503 }
-      )
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 503 })
     }
 
     const blogsPath = getCollectionPath('blogs')
@@ -37,19 +54,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const docSnap = await getDoc(docRef)
 
     if (!docSnap.exists()) {
-      return NextResponse.json(
-        { error: 'Blog not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Blog not found' }, { status: 404 })
     }
 
     return NextResponse.json({ id: docSnap.id, ...docSnap.data() })
   } catch (error) {
     console.error('Error fetching blog:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch blog' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch blog' }, { status: 500 })
   }
 }
 
