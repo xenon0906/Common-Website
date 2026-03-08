@@ -2,9 +2,6 @@ const { withSentryConfig } = require('@sentry/nextjs')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Standalone output for self-hosted deployment (Hostinger, VPS, Docker)
-  output: 'standalone',
-
   // Image optimization
   images: {
     remotePatterns: [
