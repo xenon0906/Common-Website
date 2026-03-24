@@ -8,8 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   SectionLoader,
   LoadingAnimation,
-  WhySnapgoSection,
   TrustBadgesSection,
+  ServicesSection,
   DownloadSection,
   CTASection,
   AppPreviewSection,
@@ -85,11 +85,6 @@ const SavingsCalculator = dynamic(
 const InstagramSection = dynamic(
   () => import('@/components/home/InstagramSection'),
   { loading: () => <SectionLoader />, ssr: false }
-)
-
-const CabPoolingComparison = dynamic(
-  () => import('@/components/home/CabPoolingComparison'),
-  { loading: () => <SectionLoader /> }
 )
 
 // Memoized hero component for performance
@@ -181,23 +176,14 @@ export function HomePageClient({
         <TrustBadgesSection />
       </motion.div>
 
-      <motion.div
-        initial="hidden"
-        animate={contentRevealed ? 'visible' : 'hidden'}
-        custom={0.2}
-        variants={sectionVariants}
-      >
-        <WhySnapgoSection />
-      </motion.div>
-
-      <SectionErrorBoundary name="CabPoolingComparison">
+      <SectionErrorBoundary name="ServicesSection">
         <motion.div
           initial="hidden"
           animate={contentRevealed ? 'visible' : 'hidden'}
-          custom={0.25}
+          custom={0.2}
           variants={sectionVariants}
         >
-          <CabPoolingComparison />
+          <ServicesSection />
         </motion.div>
       </SectionErrorBoundary>
 

@@ -3,12 +3,12 @@
 import {
   ShieldIcon,
   StarIcon,
-  CheckCircleIcon,
+  ShieldCheckIcon,
   UsersIcon,
-  MapPinIcon,
-  HeartIcon,
-  ZapIcon,
+  AlertIcon,
+  ClockIcon,
   LeafIcon,
+  CheckCircleIcon,
 } from '@/components/ui/icon'
 
 export function TrustBadgesSection() {
@@ -16,11 +16,11 @@ export function TrustBadgesSection() {
     { icon: ShieldIcon, label: 'DPIIT Certified' },
     { icon: StarIcon, label: 'Startup India' },
     { icon: StarIcon, label: 'Startup Uttarakhand', isGreen: true },
-    { icon: CheckCircleIcon, label: 'Aadhaar Verified' },
-    { icon: UsersIcon, label: '10,000+ Downloads' },
-    { icon: MapPinIcon, label: '150+ Daily Rides' },
-    { icon: HeartIcon, label: 'Trusted Platform' },
-    { icon: ZapIcon, label: 'Real-Time Matching' },
+    { icon: ShieldCheckIcon, label: 'Aadhaar KYC Verified' },
+    { icon: UsersIcon, label: 'Women-Only Matching' },
+    { icon: AlertIcon, label: 'SOS Emergency Button' },
+    { icon: CheckCircleIcon, label: '100% Legal' },
+    { icon: ClockIcon, label: 'Driver Confirmed 24hr Before' },
     { icon: LeafIcon, label: 'Eco-Friendly', isGreen: true },
   ]
 

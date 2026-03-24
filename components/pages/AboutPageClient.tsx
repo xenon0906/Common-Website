@@ -43,14 +43,14 @@ function AboutHero() {
       <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            Pioneering{' '}
-            <span className="text-teal-400">Cab Pooling</span> in India
+            India&apos;s Smart{' '}
+            <span className="text-teal-400">Shared Cab Network</span>
           </h1>
 
           <p className="text-xl text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Pool and go — with or without a car. Whether you're booking a cab together
-            or sharing your own ride, join India's greenest commuting community.
-            Save money, reduce emissions, travel together.
+            Snapgo is India&apos;s shared cab network — offering daily
+            micro-shuttles, shared airport cabs, and outstation ride-sharing
+            to help commuters save up to 75% on every trip.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -73,7 +73,7 @@ function AboutHero() {
           {/* Simple quote - no decorative frame */}
           <div className="max-w-2xl mx-auto">
             <p className="text-white/80 italic text-lg leading-relaxed">
-              "Every day, millions take separate cabs to the same destination. With cab pooling, 4 people share 1 cab — saving money, supporting drivers, and reducing emissions by 75%."
+              &ldquo;Every day, millions pay full fare for cabs with empty seats. We built Snapgo so no seat goes empty, no fare goes wasted, and no commuter travels alone.&rdquo;
             </p>
             <p className="text-teal-400 text-sm mt-4 font-medium">— Mohit & Surya Purohit, Co-Founders</p>
           </div>
@@ -162,7 +162,7 @@ function MissionVisionValues({ about }: { about: Record<string, AboutContentData
     {
       icon: Target,
       title: 'Mission',
-      content: about.mission?.content || 'To make travel affordable and accessible for everyone through cab pooling.',
+      content: about.mission?.content || 'To make every cab journey in India shareable — giving students, professionals, and travellers a smarter, affordable, and reliable alternative to paying full cab fare alone.',
       gradient: 'from-primary/10 to-primary/5',
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
@@ -170,7 +170,7 @@ function MissionVisionValues({ about }: { about: Record<string, AboutContentData
     {
       icon: Eye,
       title: 'Vision',
-      content: about.vision?.content || "To become India's most trusted cab pooling platform.",
+      content: about.vision?.content || "To become India's largest shared cab network — where no seat goes empty, no fare goes wasted, and no commuter travels alone.",
       gradient: 'from-teal/10 to-teal/5',
       iconBg: 'bg-teal/10',
       iconColor: 'text-teal-600',

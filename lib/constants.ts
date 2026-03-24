@@ -15,8 +15,8 @@
 export const SITE_CONFIG = {
   name: 'Snapgo',
   legalName: 'Snapgo Service Private Limited',
-  tagline: 'Pool Cabs, Save Money, Go Green',
-  description: "India's #1 Cab Pooling Platform. Pool a commercial cab with verified co-riders - 100% legal, eco-friendly, and up to 75% cheaper. Why pay for the full cab when you can save money AND the environment?",
+  tagline: 'Share the Cab. Keep the Cash.',
+  description: "India's Smart Shared Cab Network — daily micro-shuttles, shared airport cabs, outstation ride-sharing, and cab matching to help commuters save up to 75% on every trip.",
   url: 'https://snapgo.co.in',
   email: 'info@snapgo.co.in',
   phone: '+91 6398786105',
@@ -30,13 +30,13 @@ export const SITE_CONFIG = {
 }
 
 export const HERO_CONTENT = {
-  headline: 'Pool Cabs, Not Cars. Save Money AND the Planet.',
-  subtext: "Unlike carpooling with private cars, Snapgo pools commercial cabs — 100% legal, driver-friendly, and eco-conscious. Connect with verified co-riders heading your way, split the fare, and reduce road emissions by 75%. Same destination, shared cab, triple the benefit.",
+  headline: "India's Smart Shared Cab Network",
+  subtext: "Daily shuttles, airport transfers, outstation trips, and cab matching — share any cab, split any fare, save up to 75% every time.",
 }
 
 export const STATS = [
-  { label: 'App Downloads', value: 10000, suffix: '+', prefix: '' },
-  { label: 'Peak Daily Rides', value: 150, suffix: '+', prefix: '' },
+  { label: 'Users', value: 4500, suffix: '+', prefix: '' },
+  { label: 'Daily Rides', value: 120, suffix: '+', prefix: '' },
   { label: 'Cost Savings', value: 75, suffix: '%', prefix: '' },
   { label: 'Trees Equivalent', value: 500, suffix: '+', prefix: '', isEco: true },
 ]
@@ -63,13 +63,13 @@ export const FEATURES = [
     icon: 'Clock',
   },
   {
-    title: 'Green Cab Pooling',
-    description: '4 people, 1 cab = 75% less pollution. We pool commercial cabs, not private cars — legal AND eco-friendly',
+    title: 'Eco-Friendly Travel',
+    description: '4 people, 1 cab = 75% less pollution. Share commercial cabs — legal AND eco-friendly',
     icon: 'Leaf',
   },
   {
-    title: 'Pool Your Way',
-    description: 'No car? Book a cab together. Have a car? Offer rides. Two options, same savings, one green mission.',
+    title: 'Flexible Options',
+    description: 'Shuttles, airport transfers, outstation trips, or cab matching — choose what works for you.',
     icon: 'Shuffle',
   },
 ]
@@ -89,8 +89,8 @@ export const HOW_IT_WORKS = [
   },
   {
     step: 3,
-    title: 'Pool Together & Save',
-    description: 'Book a cab together or join a self-drive ride — split costs and save up to 75%',
+    title: 'Share & Save',
+    description: 'Share the cab, split the fare — save up to 75% on every ride',
     icon: 'Users',
   },
 ]
@@ -116,8 +116,8 @@ export const TESTIMONIALS = [
 export const ABOUT_STORY = {
   origin: "It was a regular day when we, Mohit and Surya Purohit, were heading to Ghaziabad Railway Station from our society. We booked a cab and noticed another person also taking a cab from our area. When we reached the station, we saw the same person at the parking lot. That's when it hit us - we both paid ₹300 separately for the same route. If we had known we were going to the same place, we could have shared the ride and paid just ₹300 total, saving ₹300 together!",
   spark: "This sparked an idea, but we didn't want to do traditional carpooling with private cars — that's not legal for commercial use and bypasses taxi drivers who depend on fares. Instead, we pioneered 'Cab Pooling' — pooling commercial cabs among verified riders. It's 100% legal, supports drivers, AND reduces road emissions by 75%. That's how Snapgo was born.",
-  mission: 'To make travel affordable and accessible for everyone through cab pooling — connecting people who share similar routes while supporting drivers and reducing environmental impact.',
-  vision: "To become India's most trusted cab pooling platform, where every shared ride means savings for riders, earnings for drivers, and a greener planet for everyone.",
+  mission: 'To make every cab journey in India shareable — giving students, professionals, and travellers a smarter, affordable, and reliable alternative to paying full cab fare alone.',
+  vision: "To become India's largest shared cab network — where no seat goes empty, no fare goes wasted, and no commuter travels alone.",
   values: 'Legal and ethical operations, driver-friendly ecosystem, environmental sustainability, user safety, and creating value for our entire community.',
 }
 
@@ -190,14 +190,9 @@ export const INDIAN_CITIES = [
 ]
 
 export const NAV_LINKS = [
-  { href: '/', label: 'Home' },
+  { href: '/#services', label: 'Services' },
   { href: '/about', label: 'About' },
-  { href: '/team', label: 'Team' },
-  { href: '/how-it-works', label: 'How It Works' },
-  { href: '/features', label: 'Features' },
   { href: '/safety', label: 'Safety' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/contact', label: 'Contact' },
 ]
 
 export const TEAM_MEMBERS = [
@@ -344,7 +339,7 @@ export const DEFAULT_CO2_CONFIG = {
  */
 export const DEFAULT_SAVINGS_CONFIG = {
   headline: 'Calculate Your Savings',
-  subheadline: 'See how much you can save by pooling cabs',
+  subheadline: 'See how much you can save by sharing cabs',
   defaultFare: 400,
   defaultRiders: 4,
   riderOptions: [2, 3, 4],
@@ -357,29 +352,69 @@ export const DEFAULT_SAVINGS_CONFIG = {
  * Used in TrustBadgesSection component
  */
 export const DEFAULT_TRUST_BADGES = [
+  { id: 'badge_1', iconName: 'Award', title: 'DPIIT Recognized', description: 'Government certified startup', order: 0, isActive: true },
+  { id: 'badge_2', iconName: 'Shield', title: 'Startup India', description: 'Official initiative member', order: 1, isActive: true },
+  { id: 'badge_3', iconName: 'ShieldCheck', title: 'Aadhaar KYC Verified', description: 'Government-backed identity verification', order: 2, isActive: true },
+  { id: 'badge_4', iconName: 'Users', title: 'Women-Only Matching', description: 'Safe travel for women', order: 3, isActive: true },
+  { id: 'badge_5', iconName: 'AlertTriangle', title: 'SOS Emergency Button', description: 'One-tap emergency alerts', order: 4, isActive: true },
+  { id: 'badge_6', iconName: 'Scale', title: '100% Legal', description: 'Licensed commercial cabs only', order: 5, isActive: true },
+  { id: 'badge_7', iconName: 'Clock', title: 'Driver Confirmed 24hr Before', description: 'No last-minute surprises', order: 6, isActive: true },
+  { id: 'badge_8', iconName: 'Leaf', title: 'Eco-Friendly', description: 'Reduce emissions by sharing', order: 7, isActive: true },
+]
+
+/**
+ * Services - Default Data
+ * Used in ServicesSection component
+ */
+export const DEFAULT_SERVICES = [
   {
-    id: 'badge_1',
-    iconName: 'Award',
-    title: 'DPIIT Recognized',
-    description: 'Government certified startup',
-    order: 0,
-    isActive: true
-  },
-  {
-    id: 'badge_2',
-    iconName: 'Shield',
-    title: 'Startup India',
-    description: 'Official initiative member',
+    id: 'snapride',
+    name: 'SnapRide',
+    tagline: 'Micro Cab Shuttle',
+    description: 'Daily fixed-route micro cab shuttle — book a seat, get stop details after booking. From just ₹80/ride in Greater Noida.',
+    iconName: 'Bus',
+    badgeType: 'confirmed' as const,
+    extraBadge: 'most-booked' as const,
+    trustLine: 'Guaranteed seat, no matching needed',
+    isPrimary: true,
     order: 1,
-    isActive: true
+    isActive: true,
   },
   {
-    id: 'badge_3',
-    iconName: 'Lock',
-    title: 'Data Protected',
-    description: 'Industry-standard encryption',
+    id: 'snapair',
+    name: 'SnapAir',
+    tagline: 'Shared Airport Transfers',
+    description: 'Shared airport cab transfers at 50% of normal fare. Driver confirmed 24 hours before your pickup.',
+    iconName: 'Plane',
+    badgeType: 'confirmed' as const,
+    trustLine: 'Driver confirmed 24hr before',
+    isPrimary: true,
     order: 2,
-    isActive: true
+    isActive: true,
+  },
+  {
+    id: 'snaptrip',
+    name: 'SnapTrip',
+    tagline: 'Outstation Cabs — Name Your Price',
+    description: 'Book a dedicated cab at your price, or share a ride and split the cost. Sedan to Tempo Traveller — 10% off round trips.',
+    iconName: 'MapPin',
+    badgeType: 'confirmed' as const,
+    trustLine: 'Transparent pricing, no surge',
+    isPrimary: true,
+    order: 3,
+    isActive: true,
+  },
+  {
+    id: 'snappool',
+    name: 'SnapPool',
+    tagline: 'Free Cab Matching',
+    description: "Can't find a confirmed service on your route? SnapPool matches you with co-riders heading the same way — completely free.",
+    iconName: 'Search',
+    badgeType: 'free-matching' as const,
+    trustLine: 'Free cab matching',
+    isPrimary: false,
+    order: 4,
+    isActive: true,
   },
 ]
 
@@ -406,7 +441,7 @@ export const DEFAULT_CTA_SECTIONS = [
  */
 export const DEFAULT_APP_PREVIEW = {
   headline: 'Experience Snapgo',
-  subheadline: 'Simple, safe, and eco-friendly cab pooling',
+  subheadline: 'Simple, safe, and eco-friendly shared cab rides',
   features: [
     { title: 'Real-time Matching', description: 'Find co-riders instantly' },
     { title: 'Verified Profiles', description: 'Aadhaar KYC for all users' },
@@ -427,17 +462,16 @@ export const DEFAULT_HOMEPAGE_CONFIG = {
   sections: [
     { componentName: 'hero', label: 'Hero Section', visible: true, order: 1 },
     { componentName: 'trustBadges', label: 'Trust Badges', visible: true, order: 2 },
-    { componentName: 'whySnapgo', label: 'Why Snapgo', visible: true, order: 3 },
-    { componentName: 'comparison', label: 'Cab Pooling Comparison', visible: true, order: 4 },
-    { componentName: 'stats', label: 'Statistics Counter', visible: true, order: 5 },
-    { componentName: 'co2Impact', label: 'CO2 Impact Tracker', visible: true, order: 6 },
-    { componentName: 'savingsCalc', label: 'Savings Calculator', visible: true, order: 7 },
-    { componentName: 'features', label: 'Features Grid', visible: true, order: 8 },
-    { componentName: 'howItWorks', label: 'How It Works', visible: true, order: 9 },
-    { componentName: 'appPreview', label: 'App Preview', visible: true, order: 10 },
-    { componentName: 'download', label: 'Download Section', visible: true, order: 11 },
-    { componentName: 'testimonials', label: 'Testimonials', visible: true, order: 12 },
-    { componentName: 'instagram', label: 'Instagram Feed', visible: true, order: 13 },
-    { componentName: 'cta', label: 'Call to Action', visible: true, order: 14 },
+    { componentName: 'services', label: 'Our Services', visible: true, order: 3 },
+    { componentName: 'stats', label: 'Statistics Counter', visible: true, order: 4 },
+    { componentName: 'co2Impact', label: 'CO2 Impact Tracker', visible: true, order: 5 },
+    { componentName: 'savingsCalc', label: 'Savings Calculator', visible: true, order: 6 },
+    { componentName: 'features', label: 'Features Grid', visible: true, order: 7 },
+    { componentName: 'howItWorks', label: 'How It Works', visible: true, order: 8 },
+    { componentName: 'appPreview', label: 'App Preview', visible: true, order: 9 },
+    { componentName: 'download', label: 'Download Section', visible: true, order: 10 },
+    { componentName: 'testimonials', label: 'Testimonials', visible: true, order: 11 },
+    { componentName: 'instagram', label: 'Instagram Feed', visible: true, order: 12 },
+    { componentName: 'cta', label: 'Call to Action', visible: true, order: 13 },
   ],
 }

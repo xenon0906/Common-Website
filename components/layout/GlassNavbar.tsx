@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -10,37 +10,14 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet'
 import { NAV_LINKS, SITE_CONFIG } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { DownloadDropdown } from '@/components/shared/DownloadDropdown'
-
-interface NavLink {
-  label: string
-  href: string
-}
 
 export function GlassNavbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [isFloating, setIsFloating] = useState(false)
-  const [navLinks, setNavLinks] = useState<NavLink[]>(NAV_LINKS)
   const pathname = usePathname()
   const { scrollY } = useScroll()
   const lastScrollY = useRef(0)
-
-  // Fetch navigation from Firebase (with NAV_LINKS fallback)
-  useEffect(() => {
-    fetch('/api/navigation')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          const headerLinks = data
-            .filter((l: any) => l.isActive !== false && (!l.location || l.location === 'header'))
-            .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
-            .map((l: any) => ({ label: l.label, href: l.href }))
-          if (headerLinks.length > 0) setNavLinks(headerLinks)
-        }
-      })
-      .catch(() => {})
-  }, [])
 
   // Hide on scroll down, show on scroll up
   useMotionValueEvent(scrollY, 'change', (latest) => {
@@ -114,13 +91,13 @@ export function GlassNavbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => {
+              {NAV_LINKS.map((link) => {
                 const isActive = pathname === link.href ||
                   (link.href !== '/' && pathname.startsWith(link.href))
 
                 return (
                   <Link
-                    key={link.href}
+                    key={link.label}
                     href={link.href}
                     className={cn(
                       'relative px-4 py-2 text-sm font-medium transition-all duration-200',
@@ -153,7 +130,12 @@ export function GlassNavbar() {
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-4">
-              <DownloadDropdown variant="gradient" size="default" />
+              <Button
+                className="bg-[#0e4493] hover:bg-[#0a3577] text-white rounded-full px-6"
+                asChild
+              >
+                <Link href="#download">Book a Seat</Link>
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -190,12 +172,12 @@ export function GlassNavbar() {
 
                     {/* Mobile Navigation Links */}
                     <nav className="flex flex-col gap-1 py-6 flex-1">
-                      {navLinks.map((link, index) => {
+                      {NAV_LINKS.map((link, index) => {
                         const isActive = pathname === link.href ||
                           (link.href !== '/' && pathname.startsWith(link.href))
 
                         return (
-                          <SheetClose asChild key={link.href}>
+                          <SheetClose asChild key={link.label}>
                             <motion.div
                               initial={{ opacity: 0, x: 20 }}
                               animate={{ opacity: 1, x: 0 }}
@@ -218,13 +200,15 @@ export function GlassNavbar() {
                       })}
                     </nav>
 
-                    {/* Mobile Download Button */}
+                    {/* Mobile Book a Seat Button */}
                     <div className="p-4 border-t border-gray-100">
-                      <DownloadDropdown
-                        variant="gradient"
+                      <Button
+                        className="w-full bg-[#0e4493] hover:bg-[#0a3577] text-white rounded-full"
                         size="lg"
-                        className="w-full justify-center"
-                      />
+                        asChild
+                      >
+                        <Link href="#download">Book a Seat</Link>
+                      </Button>
                     </div>
                   </div>
                 </SheetContent>

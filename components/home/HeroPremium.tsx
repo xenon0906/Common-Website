@@ -45,10 +45,10 @@ function AnimatedMetric({ value, suffix = '', label, isEco = false }: { value: n
 // Default hero content
 const DEFAULT_HERO: HeroContentData = {
   id: 'default',
-  headline: 'Pool Cabs. Save Money. Go Green.',
-  subtext: 'Pool and go — with or without a car. Match with verified co-riders, share the journey, and save up to 75%. Join India\'s greenest commuting movement.',
-  badge: "India's #1 Cab Pooling Platform",
-  ctaPrimary: 'Download App',
+  headline: "India's Smart Shared Cab Network",
+  subtext: 'Daily shuttles, airport transfers, outstation trips, and cab matching — share any cab, split any fare, save up to 75% every time.',
+  badge: "Share the Cab. Keep the Cash.",
+  ctaPrimary: 'Book a Seat',
   ctaSecondary: 'Watch Demo',
   isActive: true,
 }
@@ -62,11 +62,11 @@ export function HeroPremium({ hero, heroMockupUrl }: HeroPremiumProps = {}) {
   const displayHero = hero || DEFAULT_HERO
   const mockupImage = heroMockupUrl || '/images/mockups/iphone15/home-screen.png'
 
-  // Impact metrics - Rapido style
+  // Impact metrics
   const metrics = [
-    { value: 10000, suffix: '+', label: 'Downloads' },
-    { value: 150, suffix: '+', label: 'Cabs Pooled Daily' },
-    { value: 75, suffix: '%', label: 'Less Emissions', isEco: true },
+    { value: 4500, suffix: '+', label: 'Users', isEco: false },
+    { value: 75, suffix: '%', label: 'Savings', isEco: false },
+    { value: 120, suffix: '+', label: 'Daily Rides', isEco: false },
   ]
 
   return (
@@ -77,9 +77,9 @@ export function HeroPremium({ hero, heroMockupUrl }: HeroPremiumProps = {}) {
           <div className="text-center lg:text-left">
             {/* Bold stacked headline - Rapido inspired */}
             <h1 className="text-[1.5rem] xs:text-[1.65rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6">
-              <span className="text-gray-900 block whitespace-nowrap">Pool Cabs.</span>
-              <span className="text-[#0e4493] block whitespace-nowrap">Save ₹12,000/year.</span>
-              <span className="text-emerald-500 block whitespace-nowrap text-lg sm:text-2xl md:text-3xl lg:text-4xl mt-2">Go Green.</span>
+              <span className="text-gray-900 block whitespace-nowrap">India&apos;s Smart</span>
+              <span className="text-[#0e4493] block whitespace-nowrap">Shared Cab Network</span>
+              <span className="text-emerald-500 block whitespace-nowrap text-lg sm:text-2xl md:text-3xl lg:text-4xl mt-2">Share the Cab. Keep the Cash.</span>
             </h1>
 
             {/* Subheadline - clean, single paragraph */}
@@ -109,7 +109,7 @@ export function HeroPremium({ hero, heroMockupUrl }: HeroPremiumProps = {}) {
               >
                 <Link href="#download">
                   <Download className="w-5 h-5 mr-2" />
-                  {displayHero.ctaPrimary || 'Download App'}
+                  {displayHero.ctaPrimary || 'Book a Seat'}
                 </Link>
               </Button>
               <Button
