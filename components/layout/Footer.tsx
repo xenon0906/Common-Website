@@ -199,8 +199,8 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold mb-3 text-white">Company</h3>
             <ul className="space-y-2.5">
-              {footerLinks.company.map((link) => (
-                <li key={link.href}>
+              {footerLinks.company.map((link, i) => (
+                <li key={`${i}-${link.label}`}>
                   <Link
                     href={link.href}
                     className="text-white/60 hover:text-primary transition-colors text-sm"
@@ -298,8 +298,8 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Company</h3>
             <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.href}>
+              {footerLinks.company.map((link, i) => (
+                <li key={`${i}-${link.label}`}>
                   <Link
                     href={link.href}
                     className="text-white/70 hover:text-primary transition-colors"
@@ -386,9 +386,9 @@ export function Footer() {
           <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-[11px] sm:text-xs text-white/50">© {currentYear} {siteInfo.name}. All rights reserved.</p>
             <div className="flex flex-wrap justify-center gap-3 sm:gap-5">
-              {footerLinks.legal.map((link) => (
+              {footerLinks.legal.map((link, i) => (
                 <Link
-                  key={link.href}
+                  key={`${i}-${link.label}`}
                   href={link.href}
                   className="text-[11px] sm:text-xs text-white/50 hover:text-primary transition-colors"
                 >

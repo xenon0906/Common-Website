@@ -91,13 +91,13 @@ export function GlassNavbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
-              {NAV_LINKS.map((link) => {
+              {NAV_LINKS.map((link, index) => {
                 const isActive = pathname === link.href ||
                   (link.href !== '/' && pathname.startsWith(link.href))
 
                 return (
                   <Link
-                    key={link.label}
+                    key={`desktop-${index}-${link.label}`}
                     href={link.href}
                     className={cn(
                       'relative px-4 py-2 text-sm font-medium transition-all duration-200',
@@ -177,7 +177,7 @@ export function GlassNavbar() {
                           (link.href !== '/' && pathname.startsWith(link.href))
 
                         return (
-                          <SheetClose asChild key={link.label}>
+                          <SheetClose asChild key={`mobile-${index}-${link.label}`}>
                             <motion.div
                               initial={{ opacity: 0, x: 20 }}
                               animate={{ opacity: 1, x: 0 }}
