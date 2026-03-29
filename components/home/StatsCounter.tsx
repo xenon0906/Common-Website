@@ -211,13 +211,13 @@ export default function StatsCounter({ stats }: StatsCounterProps = {}) {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="inline-block px-5 py-2 glass-dark rounded-full text-sm font-semibold text-white mb-4"
           >
-            Our Impact
+            Real Numbers. Real Savings.
           </motion.span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Growing <span className="text-white/90">Every Day</span>
+            Delhi/NCR <span className="text-white/90">Trusts Snapgo</span>
           </h2>
           <p className="text-white/90 max-w-2xl mx-auto text-lg">
-            Trusted by thousands of students and professionals across India for their daily commute.
+            4,500+ verified riders in Greater Noida, Noida, Ghaziabad & Delhi saving money every single day.
           </p>
         </motion.div>
 

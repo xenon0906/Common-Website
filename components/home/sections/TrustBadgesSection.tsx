@@ -7,21 +7,21 @@ import {
   UsersIcon,
   AlertIcon,
   ClockIcon,
-  LeafIcon,
   CheckCircleIcon,
+  WalletIcon,
 } from '@/components/ui/icon'
 
 export function TrustBadgesSection() {
   const badges = [
-    { icon: ShieldIcon, label: 'DPIIT Certified' },
-    { icon: StarIcon, label: 'Startup India' },
-    { icon: StarIcon, label: 'Startup Uttarakhand', isGreen: true },
-    { icon: ShieldCheckIcon, label: 'Aadhaar KYC Verified' },
-    { icon: UsersIcon, label: 'Women-Only Matching' },
-    { icon: AlertIcon, label: 'SOS Emergency Button' },
-    { icon: CheckCircleIcon, label: '100% Legal' },
+    { icon: ShieldIcon, label: 'DPIIT Recognized Startup' },
+    { icon: StarIcon, label: 'Startup India Certified' },
+    { icon: ShieldCheckIcon, label: 'Aadhaar KYC — Every Rider' },
+    { icon: UsersIcon, label: 'Women-Only Cab Option' },
+    { icon: AlertIcon, label: 'SOS Emergency — 1 Tap' },
+    { icon: CheckCircleIcon, label: '100% Legal Commercial Cabs' },
     { icon: ClockIcon, label: 'Driver Confirmed 24hr Before' },
-    { icon: LeafIcon, label: 'Eco-Friendly', isGreen: true },
+    { icon: StarIcon, label: '4,500+ Riders Trust Us', isGreen: true },
+    { icon: WalletIcon, label: '₹80 Rides, No Surge Ever', isGreen: true },
   ]
 
   return (

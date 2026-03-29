@@ -1,55 +1,19 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
-import { useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Download, ArrowRight, Play } from 'lucide-react'
+import { ShieldCheck, Users, Leaf } from 'lucide-react'
 import { HeroContentData } from '@/lib/content'
 
-// Animated counter component - Rapido style
-function AnimatedMetric({ value, suffix = '', label, isEco = false }: { value: number; suffix?: string; label: string; isEco?: boolean }) {
-  const [count, setCount] = useState(0)
-  const [hasAnimated, setHasAnimated] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true })
-
-  useEffect(() => {
-    if (isInView && !hasAnimated) {
-      setHasAnimated(true)
-      let startTime: number
-      const duration = 2000
-      const animate = (currentTime: number) => {
-        if (!startTime) startTime = currentTime
-        const progress = Math.min((currentTime - startTime) / duration, 1)
-        setCount(Math.floor(progress * value))
-        if (progress < 1) {
-          requestAnimationFrame(animate)
-        }
-      }
-      requestAnimationFrame(animate)
-    }
-  }, [isInView, value, hasAnimated])
-
-  return (
-    <div ref={ref} className="text-center">
-      <div className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold ${isEco ? 'text-emerald-500' : 'text-gray-900'}`}>
-        {count.toLocaleString()}{suffix}
-      </div>
-      <div className={`text-xs sm:text-sm md:text-base mt-1 ${isEco ? 'text-emerald-600' : 'text-gray-500'}`}>{label}</div>
-    </div>
-  )
-}
-
-// Default hero content
 const DEFAULT_HERO: HeroContentData = {
   id: 'default',
-  headline: "India's Smart Shared Cab Network",
-  subtext: 'Daily shuttles, airport transfers, outstation trips, and cab matching — share any cab, split any fare, save up to 75% every time.',
-  badge: "Share the Cab. Keep the Cash.",
-  ctaPrimary: 'Book a Seat',
-  ctaSecondary: 'Watch Demo',
+  headline: 'Share the Ride. Keep the Savings.',
+  subtext: "India's smartest way to share cabs. Verified riders, zero surge, up to 75% cheaper than riding solo.",
+  badge: 'Trusted by 4,500+ riders',
+  ctaPrimary: 'Book a Ride',
+  ctaSecondary: 'Offer a Ride',
   isActive: true,
 }
 
@@ -60,94 +24,114 @@ interface HeroPremiumProps {
 
 export function HeroPremium({ hero, heroMockupUrl }: HeroPremiumProps = {}) {
   const displayHero = hero || DEFAULT_HERO
-  const mockupImage = heroMockupUrl || '/images/mockups/iphone15/home-screen.png'
-
-  // Impact metrics
-  const metrics = [
-    { value: 4500, suffix: '+', label: 'Users', isEco: false },
-    { value: 75, suffix: '%', label: 'Savings', isEco: false },
-    { value: 120, suffix: '+', label: 'Daily Rides', isEco: false },
-  ]
+  const mockupUrl = heroMockupUrl || '/images/mockups/iphone15/home-screen.png'
 
   return (
-    <section className="hero-viewport bg-white">
-      <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
-        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
-          {/* Left content */}
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#f8faff] to-white">
+      <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 py-20 sm:py-24 lg:py-28">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left — Text */}
           <div className="text-center lg:text-left">
-            {/* Bold stacked headline - Rapido inspired */}
-            <h1 className="text-[1.5rem] xs:text-[1.65rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6">
-              <span className="text-gray-900 block whitespace-nowrap">India&apos;s Smart</span>
-              <span className="text-[#0e4493] block whitespace-nowrap">Shared Cab Network</span>
-              <span className="text-emerald-500 block whitespace-nowrap text-lg sm:text-2xl md:text-3xl lg:text-4xl mt-2">Share the Cab. Keep the Cash.</span>
-            </h1>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#0e4493]/8 border border-[#0e4493]/12 rounded-full mb-8"
+            >
+              <Users className="w-3.5 h-3.5 text-[#0e4493]" />
+              <span className="text-[#0e4493] text-xs sm:text-sm font-medium">
+                Trusted by 4,500+ riders in Delhi/NCR
+              </span>
+            </motion.div>
 
-            {/* Subheadline - clean, single paragraph */}
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 leading-[1.08]"
+            >
+              <span className="text-gray-900">Share the Ride.</span>
+              <br />
+              <span className="text-[#0e4493]">Keep the Savings.</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-base sm:text-lg text-gray-500 max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed"
+            >
               {displayHero.subtext}
-            </p>
+            </motion.p>
 
-            {/* Impact Metrics Row - Rapido style */}
-            <div className="flex justify-center lg:justify-start gap-4 sm:gap-6 md:gap-10 lg:gap-12 mb-10 py-6 border-y border-gray-100">
-              {metrics.map((metric) => (
-                <AnimatedMetric
-                  key={metric.label}
-                  value={metric.value}
-                  suffix={metric.suffix}
-                  label={metric.label}
-                  isEco={metric.isEco}
-                />
-              ))}
-            </div>
-
-            {/* CTAs - prominent, clean */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex flex-col xs:flex-row gap-3 justify-center lg:justify-start mb-10"
+            >
               <Button
-                size="xl"
-                className="w-full sm:w-auto bg-[#0e4493] hover:bg-[#0a3577] text-white px-8"
+                size="lg"
+                className="bg-[#0e4493] hover:bg-[#0b3a7d] text-white px-8 rounded-xl h-13 text-base font-semibold shadow-md shadow-[#0e4493]/20"
                 asChild
               >
-                <Link href="#download">
-                  <Download className="w-5 h-5 mr-2" />
-                  {displayHero.ctaPrimary || 'Book a Seat'}
-                </Link>
+                <Link href="#download">Book a Ride</Link>
               </Button>
               <Button
-                size="xl"
+                size="lg"
                 variant="outline"
-                className="w-full sm:w-auto border-gray-300 hover:bg-gray-50 px-8"
+                className="border-2 border-[#0e4493] text-[#0e4493] hover:bg-[#0e4493]/5 px-8 rounded-xl h-13 text-base font-semibold"
                 asChild
               >
-                <Link href="/about">
-                  <Play className="w-5 h-5 mr-2" />
-                  {displayHero.ctaSecondary || 'Watch Demo'}
-                </Link>
+                <Link href="#download">Offer a Ride</Link>
               </Button>
-            </div>
+            </motion.div>
 
-            {/* Trust badges - simple inline text */}
-            <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-gray-500">
-              <span className="font-medium text-gray-700">DPIIT Certified</span>
-              <span>•</span>
-              <span className="font-medium text-gray-700">Startup India</span>
-              <span>•</span>
-              <span className="font-medium text-gray-700">Startup Uttarakhand</span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center lg:justify-start"
+            >
+              <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span>Aadhaar Verified</span>
+              </div>
+              <span className="text-gray-300">|</span>
+              <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600">
+                <Leaf className="w-4 h-4 text-emerald-500" />
+                <span>Eco-Friendly</span>
+              </div>
+              <span className="text-gray-300">|</span>
+              <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span>DPIIT Recognized</span>
+              </div>
+            </motion.div>
           </div>
 
-          {/* Right side - Phone mockup (iPhone 15 frame already in image) */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="relative w-[170px] xs:w-[190px] sm:w-[230px] md:w-[275px] lg:w-[315px] max-w-[48vw] sm:max-w-[42vw] lg:max-w-[70vw]">
-              <Image
-                src={mockupImage}
-                alt="Snapgo App"
-                width={300}
-                height={600}
-                className="w-full h-auto drop-shadow-2xl"
-                priority
-              />
+          {/* Right — Phone mockup with depth */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex justify-center lg:justify-end"
+          >
+            <div className="relative">
+              {/* Background depth card */}
+              <div className="absolute -inset-4 bg-[#0e4493]/[0.04] rounded-[2.5rem] -rotate-2" />
+              <div className="relative w-[230px] xs:w-[260px] sm:w-[290px] md:w-[310px] lg:w-[290px] xl:w-[330px]">
+                <Image
+                  src={mockupUrl}
+                  alt="SnapGo App"
+                  width={330}
+                  height={672}
+                  className="w-full h-auto drop-shadow-2xl relative z-10"
+                  priority
+                />
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

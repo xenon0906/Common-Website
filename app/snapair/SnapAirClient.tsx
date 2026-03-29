@@ -16,42 +16,51 @@ import {
   Users,
   ShieldCheck,
   Download,
+  Wallet,
+  CheckCircle,
 } from 'lucide-react'
 
 const steps = [
   {
     step: 1,
-    title: 'Open Airport Cabs',
+    title: 'Select Airport Cabs',
     description:
-      'Go to the Services tab and select "Airport Cabs" to start booking your airport transfer.',
-    image: '/images/services/services-hub.png',
-    alt: 'Snapgo Services tab — select Airport Cabs',
+      'Open the SnapGo app and go to the Services tab. Tap on "Airport Cabs" to start your booking.',
+    image: '/images/services/1.jpeg',
+    alt: 'SnapGo app services hub showing Airport Cabs option',
   },
   {
     step: 2,
-    title: 'Book Your Ride',
+    title: 'Set Your Route',
     description:
-      'Choose direction (To Airport or From Airport), select terminal (T1, T2, or T3), set pickup location, date, time, passengers, and vehicle type.',
-    image: '/images/services/snapair-booking.png',
-    alt: 'Snapgo Airport Services — Delhi IGI, terminal selection, direction, schedule',
+      'Choose your direction — To Airport or From Airport. Select your terminal (T1, T2, or T3), enter your pickup location, and set your travel date & time.',
+    image: '/images/services/2.jpeg',
+    alt: 'Airport cab booking flow with map, terminal selection, and direction toggle',
   },
   {
     step: 3,
-    title: 'Confirm & Travel',
+    title: 'Review & Pay',
     description:
-      'Review your booking details and pay securely. Your driver is confirmed 24 hours before pickup — no last-minute surprises.',
-    image: '/images/services/snapair-booking.png',
-    alt: 'Snapgo Airport booking confirmation',
+      'See your complete ride details — fare breakdown, wallet balance, and advance payment. Confirm your booking and your driver will be assigned 24 hours before pickup.',
+    image: '/images/services/3.jpeg',
+    alt: 'Ride details and payment breakdown showing fare, wallet deduction, and Razorpay',
   },
 ]
 
 const features = [
-  { icon: ArrowLeftRight, title: 'To & From Airport', description: 'Book rides in both directions seamlessly' },
-  { icon: Plane, title: 'All Terminals', description: 'Delhi IGI Terminal 1, 2 & 3 supported' },
-  { icon: Car, title: 'Multiple Vehicles', description: 'Choose from Sedan, Ertiga, SUV and more' },
-  { icon: Clock, title: 'Driver Confirmed 24hr Before', description: 'Know your driver details well in advance' },
-  { icon: Users, title: 'Shared = 50% Cheaper', description: 'Share the ride and pay half the normal fare' },
-  { icon: ShieldCheck, title: 'Safe & Verified', description: 'KYC verified riders and licensed cabs' },
+  { icon: ArrowLeftRight, title: 'To & From Airport', description: 'Book rides in both directions — pickups and drops' },
+  { icon: Plane, title: 'All Terminals', description: 'Delhi IGI Terminal 1, 2 & 3 fully supported' },
+  { icon: Car, title: 'Multiple Vehicles', description: 'Sedan, Ertiga, SUV, Innova, Tempo Traveller' },
+  { icon: Clock, title: 'Driver Confirmed 24hr Before', description: 'Know your driver and vehicle details well in advance' },
+  { icon: Users, title: 'Shared = 50% Cheaper', description: 'Share the ride, pay half the normal fare' },
+  { icon: ShieldCheck, title: 'Safe & Verified', description: 'Aadhaar KYC verified riders and licensed commercial cabs' },
+]
+
+const pricingHighlights = [
+  { label: 'Shared cab starts at', value: '₹399/seat' },
+  { label: 'Advance payment', value: '25% only' },
+  { label: 'Wallet balance', value: 'Applicable' },
+  { label: 'Cancellation', value: 'Free up to 1hr before' },
 ]
 
 export default function SnapAirClient() {
@@ -59,68 +68,75 @@ export default function SnapAirClient() {
   const stepsInView = useInView(stepsRef, { once: true, margin: '-100px' })
   const featuresRef = useRef<HTMLDivElement>(null)
   const featuresInView = useInView(featuresRef, { once: true, margin: '-100px' })
+  const pricingRef = useRef<HTMLDivElement>(null)
+  const pricingInView = useInView(pricingRef, { once: true, margin: '-100px' })
 
   return (
     <SiteLayout>
       <PageHero
-        badge="SnapAir"
-        title="Airport Transfers"
-        titleHighlight="at Half the Price"
-        description="Shared cabs to Delhi IGI Airport — T1, T2 & T3. Driver confirmed 24 hours before your pickup. Save 50% on every airport ride."
+        badge="SnapGo Airport Cabs"
+        title="Airport Cabs"
+        titleHighlight="Made Easy"
+        description="Affordable airport pickups & drops to Delhi IGI T1, T2 & T3. Shared or private. Driver confirmed 24 hours before your pickup."
         icon={<Plane className="w-4 h-4 text-primary" />}
         trustBadges={[
           { label: '50% Savings', variant: 'teal' },
-          { label: 'Driver Confirmed 24hr Before', variant: 'primary' },
-          { label: 'All Terminals', variant: 'teal' },
+          { label: 'All Terminals', variant: 'primary' },
+          { label: '24hr Driver Confirmation', variant: 'teal' },
         ]}
         cta={{ label: 'Download App', href: '/#download', variant: 'gradient' }}
       />
 
       {/* How It Works */}
-      <section ref={stepsRef} className="section-padding bg-gray-50">
+      <section ref={stepsRef} className="py-20 sm:py-24 bg-[#fafbfd]">
         <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={stepsInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.4 }}
-            className="text-center mb-12"
+            className="text-center mb-14"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
-              How It <span className="text-primary">Works</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+              Book in <span className="text-[#0e4493]">3 Easy Steps</span>
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Book your airport cab in 3 easy steps
+            <p className="text-gray-500 max-w-xl mx-auto text-base sm:text-lg">
+              From opening the app to confirmed booking — under 2 minutes.
             </p>
           </motion.div>
 
-          <div className="space-y-16 max-w-5xl mx-auto">
+          <div className="space-y-20 max-w-5xl mx-auto">
             {steps.map((item, index) => {
               const isEven = index % 2 === 0
               return (
                 <motion.div
                   key={item.step}
-                  initial={{ opacity: 0, y: 40 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={stepsInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: index * 0.15 }}
-                  className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-12`}
+                  transition={{ duration: 0.5, delay: index * 0.12 }}
+                  className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-10 lg:gap-16`}
                 >
-                  <div className="w-full lg:w-1/2 flex justify-center">
-                    <div className="relative w-[220px] sm:w-[260px] md:w-[280px]">
+                  {/* Phone screenshot */}
+                  <div className="w-full lg:w-5/12 flex justify-center">
+                    <div className="relative w-[220px] sm:w-[250px] md:w-[270px]">
                       <Image
                         src={item.image}
                         alt={item.alt}
-                        width={280}
-                        height={560}
-                        className="w-full h-auto rounded-3xl shadow-2xl"
+                        width={270}
+                        height={540}
+                        className="w-full h-auto rounded-[2rem] shadow-xl border border-gray-200/50"
                       />
                     </div>
                   </div>
-                  <div className="w-full lg:w-1/2 text-center lg:text-left">
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold text-lg mb-4">
+
+                  {/* Text content */}
+                  <div className="w-full lg:w-7/12 text-center lg:text-left">
+                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-[#0e4493] text-white font-bold text-lg mb-5 shadow-sm">
                       {item.step}
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold mb-3">{item.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                    <p className="text-gray-500 leading-relaxed text-base sm:text-lg max-w-md mx-auto lg:mx-0">
+                      {item.description}
+                    </p>
                   </div>
                 </motion.div>
               )
@@ -129,35 +145,89 @@ export default function SnapAirClient() {
         </div>
       </section>
 
+      {/* Pricing Highlights */}
+      <section ref={pricingRef} className="py-16 sm:py-20 bg-white">
+        <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={pricingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.4 }}
+            className="text-center mb-10"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+              Transparent Pricing
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              No hidden charges. No surge. What you see is what you pay.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto">
+            {pricingHighlights.map((item, index) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={pricingInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
+                className="bg-[#fafbfd] rounded-2xl p-5 sm:p-6 text-center border border-gray-100"
+              >
+                <div className="text-xl sm:text-2xl font-bold text-[#0e4493] mb-1">{item.value}</div>
+                <div className="text-xs sm:text-sm text-gray-500">{item.label}</div>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={pricingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="flex flex-wrap justify-center gap-4 mt-8 text-sm text-gray-500"
+          >
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-emerald-500" />
+              <span>Use wallet balance</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-emerald-500" />
+              <span>Pay via Razorpay</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-emerald-500" />
+              <span>75% pay to driver directly</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section ref={featuresRef} className="section-padding bg-white">
+      <section ref={featuresRef} className="py-20 sm:py-24 bg-[#fafbfd]">
         <div className="container mx-auto px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={featuresInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.4 }}
-            className="text-center mb-12"
+            className="text-center mb-14"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
-              Why <span className="text-primary">SnapAir</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+              Why SnapGo Airport Cabs
             </h2>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={featuresInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: index * 0.08 }}
               >
-                <Card className="h-full border hover:shadow-lg transition-shadow">
-                  <CardContent className="p-5">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                      <feature.icon className="w-6 h-6 text-primary" />
+                <Card className="h-full border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 rounded-xl bg-[#0e4493]/8 flex items-center justify-center mb-4">
+                      <feature.icon className="w-6 h-6 text-[#0e4493]" />
                     </div>
-                    <h3 className="font-bold mb-1">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <h3 className="font-semibold text-gray-900 mb-1.5">{feature.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{feature.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -167,15 +237,15 @@ export default function SnapAirClient() {
       </section>
 
       {/* CTA */}
-      <section className="section-padding bg-gradient-to-br from-primary to-primary/80">
+      <section className="py-20 sm:py-24 bg-[#0e4493]">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-            Flying Soon?
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Flying Soon? Book Your Airport Cab.
           </h2>
-          <p className="text-white/80 mb-8 max-w-lg mx-auto">
-            Book your shared airport cab on Snapgo and save 50%.
+          <p className="text-white/70 mb-8 max-w-lg mx-auto text-lg">
+            Download SnapGo and save 50% on your next airport transfer.
           </p>
-          <Button variant="outline" size="lg" className="bg-white text-primary hover:bg-white/90" asChild>
+          <Button size="lg" className="bg-white text-[#0e4493] hover:bg-gray-50 rounded-xl h-14 px-8 font-semibold" asChild>
             <Link href="/#download">
               <Download className="w-5 h-5 mr-2" />
               Download App

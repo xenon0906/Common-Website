@@ -72,13 +72,13 @@ export default function HowItWorks({ steps }: HowItWorksProps = {}) {
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
             <SparklesIcon className="w-4 h-4" />
-            Simple Steps
+            3 Steps. 2 Minutes. ₹200 Saved.
           </motion.span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            How <span className="text-primary">Snapgo</span> Works
+            How <span className="text-primary">It</span> Works
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Get started in three simple steps and start saving on your daily commute.
+            From download to your first shared ride in under 2 minutes.
           </p>
         </motion.div>
 

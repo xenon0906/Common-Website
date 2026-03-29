@@ -16,7 +16,7 @@ export const SITE_CONFIG = {
   name: 'Snapgo',
   legalName: 'Snapgo Service Private Limited',
   tagline: 'Share the Cab. Keep the Cash.',
-  description: "India's Smart Shared Cab Network — daily micro-shuttles, shared airport cabs, outstation ride-sharing, and cab matching to help commuters save up to 75% on every trip.",
+  description: "Delhi/NCR's shared cab platform. Shuttles from ₹80, airport cabs at 50% off, outstation trips at your price. 100% legal, Aadhaar verified, zero surge.",
   url: 'https://snapgo.co.in',
   email: 'info@snapgo.co.in',
   phone: '+91 6398786105',
@@ -30,46 +30,46 @@ export const SITE_CONFIG = {
 }
 
 export const HERO_CONTENT = {
-  headline: "India's Smart Shared Cab Network",
-  subtext: "Daily shuttles, airport transfers, outstation trips, and cab matching — share any cab, split any fare, save up to 75% every time.",
+  headline: "Smart Ride Sharing for Delhi/NCR",
+  subtext: "Share rides with verified co-travellers. Save up to 75% on daily commutes, airport trips, and outstation travel. Aadhaar verified. Zero surge.",
 }
 
 export const STATS = [
-  { label: 'Users', value: 4500, suffix: '+', prefix: '' },
-  { label: 'Daily Rides', value: 120, suffix: '+', prefix: '' },
-  { label: 'Cost Savings', value: 75, suffix: '%', prefix: '' },
-  { label: 'Trees Equivalent', value: 500, suffix: '+', prefix: '', isEco: true },
+  { label: 'Cheaper Than Solo Cabs', value: 75, suffix: '%', prefix: '' },
+  { label: 'Lowest Ride Price', value: 80, suffix: '', prefix: '₹' },
+  { label: 'Aadhaar-Verified Riders', value: 4500, suffix: '+', prefix: '' },
+  { label: 'Trees Worth CO₂ Saved', value: 500, suffix: '+', prefix: '', isEco: true },
 ]
 
 export const FEATURES = [
   {
-    title: 'Save Up to 75%',
-    description: 'Share cab fares and save significant money on your daily commute',
+    title: 'Save ₹200+ Per Ride',
+    description: 'Average solo cab in Delhi/NCR: ₹300-400. Average Snapgo fare: ₹80-100. You do the math.',
     icon: 'Wallet',
   },
   {
-    title: 'Aadhaar Verified',
-    description: 'All users verified via Aadhaar KYC powered by DigiLocker',
+    title: 'Aadhaar KYC — No Exceptions',
+    description: 'Every rider verified via DigiLocker. Real names, real photos. Zero fake profiles.',
     icon: 'ShieldCheck',
   },
   {
-    title: 'Female-Only Option',
-    description: 'Women can connect only with verified female riders for added safety',
+    title: 'Women-Only Cab Option',
+    description: 'Women filter to match only with verified female riders. Gender verified via Aadhaar.',
     icon: 'Users',
   },
   {
-    title: 'Real-time & Scheduled',
-    description: 'Find rides instantly or plan ahead for your convenience',
+    title: 'Book Now or Schedule Ahead',
+    description: 'Need a ride in 10 minutes or tomorrow 6 AM? Both work. Your schedule, your choice.',
     icon: 'Clock',
   },
   {
-    title: 'Eco-Friendly Travel',
-    description: '4 people, 1 cab = 75% less pollution. Share commercial cabs — legal AND eco-friendly',
+    title: '75% Less Pollution',
+    description: '4 people, 1 cab instead of 4 separate cabs. Same destination, 75% less carbon.',
     icon: 'Leaf',
   },
   {
-    title: 'Flexible Options',
-    description: 'Shuttles, airport transfers, outstation trips, or cab matching — choose what works for you.',
+    title: 'Zero Surge, Ever',
+    description: 'Rain or rush hour, ₹80 means ₹80. No dynamic pricing games.',
     icon: 'Shuffle',
   },
 ]
@@ -77,38 +77,38 @@ export const FEATURES = [
 export const HOW_IT_WORKS = [
   {
     step: 1,
-    title: 'Enter Your Destination',
-    description: 'Set your pickup and drop location in the app',
+    title: 'Tell Us Where You\'re Going',
+    description: 'Open the app, enter pickup & drop. Snapgo scans riders within 750m of your route in seconds.',
     icon: 'MapPin',
   },
   {
     step: 2,
-    title: 'Find Your Match',
-    description: 'Our algorithm finds people going to the same destination within 750m',
+    title: 'Pick Your Co-Riders',
+    description: 'See Aadhaar-verified profiles heading your way. Check names, ratings, gender. You choose who you ride with.',
     icon: 'Search',
   },
   {
     step: 3,
-    title: 'Share & Save',
-    description: 'Share the cab, split the fare — save up to 75% on every ride',
+    title: 'Ride Together, Pay Less',
+    description: 'Share the cab, split the fare. Average savings: ₹200+ per ride. That\'s ₹6,000/month.',
     icon: 'Users',
   },
 ]
 
 export const TESTIMONIALS = [
   {
-    quote: 'Snapgo has saved me so much money! I used to spend ₹400 for my daily commute, now I only pay ₹100 by sharing with fellow students. Amazing concept!',
-    author: 'College Student',
-    location: 'Sharda University',
+    quote: 'I used to spend ₹400/day on cabs from Knowledge Park to Pari Chowk. Now I pay ₹80 on SnapRide. That\'s ₹9,600 saved every month — I bought a new phone with the savings!',
+    author: 'Priya S.',
+    location: 'Sharda University, Greater Noida',
   },
   {
-    quote: 'As a working professional, Snapgo has made my daily travel both affordable and social. I have made great connections with fellow commuters.',
-    author: 'IT Professional',
-    location: 'Greater Noida',
+    quote: 'Airport cab to Noida was always ₹1,200+. With SnapAir, I split it 3 ways and pay ₹400. Driver was confirmed the night before. No stress.',
+    author: 'Rahul M.',
+    location: 'Sector 62, Noida',
   },
   {
-    quote: 'The female-only option makes me feel safe. I can now travel without worrying about security while saving money.',
-    author: 'Graduate Student',
+    quote: 'As a woman, the female-only filter is a game-changer. Every co-rider is Aadhaar-verified with real photos. I feel completely safe sharing cabs now.',
+    author: 'Anisha K.',
     location: 'Delhi NCR',
   },
 ]
@@ -116,8 +116,8 @@ export const TESTIMONIALS = [
 export const ABOUT_STORY = {
   origin: "It was a regular day when we, Mohit and Surya Purohit, were heading to Ghaziabad Railway Station from our society. We booked a cab and noticed another person also taking a cab from our area. When we reached the station, we saw the same person at the parking lot. That's when it hit us - we both paid ₹300 separately for the same route. If we had known we were going to the same place, we could have shared the ride and paid just ₹300 total, saving ₹300 together!",
   spark: "This sparked an idea, but we didn't want to do traditional carpooling with private cars — that's not legal for commercial use and bypasses taxi drivers who depend on fares. Instead, we pioneered 'Cab Pooling' — pooling commercial cabs among verified riders. It's 100% legal, supports drivers, AND reduces road emissions by 75%. That's how Snapgo was born.",
-  mission: 'To make every cab journey in India shareable — giving students, professionals, and travellers a smarter, affordable, and reliable alternative to paying full cab fare alone.',
-  vision: "To become India's largest shared cab network — where no seat goes empty, no fare goes wasted, and no commuter travels alone.",
+  mission: 'To make every cab ride in Delhi/NCR shareable within 2 taps — so no student pays ₹400 alone, no professional sits in traffic alone, and no cab drives with 3 empty seats.',
+  vision: "To become the default way Delhi/NCR moves — starting with Greater Noida, then every city where commuters overpay for empty seats.",
   values: 'Legal and ethical operations, driver-friendly ecosystem, environmental sustainability, user safety, and creating value for our entire community.',
 }
 
@@ -339,7 +339,7 @@ export const DEFAULT_CO2_CONFIG = {
  */
 export const DEFAULT_SAVINGS_CONFIG = {
   headline: 'Calculate Your Savings',
-  subheadline: 'See how much you can save by sharing cabs',
+  subheadline: 'See how much you save by not riding alone',
   defaultFare: 400,
   defaultRiders: 4,
   riderOptions: [2, 3, 4],
@@ -352,14 +352,14 @@ export const DEFAULT_SAVINGS_CONFIG = {
  * Used in TrustBadgesSection component
  */
 export const DEFAULT_TRUST_BADGES = [
-  { id: 'badge_1', iconName: 'Award', title: 'DPIIT Recognized', description: 'Government certified startup', order: 0, isActive: true },
-  { id: 'badge_2', iconName: 'Shield', title: 'Startup India', description: 'Official initiative member', order: 1, isActive: true },
-  { id: 'badge_3', iconName: 'ShieldCheck', title: 'Aadhaar KYC Verified', description: 'Government-backed identity verification', order: 2, isActive: true },
-  { id: 'badge_4', iconName: 'Users', title: 'Women-Only Matching', description: 'Safe travel for women', order: 3, isActive: true },
-  { id: 'badge_5', iconName: 'AlertTriangle', title: 'SOS Emergency Button', description: 'One-tap emergency alerts', order: 4, isActive: true },
-  { id: 'badge_6', iconName: 'Scale', title: '100% Legal', description: 'Licensed commercial cabs only', order: 5, isActive: true },
-  { id: 'badge_7', iconName: 'Clock', title: 'Driver Confirmed 24hr Before', description: 'No last-minute surprises', order: 6, isActive: true },
-  { id: 'badge_8', iconName: 'Leaf', title: 'Eco-Friendly', description: 'Reduce emissions by sharing', order: 7, isActive: true },
+  { id: 'badge_1', iconName: 'Award', title: 'DPIIT Recognized Startup', description: 'Government certified startup', order: 0, isActive: true },
+  { id: 'badge_2', iconName: 'Shield', title: 'Startup India Certified', description: 'Official initiative member', order: 1, isActive: true },
+  { id: 'badge_3', iconName: 'ShieldCheck', title: 'Aadhaar KYC — Every Rider', description: 'Every rider Aadhaar-verified via DigiLocker', order: 2, isActive: true },
+  { id: 'badge_4', iconName: 'Users', title: 'Women-Only Cab Option', description: 'Women connect only with women', order: 3, isActive: true },
+  { id: 'badge_5', iconName: 'AlertTriangle', title: 'SOS Emergency — 1 Tap', description: 'One-tap emergency alerts', order: 4, isActive: true },
+  { id: 'badge_6', iconName: 'Scale', title: '100% Legal Commercial Cabs', description: 'Licensed commercial cabs only', order: 5, isActive: true },
+  { id: 'badge_7', iconName: 'Clock', title: 'Driver Confirmed 24hr Before', description: 'Your driver is confirmed a full day early', order: 6, isActive: true },
+  { id: 'badge_8', iconName: 'Wallet', title: '₹80 Rides, No Surge Ever', description: 'Fixed pricing, zero dynamic surge', order: 7, isActive: true },
 ]
 
 /**
@@ -370,12 +370,12 @@ export const DEFAULT_SERVICES = [
   {
     id: 'snapride',
     name: 'SnapRide',
-    tagline: 'Micro Cab Shuttle',
-    description: 'Daily fixed-route micro cab shuttle — book a seat, get stop details after booking. From just ₹80/ride in Greater Noida.',
+    tagline: 'Daily Shuttle — ₹80/Seat',
+    description: 'Fixed-route micro shuttle for daily commuters in Greater Noida & Delhi/NCR. Book a seat, show up, go. No matching, no waiting. ₹80/ride — less than an auto.',
     iconName: 'Bus',
     badgeType: 'confirmed' as const,
     extraBadge: 'most-booked' as const,
-    trustLine: 'Guaranteed seat, no matching needed',
+    trustLine: 'Guaranteed seat • No surge pricing',
     isPrimary: true,
     order: 1,
     isActive: true,
@@ -383,11 +383,11 @@ export const DEFAULT_SERVICES = [
   {
     id: 'snapair',
     name: 'SnapAir',
-    tagline: 'Shared Airport Transfers',
-    description: 'Shared airport cab transfers at 50% of normal fare. Driver confirmed 24 hours before your pickup.',
+    tagline: 'Airport Cabs — 50% Off',
+    description: 'Delhi Airport shared cabs at half the price of Ola/Uber. Driver confirmed 24 hours before. No surge, no surprises.',
     iconName: 'Plane',
     badgeType: 'confirmed' as const,
-    trustLine: 'Driver confirmed 24hr before',
+    trustLine: 'Driver confirmed 24hr before pickup',
     isPrimary: true,
     order: 2,
     isActive: true,
@@ -395,11 +395,11 @@ export const DEFAULT_SERVICES = [
   {
     id: 'snaptrip',
     name: 'SnapTrip',
-    tagline: 'Outstation Cabs — Name Your Price',
-    description: 'Book a dedicated cab at your price, or share a ride and split the cost. Sedan to Tempo Traveller — 10% off round trips.',
+    tagline: 'Outstation — Name Your Price',
+    description: 'Delhi to Jaipur, Agra, Haridwar, Dehradun & more. Name your price or share the cab. 10% off all round trips.',
     iconName: 'MapPin',
     badgeType: 'confirmed' as const,
-    trustLine: 'Transparent pricing, no surge',
+    trustLine: 'No surge • Transparent pricing always',
     isPrimary: true,
     order: 3,
     isActive: true,
@@ -408,10 +408,10 @@ export const DEFAULT_SERVICES = [
     id: 'snappool',
     name: 'SnapPool',
     tagline: 'Free Cab Matching',
-    description: "Can't find a confirmed service on your route? SnapPool matches you with co-riders heading the same way — completely free.",
+    description: "No confirmed service on your route? SnapPool finds co-riders heading your way. Always free, always Aadhaar-verified.",
     iconName: 'Search',
     badgeType: 'free-matching' as const,
-    trustLine: 'Free cab matching',
+    trustLine: '100% free • Aadhaar verified matches',
     isPrimary: false,
     order: 4,
     isActive: true,
@@ -463,15 +463,16 @@ export const DEFAULT_HOMEPAGE_CONFIG = {
     { componentName: 'hero', label: 'Hero Section', visible: true, order: 1 },
     { componentName: 'trustBadges', label: 'Trust Badges', visible: true, order: 2 },
     { componentName: 'services', label: 'Our Services', visible: true, order: 3 },
-    { componentName: 'stats', label: 'Statistics Counter', visible: true, order: 4 },
-    { componentName: 'co2Impact', label: 'CO2 Impact Tracker', visible: true, order: 5 },
-    { componentName: 'savingsCalc', label: 'Savings Calculator', visible: true, order: 6 },
+    { componentName: 'comparison', label: 'Comparison Table', visible: true, order: 4 },
+    { componentName: 'stats', label: 'Statistics Counter', visible: true, order: 5 },
+    { componentName: 'howItWorks', label: 'How It Works', visible: true, order: 6 },
     { componentName: 'features', label: 'Features Grid', visible: true, order: 7 },
-    { componentName: 'howItWorks', label: 'How It Works', visible: true, order: 8 },
-    { componentName: 'appPreview', label: 'App Preview', visible: true, order: 9 },
-    { componentName: 'download', label: 'Download Section', visible: true, order: 10 },
-    { componentName: 'testimonials', label: 'Testimonials', visible: true, order: 11 },
-    { componentName: 'instagram', label: 'Instagram Feed', visible: true, order: 12 },
-    { componentName: 'cta', label: 'Call to Action', visible: true, order: 13 },
+    { componentName: 'savingsCalc', label: 'Savings Calculator', visible: true, order: 8 },
+    { componentName: 'testimonials', label: 'Testimonials', visible: true, order: 9 },
+    { componentName: 'appPreview', label: 'App Preview', visible: true, order: 10 },
+    { componentName: 'download', label: 'Download Section', visible: true, order: 11 },
+    { componentName: 'cta', label: 'Call to Action', visible: true, order: 12 },
+    { componentName: 'co2Impact', label: 'CO2 Impact Tracker', visible: false, order: 13 },
+    { componentName: 'instagram', label: 'Instagram Feed', visible: false, order: 14 },
   ],
 }

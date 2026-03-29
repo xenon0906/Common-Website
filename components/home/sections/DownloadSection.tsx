@@ -49,13 +49,13 @@ export function DownloadSection({ appLinks }: DownloadSectionProps) {
             className="inline-flex items-center gap-2 px-4 py-2 bg-teal/10 rounded-full mb-4"
           >
             <DownloadIcon className="w-4 h-4 text-teal" />
-            <span className="text-teal text-sm font-semibold">Get the App</span>
+            <span className="text-teal text-sm font-semibold">Free on Android & iOS</span>
           </motion.div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Download <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-primary">Snapgo</span> Today
+            Start Saving <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-primary">in 2 Minutes</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-            Start saving on your daily commute. Scan the QR code or click to download.
+            Download. Verify with Aadhaar. Book your first ₹80 ride. It&apos;s that simple.
           </p>
         </motion.div>
 

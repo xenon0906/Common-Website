@@ -158,13 +158,13 @@ export default function FeaturesGrid({ features }: FeaturesGridProps = {}) {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
-            Features
+            Why 4,500+ Riders Choose Us
           </motion.span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-            Why Choose <span className="text-primary">Snapgo</span>?
+            Built for <span className="text-primary">Delhi/NCR</span> Commuters
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg">
-            Experience the smarter way to travel with features designed for your safety, savings, and convenience.
+            Every feature exists because a real commuter needed it.
           </p>
         </motion.div>
 

@@ -48,9 +48,7 @@ function AboutHero() {
           </h1>
 
           <p className="text-xl text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Snapgo is India&apos;s shared cab network — offering daily
-            micro-shuttles, shared airport cabs, and outstation ride-sharing
-            to help commuters save up to 75% on every trip.
+            We started because two brothers paid ₹600 for two separate cabs to the same railway station. Today, 4,500+ riders in Delhi/NCR share commercial cabs through Snapgo — saving money, supporting drivers, and cutting emissions by 75%.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -90,7 +88,7 @@ function VideoDocumentarySection() {
       <VideoHero
         videoId="drglwf8KjVU"
         title="The Snapgo Story"
-        subtitle="See how cab pooling is transforming daily commutes — saving money, supporting drivers, and reducing emissions"
+        subtitle="See how shared cabs are transforming daily commutes in Delhi/NCR — saving money, supporting drivers, and reducing emissions"
       />
     </section>
   )
@@ -162,7 +160,7 @@ function MissionVisionValues({ about }: { about: Record<string, AboutContentData
     {
       icon: Target,
       title: 'Mission',
-      content: about.mission?.content || 'To make every cab journey in India shareable — giving students, professionals, and travellers a smarter, affordable, and reliable alternative to paying full cab fare alone.',
+      content: about.mission?.content || 'To make every cab ride in Delhi/NCR shareable within 2 taps — so no student pays ₹400 alone, no professional sits in traffic alone, and no cab drives with 3 empty seats.',
       gradient: 'from-primary/10 to-primary/5',
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
@@ -170,7 +168,7 @@ function MissionVisionValues({ about }: { about: Record<string, AboutContentData
     {
       icon: Eye,
       title: 'Vision',
-      content: about.vision?.content || "To become India's largest shared cab network — where no seat goes empty, no fare goes wasted, and no commuter travels alone.",
+      content: about.vision?.content || "To become the default way Delhi/NCR moves — starting with Greater Noida, then every city where commuters overpay for empty seats.",
       gradient: 'from-teal/10 to-teal/5',
       iconBg: 'bg-teal/10',
       iconColor: 'text-teal-600',
@@ -307,7 +305,7 @@ function TeamCTA({ siteConfig }: { siteConfig: SiteConfigData }) {
             Meet the <span className="text-snapgo-gradient">Visionaries</span>
           </h2>
           <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
-            The passionate team behind Snapgo's mission to pioneer cab pooling — making travel legal, green, and affordable for everyone.
+            The passionate team behind Snapgo — making shared cab travel legal, green, and affordable for Delhi/NCR.
           </p>
 
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
